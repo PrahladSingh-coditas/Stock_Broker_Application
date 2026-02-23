@@ -18,6 +18,13 @@ const (
 	UserLoggedInSuccessMsg = "User logged in successfully"
 )
 
+// error
+const (
+	ErrInvalidCredentials = " user not signup "
+	ErrUsernameNotFound   = " username Not Found"
+	ErrLoginFailed        = "Login Failed"
+)
+
 //Swagger Titile
 const SwaggerTitle = "Stock Broker Application API"
 

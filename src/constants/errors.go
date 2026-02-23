@@ -34,4 +34,5 @@ const (
 	ErrInvalidPhoneNumber = "Phone number must be exactly 10 digits long and contain only numbers."
 	ErrFieldRequired      = "%s is required."
 	ErrInvalidEmail       = "Invalid value for Email"
+	ErrInvalidPassword    = "Invalid Password for Username"
 )

@@ -12,5 +12,6 @@ type User struct {
 }
 
 type DatabaseConfiguration struct {
+	
 	GormDB *gorm.DB
 }

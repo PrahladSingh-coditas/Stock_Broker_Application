@@ -1,7 +1,7 @@
 host: localhost
 port: 5432
 username: postgres
-password: Test@123
+password: Sharanu@26
 dbName: postgres
 timezone: Asia/kolkata
 sslmode: disable

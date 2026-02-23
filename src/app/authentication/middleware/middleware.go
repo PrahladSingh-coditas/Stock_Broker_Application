@@ -14,6 +14,5 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 		duration := time.Since(start)
 		log.Printf("Completed in %v", duration)
-
 	}
 }

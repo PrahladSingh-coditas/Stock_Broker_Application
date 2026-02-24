@@ -40,8 +40,9 @@ const (
 //Signin and Token generation Errors
 const (
 	ErrInvalidEmailorPassword = "invalid email or password"
-	ErrPasswordMismatch       = "password does not match %w"
+	ErrPasswordMismatch       = "password does not match "
 	ErrAuthenticationFailed   = "authentication failed"
-	ErrTokenGenerationFailed  = "failed to generate authentication tokens %s"
-	ErrInternalServer = "Internal server error"
+	ErrTokenGenerationFailed  = "failed to generate authentication tokens "
+	ErrInternalServer = "internal server error"
+	ErrUserNotFound = "user not found"
 )

@@ -46,3 +46,7 @@ const (
 	ErrInternalServer = "internal server error"
 	ErrUserNotFound = "user not found"
 )
+
+const(
+	ErrBinding = "failed to bind"
+)

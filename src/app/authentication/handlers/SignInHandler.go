@@ -7,11 +7,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
 
 	genericModels "stock_broker_application/src/models"
 	"stock_broker_application/src/utils/validations"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type SigninUserHandler struct {
@@ -36,6 +38,8 @@ func NewSigninUserHandler(service *business.SigninUserService) *SigninUserHandle
 // @Failure 401 {object} models.ErrorAPIResponse
 // @Router /api/auth/signin [post]
 func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
+	start := time.Now()
+	logger := logrus.New()
 
 	var bffSigninUserRequet models.BFFSigninUserRequest
 
@@ -44,6 +48,12 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 			Key:          err.(*json.UnmarshalTypeError).Field,
 			ErrorMessage: constants.ErrUnexpectedValue,
 		}
+
+		logger.WithFields(logrus.Fields{
+			"user":    bffSigninUserRequet.Username,
+			"latency": time.Since(start).Milliseconds(),
+		}).Info(constants.ErrBinding)
+
 		ctx.JSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
 			Message: errorMsgs,
 			Error:   constants.ErrInvalidPayload,
@@ -54,6 +64,12 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 	// 400 error
 	if err := validations.GetBFFValidator().Struct(&bffSigninUserRequet); err != nil {
 		validationErrors, _ := validations.FormatValidationErrors(err)
+
+		logger.WithFields(logrus.Fields{
+			"user":    bffSigninUserRequet.Username,
+			"latency": time.Since(start).Milliseconds(),
+		}).Info(constants.ErrUnexpectedValue)
+
 		ctx.JSON(http.StatusBadRequest, validationErrors)
 		return
 	}
@@ -71,6 +87,12 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 				},
 				Error: constants.ErrAuthenticationFailed,
 			}
+
+			logger.WithFields(logrus.Fields{
+				"user":    bffSigninUserRequet.Username,
+				"latency": time.Since(start).Milliseconds(),
+			}).Info(constants.ErrPasswordMismatch)
+			
 			ctx.IndentedJSON(http.StatusUnauthorized, errorResponse)
 			return
 		}
@@ -84,6 +106,12 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 				},
 				Error: constants.ErrAuthenticationFailed,
 			}
+
+			logger.WithFields(logrus.Fields{
+				"user":    bffSigninUserRequet.Username,
+				"latency": time.Since(start).Milliseconds(),
+			}).Info(constants.ErrUserNotFound)
+
 			ctx.IndentedJSON(http.StatusNotFound, errorResponse)
 			return
 
@@ -98,10 +126,20 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 			Error: constants.ErrInternalServer,
 		}
 
+		logger.WithFields(logrus.Fields{
+			"user":    bffSigninUserRequet.Username,
+			"latency": time.Since(start).Milliseconds(),
+		}).Info(constants.ErrInternalServer)
+
 		ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
 		return
 
 	}
+
+	logger.WithFields(logrus.Fields{
+		"user":    bffSigninUserRequet.Username,
+		"latency": time.Since(start).Milliseconds(),
+	}).Info(constants.UserLoggedInSuccessMsg)
 
 	ctx.IndentedJSON(http.StatusOK, constants.UserLoggedInSuccessMsg)
 }

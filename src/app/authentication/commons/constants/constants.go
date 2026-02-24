@@ -12,6 +12,10 @@ const (
 	Fieldemail     = "email"
 )
 
+const(
+	UsernameField = "username = ?"
+)
+
 // Success message for user
 const (
 	UserCreationSuccessMsg = "User created successfully"

@@ -15,13 +15,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type CreateUserRepository interface {
+type CreateUserRepository interface { 
 	CreateNewUser(ctx context.Context, db *gorm.DB, bffCreateUserRequest models.BFFCreateUserRequest) error
 }
 
 type createUserRepository struct{}
 
-func NewCreateUserRepository() *createUserRepository {
+func NewCreateUserRepository() *createUserRepository { // constructor mainly for dependecy injection
 	return &createUserRepository{}
 }
 
@@ -44,6 +44,8 @@ func (user *createUserRepository) CreateNewUser(ctx context.Context, db *gorm.DB
 		Email:       bffCreateUserRequest.Email,
 	}
 
+
+	//INSERT INTO users (username, password, email) VALUES ('Arijit', 'hashedpassword', 'abc@gmail.com');
 	result := db.WithContext(ctx).Table(constants.UsersTableName).Create(&NewUser)
 	if result.Error != nil {
 		errorMsgs := result.Error.Error()

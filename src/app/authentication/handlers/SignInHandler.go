@@ -31,6 +31,7 @@ func NewSigninUserHandler(service *business.SigninUserService) *SigninUserHandle
 // @Success 200 {string} string "User signed in successfully"
 // @Failure 400 {object} models.ErrorAPIResponse "Invalid input payload"
 // @Failure 401 {object} models.ErrorAPIResponse "Invalid username or password"
+// @Failure 404 {object} models.ErrorAPIResponse "User Not Found"
 // @Failure 500 {object} models.ErrorAPIResponse "Authentication failed"
 // @Router /api/auth/signin [post]
 func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
@@ -59,8 +60,8 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 	if err != nil {
 
 		if err.Error() == constants.ErrUserNotFound {
-			ctx.JSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
-				Error: constants.ErrInvalidUsername,
+			ctx.JSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
+				Error: constants.ErrUserNotFound,
 			})
 			return
 		}

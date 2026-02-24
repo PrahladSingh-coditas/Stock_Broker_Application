@@ -41,8 +41,6 @@ const (
 const (
 	ErrUserNotFound            = "user not found"               // try to find by username
 	ErrInvalidUsernamePassword = "invalid username or password" //invalide u or p
-	ErrInvalidUsername         = "invalid username"             //invalid u
-	// ErrInvalidPassword         = "invalide password"            // invalid p
 	ErrPasswordMismatch      = "password does not match %w"
 	ErrAuthenticationFailed  = "authentication failed"
 	ErrTokenGenerationFailed = "failed to generate authentication tokens %s"

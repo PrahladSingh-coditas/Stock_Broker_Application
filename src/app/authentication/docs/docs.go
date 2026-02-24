@@ -58,6 +58,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.ErrorAPIResponse"
                         }
                     },
+                    "404": {
+                        "description": "User Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
                     "500": {
                         "description": "Authentication failed",
                         "schema": {

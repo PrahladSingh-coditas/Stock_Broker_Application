@@ -34,9 +34,16 @@ func GetRouter() *gin.Engine {
 	createUserRepository := repository.NewCreateUserRepository()
 	createUserService := business.NewCreateUserService(createUserRepository)
 	createUserHandler := handlers.NewCreateUserHandler(createUserService)
+
+	signInUserRepository:=repository.NewSignInUserRepository()
+	signInUserService:=business.NewSignInUserService(signInUserRepository)
+	signInUserHandler:=handlers.NewSignInUserHandler(signInUserService)
+
+	
 	authGroup := router.Group(constants.AuthRoutePrefix)
 	{
 		authGroup.POST(constants.Signup, createUserHandler.HandleCreaterUser)
+		authGroup.POST(constants.Signin, signInUserHandler.HandleSignInUser)
 	}
 
 	return router

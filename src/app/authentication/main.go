@@ -21,7 +21,7 @@ func main() {
 		log.Fatalf(constants.ErrJWTConfigReadFailed, err)
 	}
 
-	startRouter()
+ 	startRouter()
 }
 
 func startRouter() {

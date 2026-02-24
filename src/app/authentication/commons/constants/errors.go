@@ -43,4 +43,8 @@ const (
 	ErrPasswordMismatch       = "password does not match %w"
 	ErrAuthenticationFailed   = "authentication failed"
 	ErrTokenGenerationFailed  = "failed to generate authentication tokens %s"
+	ErrRecordNotFOund         = "user record not found"
+	ErrPasswordNotMatch       = "password not matched"
+	ErrBindingFailed          = "json to struct binding failed"
+	ErrValidationFailed       = "validation failed"
 )

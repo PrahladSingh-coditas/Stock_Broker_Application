@@ -14,7 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
-
+ 
 type CreateUserRepository interface {
 	CreateNewUser(ctx context.Context, db *gorm.DB, bffCreateUserRequest models.BFFCreateUserRequest) error
 }

@@ -48,16 +48,7 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 		} else {
 			switch err.Field() {
 			case constants.FieldPassword:
-				passwordErrors := ValidatePasswordConstraints(err.Value().(string))
-				if len(passwordErrors) > 0 {
-					for _, msg := range passwordErrors {
-						validationErrors = append(validationErrors, models.ErrorMessage{
-							Key:          err.Field(),
-							ErrorMessage: msg,
-						})
-					}
-					continue
-				}
+				errorMsg=constants.ErrPasswordRulesBreak
 			case constants.FieldConfirmPassword:
 				if err.Tag() == "eqfield" {
 					errorMsg = constants.ErrConfirmPasswordMatch

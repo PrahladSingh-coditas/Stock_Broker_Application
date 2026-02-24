@@ -10,18 +10,28 @@ const (
 const (
 	UsersTableName = "users"
 	Fieldemail     = "email"
+	Username       = "username = ? "
+	Password       = "password"
+)
+
+//Logger related fields
+const (
+	User    = "username"
+	Latency = "latency"
 )
 
 // Success message for user
 const (
 	UserCreationSuccessMsg = "User created successfully"
 	UserLoggedInSuccessMsg = "User logged in successfully"
+	UserDataFetchedMsg     = "User data fetched successfully"
 )
 
 //Swagger Titile
 const SwaggerTitle = "Stock Broker Application API"
 
 const EmailorPasswordField = "email_or_password"
+
 
 //Cookies
 const (

@@ -13,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// we have created a struct that have a pointer field to the service
 type CreaterUserHandler struct {
 	service *business.CreateUserService
 }
@@ -37,7 +36,6 @@ func NewCreateUserHandler(service *business.CreateUserService) *CreaterUserHandl
 // @Failure 500 {object} models.ErrorAPIResponse "Internal Server Error"
 // @Router /api/auth/signup [post]
 func (controller *CreaterUserHandler) HandleCreaterUser(ctx *gin.Context) {
-//  chaeck for unmarshalling errors
 	var bffCreateUserRequest models.BFFCreateUserRequest
 	if err := ctx.ShouldBind(&bffCreateUserRequest); err != nil {
 		errorMsgs := genericModels.ErrorMessage{Key: err.(*json.UnmarshalTypeError).Field, ErrorMessage: constants.ErrUnexpectedValue}
@@ -47,13 +45,11 @@ func (controller *CreaterUserHandler) HandleCreaterUser(ctx *gin.Context) {
 		})
 		return
 	}
-// valiation errors
 	if err := validations.GetBFFValidator().Struct(&bffCreateUserRequest); err != nil {
 		validationErros, _ := validations.FormatValidationErrors(err)
 		ctx.IndentedJSON(http.StatusBadRequest, validationErros)
 		return
 	}
-// the we call the function that is in service
 	err := controller.service.CreateNewUser(ctx, ctx.Request.Context(), bffCreateUserRequest)
 	if err != nil {
 		if strings.Contains(err.Error(), constants.ErrDuplicateEntry) {
@@ -73,7 +69,5 @@ func (controller *CreaterUserHandler) HandleCreaterUser(ctx *gin.Context) {
 		ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
 		return
 	}
-
 	ctx.IndentedJSON(http.StatusCreated, constants.UserCreationSuccessMsg)
-
 }

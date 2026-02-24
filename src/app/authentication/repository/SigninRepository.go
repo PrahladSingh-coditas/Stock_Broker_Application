@@ -2,7 +2,6 @@ package repository
 
 import (
 	"authentication/commons/constants"
-	"authentication/models"
 	"context"
 	"errors"
 	"fmt"
@@ -14,7 +13,7 @@ import (
 )
 
 type SigninUserRepository interface {
-	SigninUser(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest) (*genericModels.User, error)
+	SigninUser(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error)
 }
 
 type signinUserRepository struct{}
@@ -23,7 +22,7 @@ func NewSigninUserRepository() *signinUserRepository {
 	return &signinUserRepository{}
 }
 
-func (user *signinUserRepository) SigninUser(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest) (*genericModels.User, error) {
+func (user *signinUserRepository) SigninUser(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error) {
 
 	start := time.Now()
 	logger := logrus.New()
@@ -32,15 +31,15 @@ func (user *signinUserRepository) SigninUser(ctx context.Context, db *gorm.DB, b
 
 	result := db.WithContext(ctx).
 		Table(constants.UsersTableName).
-		Where(constants.FieldUsername, bffSigninUserRequest.Username).
+		Where(constants.FieldUsername, username).
 		First(&existingUser)
 
 	//we have checked here with username
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, errors.New(constants.ErrUserNotFound)
+			return nil, errors.New(constants.UserNotFoundError)
 		}
-		return nil, fmt.Errorf("%s: %w", constants.ErrAuthenticationFailed, result.Error)
+		return nil, fmt.Errorf("%s: %w", constants.AuthenticationFailedError, result.Error)
 	}
 
 	logger.WithFields(logrus.Fields{

@@ -9,12 +9,12 @@ import (
 )
 
 type CreateUserService struct {
-	createUserRepository repository.CreateUserRepository // we haev taken a field that is and interface in repo
+	createUserRepository repository.CreateUserRepository
 }
 
 func NewCreateUserService(createUserRepository repository.CreateUserRepository) *CreateUserService {
 	return &CreateUserService{
-		createUserRepository: createUserRepository, //this is a constructor
+		createUserRepository: createUserRepository,
 	}
 }
 

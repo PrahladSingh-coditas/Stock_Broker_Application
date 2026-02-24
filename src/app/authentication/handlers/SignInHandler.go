@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// we have created a struct that have a pointer field to the service
 type SigninUserHandler struct {
 	service *business.SigninUserService
 }
@@ -35,9 +36,8 @@ func NewSigninUserHandler(service *business.SigninUserService) *SigninUserHandle
 // @Failure 500 {object} models.ErrorAPIResponse "Authentication failed"
 // @Router /api/auth/signin [post]
 func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
-
 	var bffSigninUserRequest models.BFFSigninUserRequest
-
+	//check for api binding errors
 	if err := ctx.ShouldBind(&bffSigninUserRequest); err != nil {
 		errorMsgs := genericModels.ErrorMessage{
 			Key:          "request",
@@ -49,25 +49,23 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 		})
 		return
 	}
-
+	// valiation errors
 	if err := validations.GetBFFValidator().Struct(&bffSigninUserRequest); err != nil {
 		validationErrors, _ := validations.FormatValidationErrors(err)
 		ctx.IndentedJSON(http.StatusBadRequest, validationErrors)
 		return
 	}
-
+	// then we call the function that is in service
 	err := controller.service.SigninUser(ctx, ctx.Request.Context(), bffSigninUserRequest)
 	if err != nil {
-
-		if err.Error() == constants.ErrUserNotFound {
+		if err.Error() == constants.UserNotFoundError {
 			ctx.JSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
-				Error: constants.ErrUserNotFound,
+				Error: constants.UserNotFoundError,
 			})
 			return
 		}
-
 		ctx.JSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
-			Error: constants.ErrAuthenticationFailed,
+			Error: constants.AuthenticationFailedError,
 		})
 		return
 	}

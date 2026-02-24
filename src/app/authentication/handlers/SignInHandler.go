@@ -103,7 +103,8 @@ func (controller *SignInUserHandler) HandleSignInUser(ctx *gin.Context) {
 			logger.WithFields(logrus.Fields{
 				constants.User:    bffSignInRequest.Username,
 				constants.Latency: time.Since(start).Milliseconds(),
-			}).Info(constants.ErrPasswordMismatch)
+			}).Info(constants.ErrPasswordNotMatch)
+
 
 			ctx.IndentedJSON(http.StatusUnauthorized, errorResponse)
 			return

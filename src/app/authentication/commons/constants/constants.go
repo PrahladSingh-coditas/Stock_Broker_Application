@@ -6,7 +6,7 @@ const (
 	PortDefaultValude = 8080
 )
 
-// Database table name & field names for users
+//Database table name & field names for users
 const (
 	UsersTableName = "users"
 	Fieldemail     = "email"

@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"stock_broker_application/src/models"
 	genericModels "stock_broker_application/src/models"
 	"time"
 
@@ -28,12 +29,16 @@ func (user *signinUserRepository) SigninUser(ctx context.Context, db *gorm.DB, u
 	logger := logrus.New()
 
 	var existingUser genericModels.User
-
+	/*
+		result := db.WithContext(ctx).
+			Table(constants.UsersTableName).
+			Where(constants.FieldUsername, username).
+			First(&existingUser)
+	*/
 	result := db.WithContext(ctx).
-		Table(constants.UsersTableName).
+		Model(&models.User{}).
 		Where(constants.FieldUsername, username).
 		First(&existingUser)
-
 	//we have checked here with username
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {

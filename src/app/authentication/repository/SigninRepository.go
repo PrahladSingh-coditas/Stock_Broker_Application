@@ -13,6 +13,7 @@ import (
 
 type SignInUserRepository interface {
 	SignInUser(ctx context.Context, db *gorm.DB, bffSignInUserRequest models.BFFSignInUserRequest) (*GenericUserModel.User, error)
+	StoreOTP(ctx context.Context, db *gorm.DB, username string, data map[string]interface{}) error
 }
 
 type signInUserRepository struct{}
@@ -28,7 +29,7 @@ func (user *signInUserRepository) SignInUser(ctx context.Context, db *gorm.DB, b
 
 	var fetchedUserData GenericUserModel.User
 
-	findUserError := db.Where(constants.Username, bffSignInUserRequest.Username).First(&fetchedUserData).Error
+	findUserError := db.Where(constants.UsernameCondtion, bffSignInUserRequest.Username).First(&fetchedUserData).Error
 
 	if findUserError != nil {
 		return nil, findUserError
@@ -40,4 +41,23 @@ func (user *signInUserRepository) SignInUser(ctx context.Context, db *gorm.DB, b
 	}).Info(constants.UserDataFetchedMsg)
 
 	return &fetchedUserData, nil
+}
+
+func (repo *signInUserRepository) StoreOTP(ctx context.Context, db *gorm.DB, username string, data map[string]interface{}) error {
+
+	var user GenericUserModel.User
+
+	result := db.Model(&user).
+		Where(constants.UsernameCondtion, username).
+		Updates(data)
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }

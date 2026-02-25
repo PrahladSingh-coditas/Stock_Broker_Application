@@ -5,6 +5,7 @@ import (
 	"authentication/commons/constants"
 	"authentication/models"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	genericModels "stock_broker_application/src/models"
 	"stock_broker_application/src/utils/validations"
@@ -105,7 +106,6 @@ func (controller *SignInUserHandler) HandleSignInUser(ctx *gin.Context) {
 				constants.Latency: time.Since(start).Milliseconds(),
 			}).Info(constants.ErrPasswordNotMatch)
 
-
 			ctx.IndentedJSON(http.StatusUnauthorized, errorResponse)
 			return
 		}
@@ -126,7 +126,7 @@ func (controller *SignInUserHandler) HandleSignInUser(ctx *gin.Context) {
 	logger.WithFields(logrus.Fields{
 		constants.User:    bffSignInRequest.Username,
 		constants.Latency: time.Since(start).Milliseconds(),
-	}).Info(constants.UserLoggedInSuccessMsg)
+	}).Infof(constants.OtpSentAndExpiryMsg, constants.OtpTimeLimit)
 
-	ctx.IndentedJSON(http.StatusOK, constants.UserLoggedInSuccessMsg)
+	ctx.IndentedJSON(http.StatusOK, fmt.Sprintf(constants.OtpSentAndExpiryMsg, constants.OtpTimeLimit))
 }

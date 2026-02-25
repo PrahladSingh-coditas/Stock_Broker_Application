@@ -34,6 +34,26 @@ definitions:
     - phoneNumber
     - username
     type: object
+  models.BFFForgotPasswordRequest:
+    properties:
+      panCard:
+        example: ABCDE1234F
+        type: string
+      phoneNumber:
+        example: 8432805566
+        maximum: 9999999999
+        minimum: 1000000000
+        type: integer
+      username:
+        example: Sanjana
+        maxLength: 32
+        minLength: 5
+        type: string
+    required:
+    - panCard
+    - phoneNumber
+    - username
+    type: object
   models.BFFSigninUserRequest:
     properties:
       password:
@@ -67,6 +87,44 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/auth/forgotpassword:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates user credentials to generate OTP for forgot password
+      parameters:
+      - description: Request OTP for forgot password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BFFForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP Sent successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid input payload
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "404":
+          description: User Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "500":
+          description: Authentication failed
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+      summary: Forgot Password
+      tags:
+      - User
   /api/auth/signin:
     post:
       consumes:

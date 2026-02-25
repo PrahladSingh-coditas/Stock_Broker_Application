@@ -92,7 +92,7 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 				"user":    bffSigninUserRequet.Username,
 				"latency": time.Since(start).Milliseconds(),
 			}).Info(constants.ErrPasswordMismatch)
-			
+
 			ctx.IndentedJSON(http.StatusUnauthorized, errorResponse)
 			return
 		}
@@ -139,7 +139,7 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 	logger.WithFields(logrus.Fields{
 		"user":    bffSigninUserRequet.Username,
 		"latency": time.Since(start).Milliseconds(),
-	}).Info(constants.UserLoggedInSuccessMsg)
+	}).Info(constants.UserLoggedOtpGeneratedSuccess)
 
-	ctx.IndentedJSON(http.StatusOK, constants.UserLoggedInSuccessMsg)
+	ctx.IndentedJSON(http.StatusOK, constants.UserLoggedOtpGeneratedSuccess)
 }

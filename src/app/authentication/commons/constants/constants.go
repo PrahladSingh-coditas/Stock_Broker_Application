@@ -22,6 +22,11 @@ const (
 	UserLoggedInSuccessMsg = "User logged in successfully"
 )
 
+//success message for user with otp
+const (
+	UserLoggedOtpGeneratedSuccess = "User logged in & otp generated successfully"
+)
+
 //Swagger Titile
 const SwaggerTitle = "Stock Broker Application API"
 

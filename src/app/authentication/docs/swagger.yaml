@@ -55,6 +55,12 @@ definitions:
       message:
         example: user logged in successfully
         type: string
+      otpExpiresAt:
+        format: int32
+        type: integer
+      otpSent:
+        format: int32
+        type: integer
     type: object
   models.ErrorAPIResponse:
     properties:

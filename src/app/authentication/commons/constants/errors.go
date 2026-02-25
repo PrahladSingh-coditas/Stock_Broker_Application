@@ -50,3 +50,8 @@ const (
 const(
 	ErrBinding = "failed to bind"
 )
+
+//otp generation error
+const(
+	ErrOtpFailed = "failed to generate otp"
+)

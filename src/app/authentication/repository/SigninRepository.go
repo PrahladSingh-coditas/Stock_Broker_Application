@@ -14,6 +14,7 @@ import (
 
 type SigninUserRepository interface {
 	SigninNewUser(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest) (*genericModels.User, error)
+	GenerateOtp(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest, otp uint64) error
 }
 
 type signinUserRepository struct{}
@@ -44,4 +45,26 @@ func (user *signinUserRepository) SigninNewUser(ctx context.Context, db *gorm.DB
 
 }
 
+func (user *signinUserRepository) GenerateOtp(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest, otp uint64) error {
+	start := time.Now()
+	logger := logrus.New()
 
+	result := db.WithContext(ctx).Model(&genericModels.User{}).Where(constants.UsernameField, bffSigninUserRequest.Username).
+		Select("otpSent", "otpExpiresAt").
+		Updates(genericModels.User{
+			OtpSent:      otp,
+			OtpExpiresAt: time.Now().Add(2*time.Minute),
+		})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	logger.WithFields(logrus.Fields{
+		"user":    bffSigninUserRequest.Username,
+		"latency": time.Since(start).Milliseconds(),
+	}).Info(constants.UserLoggedInSuccessMsg)
+
+	return nil
+
+}

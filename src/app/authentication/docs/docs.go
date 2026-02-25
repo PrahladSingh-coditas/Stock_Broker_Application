@@ -186,6 +186,14 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "user logged in successfully"
+                },
+                "otpExpiresAt": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "otpSent": {
+                    "type": "integer",
+                    "format": "int32"
                 }
             }
         },

@@ -7,5 +7,6 @@ type BFFSigninUserRequest struct{
 
 type BFFSigninUserResponse struct {
 	Message string `json:"message" example:"user logged in successfully"`
-
+	OtpSent uint8
+	OtpExpiresAt uint8 
 }

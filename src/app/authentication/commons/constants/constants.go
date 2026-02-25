@@ -30,8 +30,8 @@ const (
 
 //Otp related messages
 const (
-	OtpSentAndExpiryMsg    = "OTP sent successfully, OTP will expire in next %d minutes"
-	OtpTimeLimit=2
+	OtpSentAndExpiryMsg    = "OTP sent successfully, OTP will expire in next %d seconds"
+	OtpTimeLimit=120
 	OTPSent        = "OtpSent"
 	OTPExpiryTime  = "OtpExpiresAt"
 )

@@ -38,6 +38,7 @@ func NewCreateUserHandler(service *business.CreateUserService) *CreaterUserHandl
 func (controller *CreaterUserHandler) HandleCreaterUser(ctx *gin.Context) {
 
 	var bffCreateUserRequest models.BFFCreateUserRequest
+
 	if err := ctx.ShouldBind(&bffCreateUserRequest); err != nil {
 		errorMsgs := genericModels.ErrorMessage{Key: err.(*json.UnmarshalTypeError).Field, ErrorMessage: constants.ErrUnexpectedValue}
 		ctx.IndentedJSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
@@ -74,5 +75,4 @@ func (controller *CreaterUserHandler) HandleCreaterUser(ctx *gin.Context) {
 	}
 
 	ctx.IndentedJSON(http.StatusCreated, constants.UserCreationSuccessMsg)
-
 }

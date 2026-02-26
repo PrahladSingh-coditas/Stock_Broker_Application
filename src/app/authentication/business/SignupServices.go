@@ -17,6 +17,7 @@ func NewCreateUserService(createUserRepository repository.CreateUserRepository) 
 	return &CreateUserService{
 		createUserRepository: createUserRepository,
 	}
+
 }
 
 func (service *CreateUserService) CreateNewUser(ctx context.Context, spanCtx context.Context, bffCreateUserRequest models.BFFCreateUserRequest) error {

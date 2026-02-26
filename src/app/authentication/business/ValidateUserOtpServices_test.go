@@ -1,10 +1,11 @@
 package business
 
 import (
-	"authentication/commons"
+	constErrors "authentication/commons/constants"
 	"authentication/models"
 	"authentication/repository"
 	"context"
+	"errors"
 	genericModels "stock_broker_application/src/models"
 	"testing"
 	"time"
@@ -16,7 +17,7 @@ import (
 func TestValidateUserOTP_UserNotFound(t *testing.T) {
 	mockRepo := &repository.MockValidateUserOtpRepository{
 		User:  nil,
-		Error: commons.UserNotFoundError,
+		Error: errors.New(constErrors.ErrUserNotFound),
 	}
 
 	service := NewValidateUserOtpService(mockRepo, nil) //service{repository: mockRepo, db: nil}
@@ -27,10 +28,10 @@ func TestValidateUserOTP_UserNotFound(t *testing.T) {
 	}
 
 	err := service.ValidateUserOtp(context.Background(), context.Background(), testRequest)
-	// if err != commons.UserNotFoundError {
-	// t.Errorf("expected %v, but got %v", commons.UserNotFoundError, err)
+	// if err != constErrors.ErrUserNotFound {
+	// t.Errorf("expected %v, but got %v", constErrors.ErrUserNotFound, err)
 	// }
-	assert.Equal(t, commons.UserNotFoundError, err)
+	assert.Equal(t, errors.New(constErrors.ErrUserNotFound), err)
 }
 
 // test function for testing incorrect otp error
@@ -54,10 +55,10 @@ func TestValidateUserOTP_IncorrectOtp(t *testing.T) {
 	}
 
 	err := service.ValidateUserOtp(context.Background(), context.Background(), testRequest)
-	// if err != commons.IncorrectOTPError {
-	// t.Errorf("expected %v, but got %v", commons.IncorrectOTPError, err)
+	// if err != constErrors.ErrIncorrectOtp {
+	// t.Errorf("expected %v, but got %v", constErrors.ErrIncorrectOtp, err)
 	// }
-	assert.Equal(t, commons.IncorrectOTPError, err)
+	assert.Equal(t, errors.New(constErrors.ErrIncorrectOtp), err)
 }
 
 // test function for expired otp
@@ -81,7 +82,7 @@ func TestValidateUserOTP_ExpiredOtp(t *testing.T) {
 	}
 
 	err := service.ValidateUserOtp(context.Background(), context.Background(), testRequest)
-	assert.Equal(t, commons.OtpExpiredError, err)
+	assert.Equal(t, errors.New(constErrors.ErrExpiredOtp), err)
 }
 
 // test function for happy path request/ successful otp validation

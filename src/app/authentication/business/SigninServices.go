@@ -1,10 +1,11 @@
 package business
 
 import (
-	"authentication/commons"
+	"authentication/commons/constants"
 	"authentication/models"
 	"authentication/repository"
 	"context"
+	"errors"
 	"stock_broker_application/src/utils"
 )
 
@@ -24,7 +25,7 @@ func (service *SignInService) SignIn(ctx context.Context, spanCtx context.Contex
 
 	userFromDB, errGetUserFromDB := service.signinRepository.GetUserByUsername(spanCtx, postgresClinet, bffSignInRequest.Username)
 	if errGetUserFromDB != nil {
-		return commons.UserNotFoundError
+		return errors.New(constants.ErrUserNotFound)
 	}
 
 	//mock otp testing by updating the otpSent and otpExpiresAt fields in db table when signed in for validation task
@@ -40,7 +41,7 @@ func (service *SignInService) SignIn(ctx context.Context, spanCtx context.Contex
 	// fmt.Println("otp expiry epoch time: ", expiry)
 
 	if !utils.CompareHashPassword(userFromDB.Password, bffSignInRequest.Password) {
-		return commons.IncorrectPasswordError
+		return errors.New(constants.ErrIncorrectPassword)
 	}
 	return nil
 }

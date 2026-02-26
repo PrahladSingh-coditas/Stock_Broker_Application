@@ -1,7 +1,7 @@
-host: ep-blue-bird-a5e87ya0-pooler.us-east-2.aws.neon.tech
+host: host_name_here
 port: 5432
 username: admin
-password: npg_2GYaz9JujqKL
+password: password_here
 dbName: stock-broker
 timezone: Asia/kolkata
 sslmode: require

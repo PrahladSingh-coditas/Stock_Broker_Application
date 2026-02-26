@@ -22,13 +22,6 @@ func NewValidateUserOtpService(repository repository.ValidateUserOtpRepository, 
 	}
 }
 
-func NewValidateUserOtpServiceForTest(mockRepo repository.ValidateUserOtpRepository, db *gorm.DB) *ValidateUserOtpService {
-	return &ValidateUserOtpService{
-		repository: mockRepo,
-		db:         db,
-	}
-}
-
 func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) error {
 
 	userFromDB, errGettingUserFromDB := service.repository.GetUserByUsername(spanCtx, service.db, bffValidateUserOtpRequest.Username)

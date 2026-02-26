@@ -18,6 +18,7 @@ type CreaterUserHandler struct {
 }
 
 func NewCreateUserHandler(service *business.CreateUserService) *CreaterUserHandler {
+
 	return &CreaterUserHandler{
 		service: service,
 	}
@@ -36,20 +37,26 @@ func NewCreateUserHandler(service *business.CreateUserService) *CreaterUserHandl
 // @Failure 500 {object} models.ErrorAPIResponse "Internal Server Error"
 // @Router /api/auth/signup [post]
 func (controller *CreaterUserHandler) HandleCreaterUser(ctx *gin.Context) {
-
 	var bffCreateUserRequest models.BFFCreateUserRequest
+
 	if err := ctx.ShouldBind(&bffCreateUserRequest); err != nil {
-		errorMsgs := genericModels.ErrorMessage{Key: err.(*json.UnmarshalTypeError).Field, ErrorMessage: constants.ErrUnexpectedValue}
+		errorMsgs := genericModels.ErrorMessage{
+			Key:          err.(*json.UnmarshalTypeError).Field,
+			ErrorMessage: constants.ErrUnexpectedValue,
+		}
+
 		ctx.IndentedJSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
 			Message: errorMsgs,
 			Error:   constants.ErrInvalidPayload,
 		})
+
 		return
 	}
 
 	if err := validations.GetBFFValidator().Struct(&bffCreateUserRequest); err != nil {
 		validationErros, _ := validations.FormatValidationErrors(err)
 		ctx.IndentedJSON(http.StatusBadRequest, validationErros)
+
 		return
 	}
 
@@ -64,15 +71,16 @@ func (controller *CreaterUserHandler) HandleCreaterUser(ctx *gin.Context) {
 				Error: constants.ErrConflict,
 			}
 			ctx.IndentedJSON(http.StatusConflict, errorResponse)
+
 			return
 		}
 		errorResponse := genericModels.ErrorAPIResponse{
 			Error: constants.ErrUserCreationFailed,
 		}
 		ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
+
 		return
 	}
 
 	ctx.IndentedJSON(http.StatusCreated, constants.UserCreationSuccessMsg)
-
 }

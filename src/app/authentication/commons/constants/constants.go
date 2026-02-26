@@ -10,6 +10,7 @@ const (
 const (
 	UsersTableName = "users"
 	Fieldemail     = "email"
+	Username = "username = ?"
 )
 
 // Success message for user

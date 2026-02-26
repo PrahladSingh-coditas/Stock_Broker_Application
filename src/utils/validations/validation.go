@@ -54,6 +54,7 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 						validationErrors = append(validationErrors, models.ErrorMessage{
 							Key:          err.Field(),
 							ErrorMessage: msg,
+							// ErrorMessage: msg + constants.ErrInvalidValue,
 						})
 					}
 					continue

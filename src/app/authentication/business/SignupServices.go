@@ -38,5 +38,4 @@ func (service *CreateUserService) CreateNewUser(ctx context.Context, spanCtx con
 	}
 
 	return nil
-
 }

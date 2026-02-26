@@ -8,7 +8,7 @@ require (
 	github.com/pingcap/log v1.1.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/swaggo/files v1.0.1
-	github.com/swaggo/gin-swagger v1.6.0
+	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.4
 	gorm.io/gorm v1.25.12
 	stock_broker_application v0.0.0-00010101000000-000000000000
@@ -65,7 +65,7 @@ require (
 	go.uber.org/zap v1.19.0 // indirect
 	golang.org/x/arch v0.12.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect

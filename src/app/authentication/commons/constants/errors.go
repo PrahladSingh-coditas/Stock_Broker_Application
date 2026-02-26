@@ -16,7 +16,7 @@ const (
 // Duplicate Entry Errors
 const (
 	ErrDuplicateEntry    = "already exists"
-	ErrUsernameExists    = "usernamealready exists"
+	ErrUsernameExists    = "username already exists"
 	ErrUserAlreadyExists = "user already exists"
 )
 
@@ -43,4 +43,10 @@ const (
 	ErrPasswordMismatch       = "password does not match %w"
 	ErrAuthenticationFailed   = "authentication failed"
 	ErrTokenGenerationFailed  = "failed to generate authentication tokens %s"
+)
+
+const (
+	ErrSignInFailed = "failed to sign in user"
+	ErrUserNotFound = "user not found"	
+	ErrIncorrectPassword = "entered password is not correct"
 )

@@ -39,7 +39,7 @@ func (service *SignInUserService) SignInUser(ctx context.Context, spanCtx contex
 	generatedOTP := uint64(rand.Intn(9000) + 1000)
 	data := map[string]interface{}{
 		constants.OTPSent:       generatedOTP,
-		constants.OTPExpiryTime: time.Now().Unix() + constants.OtpTimeLimit,
+		constants.OTPExpiryTime: time.Now().Unix() + constants.OtpTimeLimitInSeconds,
 	}
 
 	errInStoringOTP := service.signInUserRepository.StoreOTP(ctx, tx, bffSignInRequest.Username, data)

@@ -126,7 +126,7 @@ func (controller *SignInUserHandler) HandleSignInUser(ctx *gin.Context) {
 	logger.WithFields(logrus.Fields{
 		constants.User:    bffSignInRequest.Username,
 		constants.Latency: time.Since(start).Milliseconds(),
-	}).Infof(constants.OtpSentAndExpiryMsg, constants.OtpTimeLimit)
+	}).Infof(constants.OtpSentAndExpiryMsg, constants.OtpTimeLimitInMinutes)
 
-	ctx.IndentedJSON(http.StatusOK, fmt.Sprintf(constants.OtpSentAndExpiryMsg, constants.OtpTimeLimit))
+	ctx.IndentedJSON(http.StatusOK, fmt.Sprintf(constants.OtpSentAndExpiryMsg, constants.OtpTimeLimitInMinutes))
 }

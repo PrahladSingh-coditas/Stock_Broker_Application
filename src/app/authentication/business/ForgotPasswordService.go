@@ -6,7 +6,9 @@ import (
 	"authentication/repository"
 	"context"
 	"errors"
+	"math/rand"
 	"stock_broker_application/src/utils"
+	"time"
 )
 
 type ForgotPasswordService struct {
@@ -19,22 +21,34 @@ func NewForgotPasswordService(forgotPasswordRepository repository.ForgotPassword
 	}
 }
 
-func (service *ForgotPasswordService) ForgotPassword(ctx context.Context, spanCtx context.Context, bffForgotPasswordRequest models.BFFForgotPasswordRequest) error {
+func (service *ForgotPasswordService) ReadRecordsWithConditions(ctx context.Context, spanCtx context.Context, bffForgotPasswordRequest models.BFFForgotPasswordRequest) error {
 	postgresClinet := utils.GetPostgresClient()
 	client := postgresClinet.GormDB
 
 	user, err := service.forgotPasswordRepository.ForgotPassword(spanCtx, client, bffForgotPasswordRequest.Username)
 	if err != nil {
-		return err
+		if err.Error() == constants.UserNotFoundError {
+			return errors.New(constants.UserNotFoundError)
+		}
+		return errors.New(constants.AuthenticationFailedError)
 	}
 
 	if user.PanCard != bffForgotPasswordRequest.PanCard || user.PhoneNumber != bffForgotPasswordRequest.PhoneNumber {
 		return errors.New(constants.AuthenticationFailedError)
 	}
 
-	errs := service.forgotPasswordRepository.GenerateOTP(spanCtx, client, bffForgotPasswordRequest.Username)
-	if errs != nil {
-		return errs
+	otp := map[string]interface{}{
+		"OtpSent":      rand.Intn(9000) + 1000,
+		"OtpExpiresAt": uint64(time.Now().Unix() + 120),
 	}
+
+	errs := service.forgotPasswordRepository.GenerateOTP(spanCtx, client, bffForgotPasswordRequest.Username, otp)
+	if errs != nil {
+		if errs.Error() == constants.NoRecordsAffectedError {
+			return errors.New(constants.NoRecordsAffectedError)
+		}
+		return errors.New(constants.AuthenticationFailedError)
+	}
+
 	return nil
 }

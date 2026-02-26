@@ -54,4 +54,5 @@ const (
 	DataNotFoundError       = "no user match the credentials"
 	NoRecordsAffectedError  = "query had no effect on rows"
 	GenerateOtpError        = "error while generating otp"
+	DatabaseError           = "database error"
 )

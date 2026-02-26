@@ -69,6 +69,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.ErrorAPIResponse"
                         }
+                    },
+                    "501": {
+                        "description": "Not Implemented",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
                     }
                 }
             }

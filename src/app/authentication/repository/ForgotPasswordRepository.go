@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
 	genericModels "stock_broker_application/src/models"
 	"time"
 
@@ -15,7 +14,7 @@ import (
 
 type ForgotPasswordRepository interface {
 	ForgotPassword(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error)
-	GenerateOTP(ctx context.Context, db *gorm.DB, username string) error
+	GenerateOTP(ctx context.Context, db *gorm.DB, username string, otp map[string]interface{}) error
 }
 
 type forgotPasswordRepository struct{}
@@ -45,25 +44,22 @@ func (user *forgotPasswordRepository) ForgotPassword(ctx context.Context, db *go
 
 	logger.WithFields(logrus.Fields{
 		"latency": time.Since(start).Milliseconds(),
-	}).Info(constants.CredentialMatchSuccessMsg)
+	}).Info(constants.UserReadSuccessMsg)
 
 	return &existingUser, nil
 }
 
-func (user *forgotPasswordRepository) GenerateOTP(ctx context.Context, db *gorm.DB, username string) error {
+func (user *forgotPasswordRepository) GenerateOTP(ctx context.Context, db *gorm.DB, username string, otp map[string]interface{}) error {
 	start := time.Now()
 	logger := logrus.New()
 
 	result := db.Model(&genericModels.User{}).
 		Where(constants.FieldUsername, username).
-		Updates(map[string]interface{}{
-			"OtpSent":      rand.Intn(9000) + 1000,
-			"OtpExpiresAt": time.Now().Add(2 * time.Minute),
-		})
+		Updates(otp)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return errors.New(constants.UserNotFoundError)
+			return errors.New(constants.NoRecordsAffectedError)
 		}
 		return fmt.Errorf("%s: %w", constants.AuthenticationFailedError, result.Error)
 	}

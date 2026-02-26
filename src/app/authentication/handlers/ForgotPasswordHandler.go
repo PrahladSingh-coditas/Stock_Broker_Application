@@ -34,6 +34,7 @@ func NewForgotPasswordHandler(service *business.ForgotPasswordService) *ForgotPa
 // @Failure 401 {object} models.ErrorAPIResponse "Invalid credentials"
 // @Failure 404 {object} models.ErrorAPIResponse "User Not Found"
 // @Failure 500 {object} models.ErrorAPIResponse "Authentication failed"
+// @Failure 501 {object} models.ErrorAPIResponse "Not Implemented"
 // @Router /api/auth/forgotpassword [post]
 func (controller *ForgotPasswordHandler) HandleForgotPassword(ctx *gin.Context) {
 	var bffForgotPasswordRequest models.BFFForgotPasswordRequest
@@ -58,7 +59,7 @@ func (controller *ForgotPasswordHandler) HandleForgotPassword(ctx *gin.Context) 
 	}
 
 	// then we call the function that is in service
-	err := controller.service.ForgotPassword(ctx, ctx.Request.Context(), bffForgotPasswordRequest)
+	err := controller.service.ReadRecordsWithConditions(ctx, ctx.Request.Context(), bffForgotPasswordRequest)
 	if err != nil {
 		if err.Error() == constants.UserNotFoundError {
 			ctx.JSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
@@ -66,8 +67,20 @@ func (controller *ForgotPasswordHandler) HandleForgotPassword(ctx *gin.Context) 
 			})
 			return
 		}
-		ctx.JSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
-			Error: constants.InvalidCredentialsError,
+		if err.Error() == constants.NoRecordsAffectedError {
+			ctx.JSON(http.StatusNotImplemented, genericModels.ErrorAPIResponse{
+				Error: constants.NoRecordsAffectedError,
+			})
+			return
+		}
+		if err.Error() == constants.AuthenticationFailedError {
+			ctx.JSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+				Error: constants.InvalidCredentialsError,
+			})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
+			Error: constants.DatabaseError,
 		})
 		return
 	}

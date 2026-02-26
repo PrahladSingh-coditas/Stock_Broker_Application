@@ -44,3 +44,12 @@ const (
 	ErrAuthenticationFailed   = "authentication failed"
 	ErrTokenGenerationFailed  = "failed to generate authentication tokens %s"
 )
+
+const (
+	ErrSignInFailed      = "failed to sign in user"
+	ErrUserNotFound      = "user not found"
+	ErrIncorrectPassword = "entered password is not correct"
+	ErrOtpsMismatch      = "OTPs did not match"
+	ErrExpiredOtp        = "OTP expired"
+	ErrIncorrectOtp      = "entered OTP is not correct"
+)

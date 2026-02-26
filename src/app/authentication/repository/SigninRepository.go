@@ -36,7 +36,7 @@ func (repo *signInRepository) GetUserByUsername(ctx context.Context, db *gorm.DB
 		}
 		return nil, result.Error
 	}
-	
+
 	logger.WithFields(logrus.Fields{
 		"latency": time.Since(start).Microseconds(),
 	}).Info(constants.UserLoggedInSuccessMsg)

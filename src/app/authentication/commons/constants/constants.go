@@ -10,12 +10,14 @@ const (
 const (
 	UsersTableName = "users"
 	Fieldemail     = "email"
+	Username       = "username = ?"
 )
 
 // Success message for user
 const (
 	UserCreationSuccessMsg = "User created successfully"
 	UserLoggedInSuccessMsg = "User Signin in successfully"
+	OtpValidatedSuccessMsg = "OTP validated successfully"
 )
 
 // error

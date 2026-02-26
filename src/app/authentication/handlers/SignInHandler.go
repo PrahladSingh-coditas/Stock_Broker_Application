@@ -51,7 +51,7 @@ func (controller *SignInUserHandler) HandleSignInUser(ctx *gin.Context) {
 		return
 	}
 
-	response, err := controller.service.SignIn(ctx.Request.Context(), bffSignInRequest.Username, bffSignInRequest.Password)
+	response, err := controller.service.SignIn(ctx.Request.Context(), bffSignInRequest)
 	if err != nil {
 		if err.Error() == constants.ErrUsernameNotFound {
 			ctx.JSON(http.StatusNotFound, genericModels.ErrorAPIResponse{

@@ -124,6 +124,64 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/auth/validate-otp": {
+            "post": {
+                "description": "Validates user OTP and return clear success/ failure message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Validates user OTP",
+                "parameters": [
+                    {
+                        "description": "User OTP Validation Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFValidateUserOtpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OTP validation successful",
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFValidateUserOtpResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input payload",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Incorrect OTP",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User does not exist",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -198,6 +256,33 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "Signed in successfully"
+                }
+            }
+        },
+        "models.BFFValidateUserOtpRequest": {
+            "type": "object",
+            "required": [
+                "otp",
+                "username"
+            ],
+            "properties": {
+                "otp": {
+                    "type": "string",
+                    "example": "1234"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 5,
+                    "example": "Arijit"
+                }
+            }
+        },
+        "models.BFFValidateUserOtpResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         },

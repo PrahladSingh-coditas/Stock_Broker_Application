@@ -21,16 +21,16 @@ func NewSignInService(SignInRepository repository.SignInRepository) *SignInServi
 
 }
 
-func (service *SignInService) SignIn(ctx context.Context, username string, password string) (*models.BFFSignInResponse, error) {
+func (service *SignInService) SignIn(ctx context.Context, bffSignInRequest models.BFFSignInRequest) (*models.BFFSignInResponse, error) {
 	db := utils.GetPostgresClient().GormDB
 
-	user, err := service.signInRepository.GetUserByUsername(ctx, db, username)
+	user, err := service.signInRepository.GetUserByUsername(ctx, db, bffSignInRequest.Username)
 	if err != nil {
 		return nil, err
 	}
 
 	// compare password
-	if !utils.CompareHashPassword(user.Password, password) {
+	if !utils.CompareHashPassword(user.Password, bffSignInRequest.Password) {
 		return nil, errors.New(constants.ErrPasswordMismatch)
 	}
 

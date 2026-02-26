@@ -24,7 +24,8 @@ const (
 
 //success message for user with otp
 const (
-	UserLoggedOtpGeneratedSuccess = "User logged in & Otp generated successfully. Otp will expire in 2 minutes."
+	UserOtpGeneratedSuccess = "Otp generated successfully."
+	UserOtpExpiryMsg = "Otp will expire in 2 minutes."
 )
 
 //Swagger Titile

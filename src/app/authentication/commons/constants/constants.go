@@ -10,13 +10,14 @@ const (
 const (
 	UsersTableName = "users"
 	Fieldemail     = "email"
-	Username = "username = ?"
+	Username       = "username = ?"
 )
 
 // Success message for user
 const (
 	UserCreationSuccessMsg = "User created successfully"
 	UserLoggedInSuccessMsg = "User logged in successfully"
+	OtpValidatedSuccessMsg = "OTP validated successfully"
 )
 
 //Swagger Titile

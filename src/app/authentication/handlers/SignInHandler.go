@@ -29,12 +29,12 @@ func NewSignInHandler(service *business.SignInService) *SignInHandler {
 // @Description Authenticates user and returns JWT token
 // @Tags User
 // @Accept json
-// @Produce
+// @Produce json
 // @Param request body models.BFFSignInRequest true "User Sign In Request"
 // @Success 200 {object} models.BFFSignInResponse "Signin successful"
 // @Failure 400 {object} models.ErrorAPIResponse "Invalid input payload"
 // @Failure 401 {object} models.ErrorAPIResponse "Invalid credentials"
-// @Failure 409 {object} models.ErrorAPIResponse "User does not exist"
+// @Failure 404 {object} models.ErrorAPIResponse "User does not exist"
 // @Failure 500 {object} models.ErrorAPIResponse "Internal Server Error"
 // @Router /api/auth/signin [post]
 func (controller *SignInHandler) HandleSignIn(ctx *gin.Context) {
@@ -42,6 +42,7 @@ func (controller *SignInHandler) HandleSignIn(ctx *gin.Context) {
 
 	if errBindReq := ctx.ShouldBind(&bffSignInRequest); errBindReq != nil {
 		errorMsgs := genericModels.ErrorMessage{Key: errBindReq.(*json.UnmarshalTypeError).Field, ErrorMessage: constants.ErrUnexpectedValue}
+
 		ctx.IndentedJSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
 			Message: errorMsgs,
 			Error:   constants.ErrInvalidPayload,
@@ -57,7 +58,7 @@ func (controller *SignInHandler) HandleSignIn(ctx *gin.Context) {
 
 	errWhileSignIn := controller.service.SignIn(ctx, ctx.Request.Context(), bffSignInRequest)
 	if errWhileSignIn != nil {
-		if errors.Is(errWhileSignIn, commons.UserNotFoundError) {
+		if errors.Is(errWhileSignIn, errors.New(constants.ErrUserNotFound)) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          commons.Username,
@@ -69,7 +70,7 @@ func (controller *SignInHandler) HandleSignIn(ctx *gin.Context) {
 			return
 		}
 
-		if errors.Is(errWhileSignIn, commons.IncorrectPasswordError) {
+		if errors.Is(errWhileSignIn, errors.New(constants.ErrIncorrectPassword)) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          commons.Password,

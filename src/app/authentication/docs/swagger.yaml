@@ -59,15 +59,14 @@ definitions:
   models.BFFValidateUserOtpRequest:
     properties:
       otp:
-        example: "1234"
-        type: string
+        maximum: 9999
+        minimum: 0
+        type: integer
       username:
-        example: Arijit
         maxLength: 32
         minLength: 5
         type: string
     required:
-    - otp
     - username
     type: object
   models.BFFValidateUserOtpResponse:

@@ -262,19 +262,18 @@ const docTemplate = `{
         "models.BFFValidateUserOtpRequest": {
             "type": "object",
             "required": [
-                "otp",
                 "username"
             ],
             "properties": {
                 "otp": {
-                    "type": "string",
-                    "example": "1234"
+                    "type": "integer",
+                    "maximum": 9999,
+                    "minimum": 0
                 },
                 "username": {
                     "type": "string",
                     "maxLength": 32,
-                    "minLength": 5,
-                    "example": "Arijit"
+                    "minLength": 5
                 }
             }
         },

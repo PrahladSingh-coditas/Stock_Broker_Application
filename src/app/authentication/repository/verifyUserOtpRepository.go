@@ -20,10 +20,12 @@ func NewValidateUserOtpRepository() *validateUserOtpRepository {
 }
 
 func (repo *validateUserOtpRepository) GetUserByUsername(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error) {
+
 	var user genericModels.User
 	result := db.WithContext(ctx).Table(constants.UsersTableName).Where(constants.Username, username).First(&user)
 	if result.Error != nil {
 		return nil, fmt.Errorf(constants.ErrUserNotFound)
 	}
+
 	return &user, nil
 }

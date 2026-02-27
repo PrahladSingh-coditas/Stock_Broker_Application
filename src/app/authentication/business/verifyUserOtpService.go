@@ -6,6 +6,7 @@ import (
 	"authentication/repository"
 	"context"
 	"stock_broker_application/src/utils"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -22,13 +23,6 @@ func NewValidateUserOtpService(repository repository.ValidateUserOtpRepository, 
 	}
 }
 
-func NewValidateUserOtpServiceForTest(mockRepo repository.ValidateUserOtpRepository, db *gorm.DB) *ValidateUserOtpService {
-	return &ValidateUserOtpService{
-		repository: mockRepo,
-		db:         db,
-	}
-}
-
 func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) error {
 
 	userFromDB, errGettingUserFromDB := service.repository.GetUserByUsername(spanCtx, service.db, bffValidateUserOtpRequest.Username)
@@ -40,8 +34,9 @@ func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, span
 		return commons.IncorrectOTPError
 	}
 
-	if !utils.CheckOtpExpiry(userFromDB.OtpExpiresAt, userFromDB.OtpSent) {
+	if !utils.CheckOtpExpiry(userFromDB.OtpExpiresAt, time.Now()) {
 		return commons.OtpExpiredError
 	}
+
 	return nil
 }

@@ -69,6 +69,15 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 				errorMsg = constants.ErrInvalidPhoneNumber
 			case constants.FieldEmail:
 				errorMsg = constants.ErrInvalidEmail
+			case constants.FieldOtp:
+				switch err.Tag() {
+				case "required":
+					errorMsg = fmt.Sprintf(constants.ErrFieldRequired, "otp")
+				case "otp":
+					errorMsg = "otp must be exactly 4 digits and only numeric"
+				default:
+					errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
+				}
 			default:
 				errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 			}
@@ -123,11 +132,17 @@ func IsEmailValid(f1 validator.FieldLevel) bool {
 	return EmailRegex.MatchString(email)
 }
 
+func OtpValidator(f1 validator.FieldLevel) bool {
+	matched, _ := regexp.MatchString(constants.OtpRegexp, f1.Field().String())
+	return matched
+}
+
 func init() {
 	bffValidator = validator.New()
 	bffValidator.RegisterValidation("panCard", panCardValidator)
 	bffValidator.RegisterValidation("strongPassword", strongPasswordValidator)
 	bffValidator.RegisterValidation("Email", IsEmailValid)
+	bffValidator.RegisterValidation("otp", OtpValidator)
 }
 
 func GetBFFValidator() *validator.Validate {

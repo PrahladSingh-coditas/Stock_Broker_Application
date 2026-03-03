@@ -8,10 +8,10 @@ const (
 
 // Database table name & field names for users
 const (
-	UsersTableName = "users"
-	Fieldemail     = "email"
-	UsernameCondtion       = "username = ? "
-	Password       = "password"
+	UsersTableName   = "users"
+	Fieldemail       = "email"
+	UsernameCondtion = "username = ? "
+	Password         = "password"
 )
 
 //Logger related fields
@@ -25,16 +25,15 @@ const (
 	UserCreationSuccessMsg = "User created successfully"
 	UserLoggedInSuccessMsg = "User logged in successfully"
 	UserDataFetchedMsg     = "User data fetched successfully"
-	
 )
 
 //Otp related messages
 const (
-	OtpSentAndExpiryMsg    = "OTP sent successfully, OTP will expire in next %d minutes"
-	OtpTimeLimitInSeconds=120
-	OtpTimeLimitInMinutes=2
-	OTPSent        = "OtpSent"
-	OTPExpiryTime  = "OtpExpiresAt"
+	OtpSentAndExpiryMsg   = "OTP sent successfully, OTP will expire in next %d minutes"
+	OtpTimeLimitInSeconds = 120
+	OtpTimeLimitInMinutes = 2
+	OTPSent               = "OtpSent"
+	OTPExpiryTime         = "OtpExpiresAt"
 )
 
 //Swagger Titile

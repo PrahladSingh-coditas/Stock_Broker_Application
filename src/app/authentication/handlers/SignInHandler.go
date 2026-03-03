@@ -80,7 +80,7 @@ func (controller *SignInUserHandler) HandleSignInUser(ctx *gin.Context) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.User,
-					ErrorMessage: constants.ErrRecordNotFOund,
+					ErrorMessage: constants.ErrRecordNotFound,
 				},
 				Error: constants.ErrAuthenticationFailed,
 			}

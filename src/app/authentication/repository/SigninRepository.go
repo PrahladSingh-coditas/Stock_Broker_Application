@@ -14,6 +14,7 @@ import (
 
 type SigninUserRepository interface {
 	SigninNewUser(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest) (*genericModels.User, error)
+	InsertOtpInDb(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest, otp uint64) error
 }
 
 type signinUserRepository struct{}
@@ -28,7 +29,7 @@ func (user *signinUserRepository) SigninNewUser(ctx context.Context, db *gorm.DB
 
 	var ExistingUser genericModels.User
 
-	// SELECT * FROM users WHERE username = 'Arijit' LIMIT 1;
+	// SELECT * FROM users WHERE username = 'Sakshi' LIMIT 1;
 	result := db.WithContext(ctx).Where(constants.UsernameField, bffSigninUserRequest.Username).First(&ExistingUser)
 
 	if result.Error != nil {
@@ -43,5 +44,27 @@ func (user *signinUserRepository) SigninNewUser(ctx context.Context, db *gorm.DB
 	return &ExistingUser, nil
 
 }
+ // to do: combine both signin and otp queries:
+func (user *signinUserRepository) InsertOtpInDb(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest, otp uint64) error {
+	start := time.Now()
+	logger := logrus.New()
 
+	result := db.WithContext(ctx).Model(&genericModels.User{}).Where(constants.UsernameField, bffSigninUserRequest.Username).
+		Select("otpSent", "otpExpiresAt").
+		Updates(genericModels.User{
+			OtpSent:      otp,
+			OtpExpiresAt: uint64(time.Now().Unix()+120), 
+		})
 
+	if result.Error != nil {
+		return result.Error
+	}
+
+	logger.WithFields(logrus.Fields{
+		"user":    bffSigninUserRequest.Username,
+		"latency": time.Since(start).Milliseconds(),
+	}).Info(constants.UserLoggedInSuccessMsg)
+
+	return nil
+
+}

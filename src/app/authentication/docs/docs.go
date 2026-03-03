@@ -129,33 +129,33 @@ const docTemplate = `{
                 "confirmPassword": {
                     "type": "string",
                     "minLength": 8,
-                    "example": "Secure@123"
+                    "example": "Sakshi@123"
                 },
                 "email": {
                     "type": "string",
-                    "example": "arijit@gmail.com"
+                    "example": "sakshi@gmail.com"
                 },
                 "panCard": {
                     "type": "string",
-                    "example": "EQZRP1234P"
+                    "example": "ABCDE1234S"
                 },
                 "password": {
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 8,
-                    "example": "Secure@123"
+                    "example": "Sakshi@123"
                 },
                 "phoneNumber": {
                     "type": "integer",
                     "maximum": 9999999999,
                     "minimum": 1000000000,
-                    "example": 7568912340
+                    "example": 9876543210
                 },
                 "username": {
                     "type": "string",
                     "maxLength": 32,
                     "minLength": 5,
-                    "example": "Arijit"
+                    "example": "Sakshi"
                 }
             }
         },
@@ -170,13 +170,13 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 8,
-                    "example": "Secure@123"
+                    "example": "Sakshi@123"
                 },
                 "username": {
                     "type": "string",
                     "maxLength": 32,
                     "minLength": 5,
-                    "example": "Arijit"
+                    "example": "Sakshi"
                 }
             }
         },
@@ -186,6 +186,14 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "user logged in successfully"
+                },
+                "otpexpiresat": {
+                    "type": "string",
+                    "example": "otp expires in 2 minutes"
+                },
+                "otpsent": {
+                    "type": "string",
+                    "example": "otp generated successfully"
                 }
             }
         },

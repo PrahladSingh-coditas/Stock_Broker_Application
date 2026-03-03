@@ -42,6 +42,7 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 	logger := logrus.New()
 
 	var bffSigninUserRequet models.BFFSigninUserRequest
+	
 
 	if err := ctx.ShouldBind(&bffSigninUserRequet); err != nil {
 		errorMsgs := genericModels.ErrorMessage{
@@ -92,7 +93,7 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 				"user":    bffSigninUserRequet.Username,
 				"latency": time.Since(start).Milliseconds(),
 			}).Info(constants.ErrPasswordMismatch)
-			
+
 			ctx.IndentedJSON(http.StatusUnauthorized, errorResponse)
 			return
 		}
@@ -136,10 +137,15 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 
 	}
 
+	// 200 status OK
 	logger.WithFields(logrus.Fields{
 		"user":    bffSigninUserRequet.Username,
 		"latency": time.Since(start).Milliseconds(),
-	}).Info(constants.UserLoggedInSuccessMsg)
+	}).Info(constants.UserLoggedInSuccessMsg, constants.UserOtpGeneratedSuccess)
 
-	ctx.IndentedJSON(http.StatusOK, constants.UserLoggedInSuccessMsg)
+	ctx.IndentedJSON(http.StatusOK, models.BFFSigninUserResponse{
+		Message:      constants.UserLoggedInSuccessMsg,
+		OtpSent:      constants.UserOtpGeneratedSuccess,
+		OtpExpiresAt: constants.UserOtpExpiryMsg,
+	})
 }

@@ -75,7 +75,7 @@ func (controller *SignInUserHandler) HandleSignInUser(ctx *gin.Context) {
 	err := controller.service.SignInUser(ctx, ctx.Request.Context(), bffSignInRequest)
 
 	if err != nil {
-		if strings.Contains(err.Error(), constants.ErrUserNotFound) {
+		if strings.Contains(err.Error(), constants.ErrUserNotFoundMsg) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.User,

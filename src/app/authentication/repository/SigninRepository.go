@@ -4,17 +4,19 @@ import (
 	"authentication/commons/constants"
 	"authentication/models"
 	"context"
+	"errors"
 	"time"
 
 	genericModels "stock_broker_application/src/models"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type SigninUserRepository interface {
-	SigninNewUser(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest) (*genericModels.User, error)
-	InsertOtpInDb(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest, otp uint64) error
+	SigninAndInsertOtpInDb(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest, otp uint64) (*genericModels.User, error) 
+
 }
 
 type signinUserRepository struct{}
@@ -23,48 +25,33 @@ func NewSigninUserRepository() *signinUserRepository { //constructor
 	return &signinUserRepository{}
 }
 
-func (user *signinUserRepository) SigninNewUser(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest) (*genericModels.User, error) {
+func (user *signinUserRepository) SigninAndInsertOtpInDb(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest, otp uint64) (*genericModels.User, error) {
 	start := time.Now()
 	logger := logrus.New()
 
 	var ExistingUser genericModels.User
 
-	// SELECT * FROM users WHERE username = 'Sakshi' LIMIT 1;
-	result := db.WithContext(ctx).Where(constants.UsernameField, bffSigninUserRequest.Username).First(&ExistingUser)
+	result := db.WithContext(ctx).
+		Model(&genericModels.User{}).
+		Where(constants.UsernameField, bffSigninUserRequest.Username).
+		Clauses(clause.Returning{}).
+		Updates(map[string]interface{}{
+			"otpSent":      otp,
+			"otpExpiresAt": time.Now().Unix() + 120,
+		}).
+		Scan(&ExistingUser)
 
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
+	if result.RowsAffected == 0 {
+		return nil, errors.New("invalid username or password")
+	}
 	logger.WithFields(logrus.Fields{
 		"user":    bffSigninUserRequest.Username,
 		"latency": time.Since(start).Milliseconds(),
 	}).Info(constants.UserLoggedInSuccessMsg)
 
 	return &ExistingUser, nil
-
-}
- // to do: combine both signin and otp queries:
-func (user *signinUserRepository) InsertOtpInDb(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest, otp uint64) error {
-	start := time.Now()
-	logger := logrus.New()
-
-	result := db.WithContext(ctx).Model(&genericModels.User{}).Where(constants.UsernameField, bffSigninUserRequest.Username).
-		Select("otpSent", "otpExpiresAt").
-		Updates(genericModels.User{
-			OtpSent:      otp,
-			OtpExpiresAt: uint64(time.Now().Unix()+120), 
-		})
-
-	if result.Error != nil {
-		return result.Error
-	}
-
-	logger.WithFields(logrus.Fields{
-		"user":    bffSigninUserRequest.Username,
-		"latency": time.Since(start).Milliseconds(),
-	}).Info(constants.UserLoggedInSuccessMsg)
-
-	return nil
-
 }

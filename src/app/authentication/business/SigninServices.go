@@ -28,7 +28,9 @@ func (service *SigninUserService) SigninUser(ctx context.Context, spanCtx contex
 	postgresClient := utils.GetPostgresClient()
 	client := postgresClient.GormDB
 
-	user, err := service.signinUserRepository.SigninNewUser(spanCtx, client, bffSigninUserRequest)
+	otp := 1000 + rand.Uint64N(9000)//prev range of Uint64N(9000) :[0,9000) now 1000 is added to entire range and the range becomes: [1000,10000)
+
+	user, err := service.signinUserRepository.SigninAndInsertOtpInDb(spanCtx, client, bffSigninUserRequest, otp)
 	if err != nil {
 		return errors.New(constants.ErrInvalidEmailorPassword)
 	}
@@ -38,12 +40,10 @@ func (service *SigninUserService) SigninUser(ctx context.Context, spanCtx contex
 		return errors.New(constants.ErrPasswordMismatch)
 	}
  
-	otp := 1000 + rand.Uint64N(9000)//prev range of Uint64N(9000) :[0,9000) now 1000 is added to entire range and the range becomes: [1000,10000)
-
-	otpError := service.signinUserRepository.InsertOtpInDb(spanCtx, client, bffSigninUserRequest, otp)
-	if otpError != nil {
-		return errors.New(constants.ErrOtpFailed)
-	}
+	// otpError := service.signinUserRepository.InsertOtpInDb(spanCtx, client, bffSigninUserRequest, otp)
+	// if otpError != nil {
+	// 	return errors.New(constants.ErrOtpFailed)
+	// }
 
 	return nil
 }

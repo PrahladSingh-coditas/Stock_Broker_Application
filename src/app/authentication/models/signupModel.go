@@ -10,5 +10,5 @@ type BFFCreateUserRequest struct {
 }
 
 type BFFCreateUserResponse struct {
-	Message string `json:"message" example:"user created successfully"`
+	Message string `json:"message" example:"login successful"`
 }

@@ -8,10 +8,11 @@ const (
 
 // Database table name & field names for users
 const (
-	UsersTableName = "users"
-	Fieldemail     = "email"
-	Username       = "username = ? "
-	Password       = "password"
+	UsersTableName   = "users"
+	Fieldemail       = "email"
+	UsernameCondtion = "username = ? "
+	Password         = "password"
+	Database         = "database"
 )
 
 //Logger related fields
@@ -27,11 +28,19 @@ const (
 	UserDataFetchedMsg     = "User data fetched successfully"
 )
 
+//Otp related messages
+const (
+	OtpSentAndExpiryMsg   = "OTP sent successfully, OTP will expire in next %d minutes"
+	OtpTimeLimitInSeconds = 120
+	OtpTimeLimitInMinutes = 2
+	OTPSent               = "OtpSent"
+	OTPExpiryTime         = "OtpExpiresAt"
+)
+
 //Swagger Titile
 const SwaggerTitle = "Stock Broker Application API"
 
 const EmailorPasswordField = "email_or_password"
-
 
 //Cookies
 const (

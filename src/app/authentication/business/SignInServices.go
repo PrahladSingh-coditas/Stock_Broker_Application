@@ -6,8 +6,9 @@ import (
 	"authentication/repository"
 	"context"
 	"errors"
-	"fmt"
+	"math/rand"
 	"stock_broker_application/src/utils"
+	"time"
 )
 
 type SignInUserService struct {
@@ -24,14 +25,25 @@ func (service *SignInUserService) SignInUser(ctx context.Context, spanCtx contex
 	postgresClinet := utils.GetPostgresClient()
 	tx := postgresClinet.GormDB
 
-	userDataFromDB, errorFromRepository := service.signInUserRepository.SignInUser(spanCtx, tx, bffSignInRequest)
-	if errorFromRepository != nil {
-		return errorFromRepository
+	userData, err1 := service.signInUserRepository.SignInUser(spanCtx, tx, bffSignInRequest.Username)
+	if err1 != nil {
+		return err1
 	}
 
-	checkPassword := utils.CompareHashPassword(userDataFromDB.Password, bffSignInRequest.Password)
+	checkPassword := utils.CompareHashPassword(userData.Password, bffSignInRequest.Password)
 	if !checkPassword {
-		return fmt.Errorf(constants.ErrPasswordMismatch, errors.New(constants.ErrPasswordNotMatch))
+		return errors.New(constants.ErrPasswordNotMatch)
+	}
+
+	generatedOTP := uint64(rand.Intn(9000) + 1000)
+	data := map[string]interface{}{
+		constants.OTPSent:       generatedOTP,
+		constants.OTPExpiryTime: time.Now().Unix() + constants.OtpTimeLimitInSeconds,
+	}
+
+	err2 := service.signInUserRepository.StoreOTP(ctx, tx, bffSignInRequest.Username, data)
+	if err2 != nil {
+		return err2
 	}
 
 	return nil

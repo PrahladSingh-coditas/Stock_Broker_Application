@@ -6,7 +6,6 @@ import (
 	"authentication/repository"
 	"context"
 	"errors"
-	"fmt"
 	"math/rand"
 	"stock_broker_application/src/utils"
 	"time"
@@ -26,14 +25,14 @@ func (service *SignInUserService) SignInUser(ctx context.Context, spanCtx contex
 	postgresClinet := utils.GetPostgresClient()
 	tx := postgresClinet.GormDB
 
-	userData, err1:= service.signInUserRepository.SignInUser(spanCtx, tx, bffSignInRequest.Username)
+	userData, err1 := service.signInUserRepository.SignInUser(spanCtx, tx, bffSignInRequest.Username)
 	if err1 != nil {
 		return err1
 	}
 
 	checkPassword := utils.CompareHashPassword(userData.Password, bffSignInRequest.Password)
 	if !checkPassword {
-		return fmt.Errorf(constants.ErrPasswordMismatch, errors.New(constants.ErrPasswordNotMatch))
+		return errors.New(constants.ErrPasswordNotMatch)
 	}
 
 	generatedOTP := uint64(rand.Intn(9000) + 1000)

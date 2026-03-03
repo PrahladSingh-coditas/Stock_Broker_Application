@@ -12,6 +12,7 @@ const (
 	Fieldemail       = "email"
 	UsernameCondtion = "username = ? "
 	Password         = "password"
+	Database         = "database"
 )
 
 //Logger related fields

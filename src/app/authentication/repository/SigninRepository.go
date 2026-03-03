@@ -3,6 +3,7 @@ package repository
 import (
 	"authentication/commons/constants"
 	"context"
+	"errors"
 	GenericUserModel "stock_broker_application/src/models"
 	"time"
 
@@ -27,16 +28,15 @@ func (user *signInUserRepository) SignInUser(ctx context.Context, db *gorm.DB, u
 	logger := logrus.New()
 
 	var fetchedUserData GenericUserModel.User
-	var User GenericUserModel.User
 
-	err := db.Model(&User).Where(constants.UsernameCondtion, username).First(&fetchedUserData)
+	err := db.Where(constants.UsernameCondtion, username).First(&fetchedUserData)
 
-	if err.RowsAffected==0 {
-		return nil, gorm.ErrRecordNotFound
+	if err.RowsAffected == 0 {
+		return nil, errors.New(constants.ErrUserNotFoundMsg)
 	}
 
-	if err != nil {
-		return nil, err.Error
+	if err.Error != nil {
+		return nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
 	}
 
 	logger.WithFields(logrus.Fields{
@@ -56,11 +56,11 @@ func (repo *signInUserRepository) StoreOTP(ctx context.Context, db *gorm.DB, use
 		Updates(updates)
 
 	if result.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
+		return errors.New(constants.ErrUserNotFoundMsg)
 	}
 
 	if result.Error != nil {
-		return result.Error
+		return errors.New(constants.ErrDatabaseQueryErrorMsg)
 	}
 
 	return nil

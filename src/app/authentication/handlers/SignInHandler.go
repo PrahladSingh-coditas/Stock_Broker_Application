@@ -14,7 +14,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 type SignInUserHandler struct {
@@ -73,14 +72,14 @@ func (controller *SignInUserHandler) HandleSignInUser(ctx *gin.Context) {
 		return
 	}
 
-	errorFromService := controller.service.SignInUser(ctx, ctx.Request.Context(), bffSignInRequest)
+	err := controller.service.SignInUser(ctx, ctx.Request.Context(), bffSignInRequest)
 
-	if errorFromService != nil {
-		if errorFromService == gorm.ErrRecordNotFound {
+	if err != nil {
+		if strings.Contains(err.Error(), constants.ErrUserNotFound) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.User,
-					ErrorMessage: constants.ErrRecordNotFound,
+					ErrorMessage: constants.ErrUserNotFoundMsg,
 				},
 				Error: constants.ErrAuthenticationFailed,
 			}
@@ -92,7 +91,7 @@ func (controller *SignInUserHandler) HandleSignInUser(ctx *gin.Context) {
 
 			ctx.IndentedJSON(http.StatusNotFound, errorResponse)
 			return
-		} else if strings.Contains(errorFromService.Error(), constants.ErrPasswordNotMatch) {
+		} else if strings.Contains(err.Error(), constants.ErrPasswordNotMatch) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.Password,
@@ -108,19 +107,35 @@ func (controller *SignInUserHandler) HandleSignInUser(ctx *gin.Context) {
 
 			ctx.IndentedJSON(http.StatusUnauthorized, errorResponse)
 			return
+		} else if strings.Contains(err.Error(), constants.ErrDatabaseQueryErrorMsg) {
+			errorResponse := genericModels.ErrorAPIResponse{
+				Message: genericModels.ErrorMessage{
+					Key:          constants.Database,
+					ErrorMessage: constants.ErrDatabaseQueryErrorMsg,
+				},
+				Error: constants.ErrAuthenticationFailed,
+			}
+
+			logger.WithFields(logrus.Fields{
+				constants.User:    bffSignInRequest.Username,
+				constants.Latency: time.Since(start).Milliseconds(),
+			}).Info(constants.ErrDatabaseQueryErrorMsg)
+
+			ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
+			return
+		} else {
+			errorResponse := genericModels.ErrorAPIResponse{
+				Error: constants.ErrAuthenticationFailed,
+			}
+
+			logger.WithFields(logrus.Fields{
+				constants.User:    bffSignInRequest.Username,
+				constants.Latency: time.Since(start).Milliseconds(),
+			}).Info(constants.ErrAuthenticationFailed)
+
+			ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
+			return
 		}
-
-		errorResponse := genericModels.ErrorAPIResponse{
-			Error: constants.ErrAuthenticationFailed,
-		}
-
-		logger.WithFields(logrus.Fields{
-			constants.User:    bffSignInRequest.Username,
-			constants.Latency: time.Since(start).Milliseconds(),
-		}).Info(constants.ErrAuthenticationFailed)
-
-		ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
-		return
 	}
 
 	logger.WithFields(logrus.Fields{

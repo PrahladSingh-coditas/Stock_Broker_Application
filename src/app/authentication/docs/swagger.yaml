@@ -50,6 +50,25 @@ definitions:
     - password
     - username
     type: object
+  models.BFFValidateUserOtpRequest:
+    properties:
+      otp:
+        example: "1234"
+        type: string
+      username:
+        example: Dharmesh
+        maxLength: 32
+        minLength: 5
+        type: string
+    required:
+    - otp
+    - username
+    type: object
+  models.BFFValidateUserOtpResponse:
+    properties:
+      message:
+        type: string
+    type: object
   models.ErrorAPIResponse:
     properties:
       error:
@@ -138,6 +157,44 @@ paths:
           schema:
             $ref: '#/definitions/models.ErrorAPIResponse'
       summary: Create a new user
+      tags:
+      - User
+  /api/auth/validate-otp:
+    post:
+      consumes:
+      - application/json
+      description: Validates user OTP and return clear success/ failure message
+      parameters:
+      - description: User OTP Validation Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BFFValidateUserOtpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP validation successful
+          schema:
+            $ref: '#/definitions/models.BFFValidateUserOtpResponse'
+        "400":
+          description: Invalid input payload
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "401":
+          description: 'Case A: Incorrect OTP / Case B: Expired OTP'
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "404":
+          description: User does not exist
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+      summary: Validates user OTP
       tags:
       - User
 swagger: "2.0"

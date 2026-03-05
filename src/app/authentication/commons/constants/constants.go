@@ -19,6 +19,7 @@ const (
 const (
 	User    = "username"
 	Latency = "latency"
+	Otp     = "OTP"
 )
 
 // Success message for user
@@ -26,6 +27,8 @@ const (
 	UserCreationSuccessMsg = "User created successfully"
 	UserLoggedInSuccessMsg = "User logged in successfully"
 	UserDataFetchedMsg     = "User data fetched successfully"
+	UserOtpFetchedMsg     = "User Otp fetched successfully"
+	OtpValidatedSuccessMsg = "OTP validated successfully"
 )
 
 //Otp related messages

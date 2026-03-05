@@ -1,5 +1,7 @@
 package constants
 
+import "errors"
+
 // Database Constraint & Index Names
 const (
 	ErrUniqueConstraintViolation = "duplicate key value violates unique constraint"
@@ -51,3 +53,17 @@ const (
 	ErrBindingFailed          = "json to struct binding failed"
 	ErrValidationFailed       = "validation failed"
 )
+
+//Otp related errors
+const (
+	ErrSignInFailed = "failed to sign in user"
+	ErrOtpsMismatch = "OTPs did not match"
+	ErrExpiredOtp   = "OTP expired"
+	ErrIncorrectOtp = "entered OTP is not correct"
+	ErrInvalidOtp   = "OTP must be a 4 digit number"
+)
+
+var UserNotFoundError = errors.New(ErrUserNotFound)
+var IncorrectPasswordError = errors.New(ErrIncorrectOtp)
+var IncorrectOTPError = errors.New(ErrOtpsMismatch)
+var OtpExpiredError = errors.New(ErrExpiredOtp)

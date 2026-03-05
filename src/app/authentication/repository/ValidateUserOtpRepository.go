@@ -1,0 +1,41 @@
+package repository
+
+import (
+	"authentication/commons/constants"
+	"context"
+	genericModels "stock_broker_application/src/models"
+	"time"
+
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+)
+
+type ValidateUserOtpRepository interface {
+	GetUserByUsername(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error)
+}
+
+type validateUserOtpRepository struct{}
+
+func NewValidateUserOtpRepository() *validateUserOtpRepository {
+	return &validateUserOtpRepository{}
+}
+
+func (repo *validateUserOtpRepository) GetUserByUsername(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error) {
+
+	start := time.Now()
+	logger := logrus.New()
+	var user genericModels.User
+	
+	result := db.WithContext(ctx).Table(constants.UsersTableName).Where(constants.UsernameCondtion, username).First(&user)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	logger.WithFields(logrus.Fields{
+		constants.User:    username,
+		constants.Latency: time.Since(start).Milliseconds(),
+	}).Info(constants.UserOtpFetchedMsg)
+
+	return &user, nil
+}

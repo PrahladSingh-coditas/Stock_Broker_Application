@@ -45,9 +45,11 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 	logger := logrus.New()
 
 	var bffValidateUserOtpRequest models.BFFValidateUserOtpRequest
-	if errWhileBindingReq := ctx.ShouldBind(&bffValidateUserOtpRequest); errWhileBindingReq != nil {
+	var userResponse models.BFFValidateUserOtpResponse
+
+	if bindingError := ctx.ShouldBind(&bffValidateUserOtpRequest); bindingError != nil {
 		errorMessage := genericModels.ErrorMessage{
-			Key:          errWhileBindingReq.(*json.UnmarshalTypeError).Field,
+			Key:          bindingError.(*json.UnmarshalTypeError).Field,
 			ErrorMessage: constants.ErrUnexpectedValue,
 		}
 
@@ -63,8 +65,8 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 		return
 	}
 
-	if errWhileValidations := validations.GetBFFValidator().Struct(&bffValidateUserOtpRequest); errWhileValidations != nil {
-		validationErrors, _ := validations.FormatValidationErrors(errWhileValidations)
+	if validationError := validations.GetBFFValidator().Struct(&bffValidateUserOtpRequest); validationError != nil {
+		validationErrors, _ := validations.FormatValidationErrors(validationError)
 
 		logger.WithFields(logrus.Fields{
 			constants.User:    bffValidateUserOtpRequest.Username,
@@ -75,7 +77,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 		return
 	}
 
-	err := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
+	token,err := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
 	if err != nil {
 		if errors.Is(err, constants.UserNotFoundError) {
 			errorUserNotFoundResponse := genericModels.ErrorAPIResponse{
@@ -91,11 +93,9 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 				constants.Latency: time.Since(start).Milliseconds(),
 			}).Info(constants.ErrUserNotFoundMsg)
 
-			ctx.IndentedJSON(http.StatusBadRequest, errorUserNotFoundResponse)
+			ctx.IndentedJSON(http.StatusNotFound, errorUserNotFoundResponse)
 			return
-		}
-
-		if errors.Is(err, constants.IncorrectOTPError) {
+		} else if errors.Is(err, constants.IncorrectOTPError) {
 			errorIncorrectOtpResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.Otp,
@@ -111,9 +111,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 
 			ctx.IndentedJSON(http.StatusUnauthorized, errorIncorrectOtpResponse)
 			return
-		}
-
-		if errors.Is(err, constants.OtpExpiredError) {
+		} else if errors.Is(err, constants.OtpExpiredError) {
 			errorExpiredOtpResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.Otp,
@@ -129,6 +127,22 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 
 			ctx.IndentedJSON(http.StatusUnauthorized, errorExpiredOtpResponse)
 			return
+		} else if errors.Is(err, constants.TokenCreationFailedError) {
+			errorExpiredOtpResponse := genericModels.ErrorAPIResponse{
+				Message: genericModels.ErrorMessage{
+					Key:          constants.Token,
+					ErrorMessage: constants.ErrTokenCreationFailed,
+				},
+				Error: constants.ErrAuthenticationFailed,
+			}
+
+			logger.WithFields(logrus.Fields{
+				constants.User:    bffValidateUserOtpRequest.Username,
+				constants.Latency: time.Since(start).Milliseconds(),
+			}).Info(constants.ErrTokenCreationFailed)
+
+			ctx.IndentedJSON(http.StatusInternalServerError, errorExpiredOtpResponse)
+			return
 		}
 
 		logger.WithFields(logrus.Fields{
@@ -136,7 +150,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 			constants.Latency: time.Since(start).Milliseconds(),
 		}).Info(constants.ErrAuthenticationFailed)
 
-		ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+		ctx.IndentedJSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
 			Error: constants.ErrSignInFailed,
 		})
 		return
@@ -147,5 +161,9 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 			constants.Latency: time.Since(start).Milliseconds(),
 		}).Info(constants.OtpValidatedSuccessMsg)
 
-	ctx.IndentedJSON(http.StatusOK, constants.OtpValidatedSuccessMsg)
+	
+	userResponse.AccessToken=token
+	userResponse.Message=constants.OtpValidatedSuccessMsg
+
+	ctx.IndentedJSON(http.StatusOK, userResponse)
 }

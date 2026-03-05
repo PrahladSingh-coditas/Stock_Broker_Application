@@ -6,5 +6,6 @@ type BFFValidateUserOtpRequest struct {
 }
 
 type BFFValidateUserOtpResponse struct {
-	Message string `json:"message"`
+	Message      string `json:"message"`
+	AccessToken  string `json:"token"`
 }

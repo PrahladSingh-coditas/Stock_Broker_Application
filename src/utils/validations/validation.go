@@ -48,7 +48,7 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 		} else {
 			switch err.Field() {
 			case constants.FieldPassword:
-				errorMsg=constants.ErrPasswordRulesBreak
+				errorMsg = constants.ErrPasswordRulesBreak
 			case constants.FieldConfirmPassword:
 				if err.Tag() == "eqfield" {
 					errorMsg = constants.ErrConfirmPasswordMatch
@@ -113,11 +113,17 @@ func IsEmailValid(f1 validator.FieldLevel) bool {
 	return EmailRegex.MatchString(email)
 }
 
+func OtpValidator(f1 validator.FieldLevel) bool {
+	matched, _ := regexp.MatchString(constants.OtpRegexp, f1.Field().String())
+	return matched
+}
+
 func init() {
 	bffValidator = validator.New()
 	bffValidator.RegisterValidation("panCard", panCardValidator)
 	bffValidator.RegisterValidation("strongPassword", strongPasswordValidator)
 	bffValidator.RegisterValidation("Email", IsEmailValid)
+	bffValidator.RegisterValidation("otp", OtpValidator)
 }
 
 func GetBFFValidator() *validator.Validate {

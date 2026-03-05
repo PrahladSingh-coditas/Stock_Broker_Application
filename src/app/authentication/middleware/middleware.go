@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
 // This middleware: Logs request method & path; Measures request execution time; Logs how long request took
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {

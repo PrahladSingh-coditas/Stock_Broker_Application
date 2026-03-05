@@ -1,0 +1,29 @@
+package repository
+
+import (
+	"authentication/commons/constants"
+	"context"
+	genericModels "stock_broker_application/src/models"
+
+	"gorm.io/gorm"
+)
+
+type ValidateUserOtpRepository interface {
+	GetUserByUsername(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error)
+}
+
+type validateUserOtpRepository struct{}
+
+func NewValidateUserOtpRepository() *validateUserOtpRepository {
+	return &validateUserOtpRepository{}
+}
+
+// this function takes username from request(from service), fetces the user from db and returns the user
+func (repo *validateUserOtpRepository) GetUserByUsername(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error) {
+	var user genericModels.User
+	result := db.WithContext(ctx).Table(constants.UsersTableName).Where(constants.UsernameField, username).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+}

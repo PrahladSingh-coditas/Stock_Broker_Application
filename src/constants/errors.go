@@ -35,3 +35,10 @@ const (
 	ErrFieldRequired      = "%s is required."
 	ErrInvalidEmail       = "Invalid value for Email"
 )
+
+//validate otp
+const (
+	ErrHashingPassword      = "error hashing password: %w"
+	ErrAuthenticationFailed = "authentication failed"
+	ErrUserNotFound         = "user not found"
+)

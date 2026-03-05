@@ -55,3 +55,14 @@ const(
 const(
 	ErrOtpFailed = "failed to generate otp"
 )
+
+
+//otp validation errors
+const (
+	ErrSignInFailed      = "failed to sign in user" 
+	ErrIncorrectPassword = "entered password is not correct"
+	ErrOtpsMismatch      = "OTPs did not match"
+	ErrExpiredOtp        = "OTP expired"
+	ErrIncorrectOtp      = "entered OTP is not correct"
+	ErrInvalidOtp        = "OTP must be a 4 digit number"
+)

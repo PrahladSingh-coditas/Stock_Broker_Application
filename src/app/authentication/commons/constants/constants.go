@@ -16,17 +16,21 @@ const(
 	UsernameField = "username = ?"
 )
 
-// Success message for user
+// Success message for user login
 const (
 	UserCreationSuccessMsg = "User created successfully"
 	UserLoggedInSuccessMsg = "User logged in successfully"
 )
 
-//success message for user with otp
+//success message for user otp generation
 const (
 	UserOtpGeneratedSuccess = "Otp generated successfully."
 	UserOtpExpiryMsg = "Otp will expire in 2 minutes."
 )
+
+//success message for user otp validation
+const OtpValidatedSuccessMsg = "OTP validated successfully"
+
 
 //Swagger Titile
 const SwaggerTitle = "Stock Broker Application API"

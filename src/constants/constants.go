@@ -4,6 +4,8 @@ const (
 	RunningServerPort = "Running Server on port : %v"
 )
 
+const ConfigPath string ="Stock_Broker_Application/src/utils/configs/config.go"
+
 const (
 	PANCardRegex     = `^[A-Z]{5}[0-9]{4}[A-Z]{1}$`
 	PasswordRegex    = `^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$`
@@ -23,6 +25,7 @@ const (
 	FieldPhoneNumber     = "PhoneNumber"
 	FieldEmail           = "Email"
 	FieldUsername        = "Username"
+	FieldOtp             = "Otp"
 )
 
 // Migration success Message

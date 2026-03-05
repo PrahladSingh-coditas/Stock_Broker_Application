@@ -14,27 +14,19 @@ import (
 
 type ValidateUserOtpService struct {
 	repository repository.ValidateUserOtpRepository
-	db         *gorm.DB
 }
 
-func NewValidateUserOtpService(repository repository.ValidateUserOtpRepository, db *gorm.DB) *ValidateUserOtpService {
+func NewValidateUserOtpService(repository repository.ValidateUserOtpRepository) *ValidateUserOtpService {
 	return &ValidateUserOtpService{
 		repository: repository,
-		db:         db,
-	}
-}
-
-func NewValidateUserOtpServiceForTest(mockRepo repository.ValidateUserOtpRepository, db *gorm.DB) *ValidateUserOtpService {
-	return &ValidateUserOtpService{
-		repository: mockRepo,
-		db:         db,
 	}
 }
 
 // this function takes userRequest, fetches the user from db(via repository), performs all otp validations and returns error/ nil
 func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) error {
-	// postgresClinet := utils.GetPostgresClient().GormDB
-	userFromDB, err := service.repository.GetUserByUsername(spanCtx, service.db, bffValidateUserOtpRequest.Username)
+	postgresClinet := utils.GetPostgresClient()
+	client := postgresClinet.GormDB
+	userFromDB, err := service.repository.GetUserByUsername(spanCtx, client, bffValidateUserOtpRequest.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return commons.UserNotFoundError

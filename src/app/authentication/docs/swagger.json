@@ -1,8 +1,12 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "Omnenest backend for watchlist micro-service (Middleware layer).",
+        "title": "omnenest-backend",
+        "contact": {},
+        "version": "1.0"
     },
+    "basePath": "/v1",
     "paths": {
         "/api/auth/forgotpassword": {
             "post": {
@@ -376,6 +380,14 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "x-extension-openapi": "{\"example\": \"value on a json format\"}"
         }
     }
 }

@@ -9,6 +9,7 @@ import (
 	"authentication/repository"
 
 	genericConstants "stock_broker_application/src/constants"
+	"stock_broker_application/src/utils"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -43,11 +44,17 @@ func GetRouter() *gin.Engine {
 	forgotPasswordService := business.NewForgotPasswordService(forgotPasswordRepository)
 	forgotPasswordHandler := handlers.NewForgotPasswordHandler(forgotPasswordService)
 
+	postgresClient := utils.GetPostgresClient().GormDB
+	verifyUserOtpRepository := repository.NewValidateUserOtpRepository()
+	verifyUserOtpService := business.NewValidateUserOtpService(verifyUserOtpRepository, postgresClient)
+	verifyUserOtpHandler := handlers.NewValidateUserOtpHandler(verifyUserOtpService)
+
 	authGroup := router.Group(constants.AuthRoutePrefix)
 	{
 		authGroup.POST(constants.Signup, createUserHandler.HandleCreaterUser)
 		authGroup.POST(constants.Signin, signinUserHandler.HandleSigninUser)
 		authGroup.POST(constants.ForgotPassword, forgotPasswordHandler.HandleForgotPassword)
+		authGroup.POST(constants.ValidateOtp, verifyUserOtpHandler.HandleValidateUserOtp)
 	}
 
 	return router

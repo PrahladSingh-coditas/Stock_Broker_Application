@@ -22,7 +22,7 @@ func NewValidateUserOtpService(repository repository.ValidateUserOtpRepository) 
 	}
 }
 
-// this function takes userRequest, fetches the user from db(via repository), performs all otp validations and returns error/ nil
+// this function takes userRequest, fetches the user from db(via repository), performs all otp validations and returns access token and error/ nil
 func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) (string, error) {
 	postgresClinet := utils.GetPostgresClient()
 	client := postgresClinet.GormDB
@@ -35,11 +35,11 @@ func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, span
 	}
 
 	if !utils.CompareUserRequestOTP(userFromDB.OtpSent, bffValidateUserOtpRequest.Otp) {
-		return "", commons.IncorrectOTPError //errors.New(constants.ErrIncorrectOtp)
+		return "", commons.IncorrectOTPError 
 	}
 
 	if !utils.CheckOtpExpiry(userFromDB.OtpExpiresAt, time.Now()) {
-		return "", commons.OtpExpiredError //errors.New(constants.ErrExpiredOtp)
+		return "", commons.OtpExpiredError 
 	}
 
 	access_token, _, _err := utils.GenerateToken(bffValidateUserOtpRequest.Username)

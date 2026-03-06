@@ -11,15 +11,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// @title omnenest-backend
-// @version 1.0
-// @description Omnenest backend for watchlist micro-service (Middleware layer).
-// @BasePath /v1
-// @query.collection.format multi
-// @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
-// @x-extension-openapi {"example": "value on a json format"}
 func main() {
 
 	if err := utils.InitPostgresConfg(constants.BaseConfig); err != nil {

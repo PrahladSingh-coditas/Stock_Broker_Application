@@ -1,4 +1,3 @@
-basePath: /v1
 definitions:
   models.BFFCreateUserRequest:
     properties:
@@ -105,9 +104,6 @@ definitions:
     type: object
 info:
   contact: {}
-  description: Omnenest backend for watchlist micro-service (Middleware layer).
-  title: omnenest-backend
-  version: "1.0"
 paths:
   /api/auth/forgotpassword:
     post:
@@ -262,10 +258,4 @@ paths:
       summary: Validates user OTP
       tags:
       - User
-securityDefinitions:
-  BearerAuth:
-    in: header
-    name: Authorization
-    type: apiKey
-    x-extension-openapi: '{"example": "value on a json format"}'
 swagger: "2.0"

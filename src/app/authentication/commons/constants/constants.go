@@ -20,6 +20,7 @@ const (
 	User    = "username"
 	Latency = "latency"
 	Otp     = "OTP"
+	Token   = "token"
 )
 
 // Success message for user
@@ -27,7 +28,7 @@ const (
 	UserCreationSuccessMsg = "User created successfully"
 	UserLoggedInSuccessMsg = "User logged in successfully"
 	UserDataFetchedMsg     = "User data fetched successfully"
-	UserOtpFetchedMsg     = "User Otp fetched successfully"
+	UserOtpFetchedMsg      = "User Otp fetched successfully"
 	OtpValidatedSuccessMsg = "OTP validated successfully"
 )
 
@@ -53,4 +54,9 @@ const (
 	Domain   = ""
 	Secure   = true
 	HttpOnly = true
+)
+
+//token related messages
+const (
+	PasswordResetPurpose = "password_reset"
 )

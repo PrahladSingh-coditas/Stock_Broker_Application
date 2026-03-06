@@ -59,6 +59,8 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 				errorMsg = constants.ErrInvalidPhoneNumber
 			case constants.FieldEmail:
 				errorMsg = constants.ErrInvalidEmail
+			case constants.FieldOtp:
+				errorMsg = constants.ErrInvalidOtp
 			default:
 				errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 			}

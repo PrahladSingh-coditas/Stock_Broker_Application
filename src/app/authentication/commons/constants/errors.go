@@ -56,14 +56,16 @@ const (
 
 //Otp related errors
 const (
-	ErrSignInFailed = "failed to sign in user"
-	ErrOtpsMismatch = "OTPs did not match"
-	ErrExpiredOtp   = "OTP expired"
-	ErrIncorrectOtp = "entered OTP is not correct"
-	ErrInvalidOtp   = "OTP must be a 4 digit number"
+	ErrSignInFailed        = "failed to sign in user"
+	ErrOtpsMismatch        = "OTPs did not match"
+	ErrExpiredOtp          = "OTP expired"
+	ErrIncorrectOtp        = "entered OTP is not correct"
+	ErrInvalidOtp          = "OTP must be a 4 digit number"
+	ErrTokenCreationFailed = "token generation failed"
 )
 
 var UserNotFoundError = errors.New(ErrUserNotFound)
 var IncorrectPasswordError = errors.New(ErrIncorrectOtp)
 var IncorrectOTPError = errors.New(ErrOtpsMismatch)
 var OtpExpiredError = errors.New(ErrExpiredOtp)
+var TokenCreationFailedError = errors.New(ErrTokenCreationFailed)

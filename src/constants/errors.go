@@ -26,7 +26,7 @@ const (
 	ErrPasswordDigit        = "Password must contain at least one digit."
 	ErrPasswordSpecialChar  = "Password must contain at least one special character (@$!%*?&)."
 	ErrConfirmPasswordMatch = "ConfirmPassword must match Password."
-	ErrPasswordRulesBreak= "Password must be 8 to 20 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special character (@$!%*?&)."
+	ErrPasswordRulesBreak   = "Password must be 8 to 20 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special character (@$!%*?&)."
 )
 
 const (
@@ -35,4 +35,5 @@ const (
 	ErrInvalidPhoneNumber = "Phone number must be exactly 10 digits long and contain only numbers."
 	ErrFieldRequired      = "%s is required."
 	ErrInvalidEmail       = "Invalid value for Email"
+	ErrInvalidOtp         = "OTP must be of length 4 and numeric."
 )

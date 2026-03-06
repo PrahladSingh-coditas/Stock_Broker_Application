@@ -11,28 +11,21 @@ import (
 
 var secretKey *models.JWT
 
-func GenerateToken(username string) (string, string, error) {
+func GenerateToken(username string, purpose string) (string, error) {
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(time.Minute * 15).Unix(),
+		"sub":     username,
+		"purpose": purpose,
+		"iat":     time.Now().Unix(),
+		"exp":     time.Now().Add(time.Minute * 15).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(secretKey.AccessSecretKey))
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(time.Hour * 24 * 30).Unix(),
-	})
-
-	refreshTokenString, err := refreshToken.SignedString([]byte(secretKey.RefreshSecretKey))
-	if err != nil {
-		return "", "", err
-	}
-	return accessTokenString, refreshTokenString, nil
+	return accessTokenString, nil
 }
 
 func InitJWTConfig(configPath string) error {

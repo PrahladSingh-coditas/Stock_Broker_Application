@@ -15,6 +15,8 @@ func GenerateToken(username string) (string, string, error) {
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
+		"purpose":  "reset-password",
+		"iat":      time.Now().Unix(),
 		"exp":      time.Now().Add(time.Minute * 15).Unix(),
 	})
 
@@ -25,6 +27,8 @@ func GenerateToken(username string) (string, string, error) {
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
+		"purpose":  "reset-password",
+		"iat":      time.Now().Unix(),
 		"exp":      time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
 

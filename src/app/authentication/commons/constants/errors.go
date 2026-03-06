@@ -59,8 +59,9 @@ const (
 
 //OTP Validation Errors
 const (
-	IncorrectOTPError = "Incorrect OTP"
-	OtpExpiredError   = "OTP Expired"
-	OtpMismatchError = "OTP Mismatched"
-	SigninFailedError = "Signin Failed Using OTP"
+	IncorrectOTPError    = "Incorrect OTP"
+	OtpExpiredError      = "OTP Expired"
+	OtpMismatchError     = "OTP Mismatched"
+	SigninFailedError    = "Signin Failed Using OTP"
+	TokenGenerationError = "Error in Generating Token"
 )

@@ -40,6 +40,8 @@ func NewValidateUserOtpHandler(service *business.ValidateUserOtpService) *Valida
 // @Router /api/auth/validateotp [post]
 func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context) {
 	var bffValidateUserOtpRequest models.BFFValidateUserOtpRequest
+
+	var bFFValidateUserOtpResponse models.BFFValidateUserOtpResponse
 	if errWhileBindingReq := ctx.ShouldBind(&bffValidateUserOtpRequest); errWhileBindingReq != nil {
 		errorMessage := genericModels.ErrorMessage{
 			Key:          errWhileBindingReq.(*json.UnmarshalTypeError).Field,
@@ -59,9 +61,9 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 		return
 	}
 
-	errWhileOtpValidation := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
+	token_string, errWhileOtpValidation := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
 	if errWhileOtpValidation != nil {
-		if errors.Is(errWhileOtpValidation, commons.UserNotFoundError) { //errors.New(constants.ErrUserNotFound)
+		if errors.Is(errWhileOtpValidation, commons.UserNotFoundError) {
 			errorUserNotFoundResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          commons.Username,
@@ -73,7 +75,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 			return
 		}
 
-		if errors.Is(errWhileOtpValidation, commons.IncorrectOTPError) { //errors.New(constants.ErrIncorrectOtp)
+		if errors.Is(errWhileOtpValidation, commons.IncorrectOTPError) {
 			errorIncorrectOtpResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          commons.Otp,
@@ -85,7 +87,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 			return
 		}
 
-		if errors.Is(errWhileOtpValidation, commons.OtpExpiredError) { //errors.New(constants.ErrExpiredOtp)
+		if errors.Is(errWhileOtpValidation, commons.OtpExpiredError) {
 			errorExpiredOtpResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          commons.Otp,
@@ -97,11 +99,26 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 			return
 		}
 
+		if errors.Is(errWhileOtpValidation, commons.TokenGenerationError) {
+			errorTokenResponse := genericModels.ErrorAPIResponse{
+				Message: genericModels.ErrorMessage{
+					Key:          commons.Token,
+					ErrorMessage: constants.TokenGenerationError,
+				},
+				Error: constants.AuthenticationFailedError,
+			}
+			ctx.IndentedJSON(http.StatusBadRequest, errorTokenResponse)
+			return
+		}
+
 		ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
 			Error: constants.SigninFailedError,
 		})
 		return
 	}
 
-	ctx.IndentedJSON(http.StatusOK, constants.OtpValidatedSuccessMsg)
+	bFFValidateUserOtpResponse.Message = constants.OtpValidatedSuccessMsg
+	bFFValidateUserOtpResponse.Token = token_string
+
+	ctx.IndentedJSON(http.StatusOK, bFFValidateUserOtpResponse)
 }

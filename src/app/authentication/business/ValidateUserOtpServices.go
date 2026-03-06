@@ -23,23 +23,29 @@ func NewValidateUserOtpService(repository repository.ValidateUserOtpRepository) 
 }
 
 // this function takes userRequest, fetches the user from db(via repository), performs all otp validations and returns error/ nil
-func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) error {
+func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) (string, error) {
 	postgresClinet := utils.GetPostgresClient()
 	client := postgresClinet.GormDB
 	userFromDB, err := service.repository.GetUserByUsername(spanCtx, client, bffValidateUserOtpRequest.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return commons.UserNotFoundError
+			return "", commons.UserNotFoundError
 		}
-		return err
+		return "", err
 	}
 
 	if !utils.CompareUserRequestOTP(userFromDB.OtpSent, bffValidateUserOtpRequest.Otp) {
-		return commons.IncorrectOTPError //errors.New(constants.ErrIncorrectOtp)
+		return "", commons.IncorrectOTPError //errors.New(constants.ErrIncorrectOtp)
 	}
 
 	if !utils.CheckOtpExpiry(userFromDB.OtpExpiresAt, time.Now()) {
-		return commons.OtpExpiredError //errors.New(constants.ErrExpiredOtp)
+		return "", commons.OtpExpiredError //errors.New(constants.ErrExpiredOtp)
 	}
-	return nil
+
+	access_token, _, _err := utils.GenerateToken(bffValidateUserOtpRequest.Username)
+	if _err != nil {
+		return "", commons.TokenGenerationError
+	}
+
+	return access_token, nil
 }

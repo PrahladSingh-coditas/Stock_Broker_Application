@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"stock_broker_application/src/utils"
-	genConstants "stock_broker_application/src/constants"
 	"time"
 
 	"gorm.io/gorm"

@@ -117,7 +117,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 		return
 	}
 
-	bFFValidateUserOtpResponse.Message = constants.OtpValidatedSuccessMsg
+	bFFValidateUserOtpResponse.Message = constants.TokenGeneratedSuccessMsg
 	bFFValidateUserOtpResponse.Token = token_string
 
 	ctx.IndentedJSON(http.StatusOK, bFFValidateUserOtpResponse)

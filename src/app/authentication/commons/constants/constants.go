@@ -20,7 +20,8 @@ const (
 	UserReadSuccessMsg                  = "User read successfully"
 	CredentialMatchSuccessMsg           = "Credential matched successfully"
 	ForgotPasswordGenerateOtpSuccessMsg = "Forgot password OTP sent successfully, will expire in 2 minutes"
-	OtpValidatedSuccessMsg = "OTP Validation Successful"
+	OtpValidatedSuccessMsg              = "OTP Validation Successful"
+	TokenGeneratedSuccessMsg            = "Token Generated Successfully"
 )
 
 //Swagger Titile

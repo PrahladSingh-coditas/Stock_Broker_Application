@@ -45,8 +45,6 @@ func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, span
 		return "", constants.OtpExpiredError
 	}
 
-	utils.InitJWTConfig(genConstants.ConfigPath)
-
 	accessToken, err := utils.GenerateToken(bffValidateUserOtpRequest.Username, constants.PasswordResetPurpose)
 
 	if err != nil {

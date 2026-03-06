@@ -9,7 +9,6 @@ import (
 	"authentication/repository"
 
 	genericConstants "stock_broker_application/src/constants"
-	"stock_broker_application/src/utils"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -17,9 +16,9 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func GetRouter() *gin.Engine {  // it basically gives a gin engine
+func GetRouter() *gin.Engine { // it basically gives a gin engine
 	router := gin.New()
-	router.Use(middleware.AuthMiddleware()) 
+	router.Use(middleware.AuthMiddleware())
 	router.Use(gin.Recovery())
 
 	docs.SwaggerInfo.Title = constants.SwaggerTitle //prints title
@@ -27,8 +26,8 @@ func GetRouter() *gin.Engine {  // it basically gives a gin engine
 	router.GET(constants.SwaggerRoute, ginSwagger.WrapHandler(files.Handler))
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{genericConstants.AllowedOrigin},  // it has * therefore from any port we cna call;i.e.terminal,swagger,postman etc etc
-		AllowMethods: []string{genericConstants.POST, genericConstants.GET}, // Only these HTTP methods allowed.
+		AllowOrigins: []string{genericConstants.AllowedOrigin},                                                        // it has * therefore from any port we cna call;i.e.terminal,swagger,postman etc etc
+		AllowMethods: []string{genericConstants.POST, genericConstants.GET},                                           // Only these HTTP methods allowed.
 		AllowHeaders: []string{genericConstants.Origin, genericConstants.ContentType, genericConstants.Authorization}, // This allows frontend to send these headers.
 	}))
 
@@ -36,15 +35,13 @@ func GetRouter() *gin.Engine {  // it basically gives a gin engine
 	createUserService := business.NewCreateUserService(createUserRepository)
 	createUserHandler := handlers.NewCreateUserHandler(createUserService)
 
-	
 	signinRepository := repository.NewSigninUserRepository()
 	signinService := business.NewSigninUserService(signinRepository)
 	signinHandler := handlers.NewSigninUserHandler(signinService)
 
 	//validate OTP
-	postgresClient := utils.GetPostgresClient().GormDB
 	verifyUserOtpRepository := repository.NewValidateUserOtpRepository()
-	verifyUserOtpService := business.NewValidateUserOtpService(verifyUserOtpRepository, postgresClient)
+	verifyUserOtpService := business.NewValidateUserOtpService(verifyUserOtpRepository)
 	verifyUserOtpHandler := handlers.NewValidateUserOtpHandler(verifyUserOtpService)
 
 	authGroup := router.Group(constants.AuthRoutePrefix)
@@ -54,8 +51,6 @@ func GetRouter() *gin.Engine {  // it basically gives a gin engine
 
 		authGroup.POST(constants.Validateotp, verifyUserOtpHandler.HandleValidateUserOtp)
 	}
-	
 
 	return router
 }
-

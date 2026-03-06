@@ -66,3 +66,5 @@ const (
 	ErrIncorrectOtp      = "entered OTP is not correct"
 	ErrInvalidOtp        = "OTP must be a 4 digit number"
 )
+
+//token generation errors

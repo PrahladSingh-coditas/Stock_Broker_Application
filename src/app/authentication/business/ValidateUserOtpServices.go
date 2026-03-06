@@ -2,6 +2,7 @@ package business
 
 import (
 	"authentication/commons"
+	"authentication/commons/constants"
 	"authentication/models"
 	"authentication/repository"
 	"context"
@@ -14,40 +15,39 @@ import (
 
 type ValidateUserOtpService struct {
 	repository repository.ValidateUserOtpRepository
-	db         *gorm.DB
 }
 
-func NewValidateUserOtpService(repository repository.ValidateUserOtpRepository, db *gorm.DB) *ValidateUserOtpService {
+func NewValidateUserOtpService(repository repository.ValidateUserOtpRepository) *ValidateUserOtpService {
 	return &ValidateUserOtpService{
 		repository: repository,
-		db:         db,
 	}
 }
 
-func NewValidateUserOtpServiceForTest(mockRepo repository.ValidateUserOtpRepository, db *gorm.DB) *ValidateUserOtpService {
-	return &ValidateUserOtpService{
-		repository: mockRepo,
-		db:         db,
-	}
-}
+// this function takes userRequest, fetches the user from db(via repository), performs all otp validations and returns error/ nil and token
+func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) (string, error) {
+	postgresClient := utils.GetPostgresClient()
+	client := postgresClient.GormDB
 
-// this function takes userRequest, fetches the user from db(via repository), performs all otp validations and returns error/ nil
-func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) error {
-	// postgresClinet := utils.GetPostgresClient().GormDB
-	userFromDB, err := service.repository.GetUserByUsername(spanCtx, service.db, bffValidateUserOtpRequest.Username)
+	userFromDB, err := service.repository.GetUserByUsername(spanCtx, client, bffValidateUserOtpRequest.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return commons.UserNotFoundError //errors.New(constants.ErrUserNotFound)
+			return "", commons.UserNotFoundError //errors.New(constants.ErrUserNotFound)
 		}
-		return err
+		return "", err
 	}
 
 	if !utils.CompareUserRequestOTP(userFromDB.OtpSent, bffValidateUserOtpRequest.Otp) {
-		return commons.IncorrectOTPError //errors.New(constants.ErrIncorrectOtp)
+		return "", commons.IncorrectOTPError //errors.New(constants.ErrIncorrectOtp)
 	}
 
 	if !utils.CheckOtpExpiry(userFromDB.OtpExpiresAt, time.Now()) {
-		return commons.OtpExpiredError //errors.New(constants.ErrExpiredOtp)
+		return "", commons.OtpExpiredError //errors.New(constants.ErrExpiredOtp)
 	}
-	return nil
+
+	tokenString, err := utils.GenerateToken(bffValidateUserOtpRequest.Username, constants.Purpose)
+	if err != nil {
+		return "", commons.TokenGenerationFailed
+	}
+
+	return tokenString, nil
 }

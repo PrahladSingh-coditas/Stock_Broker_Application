@@ -46,3 +46,6 @@ const (
 	Secure   = true
 	HttpOnly = true
 )
+
+//purpose for JWT
+const Purpose = "password_reset"

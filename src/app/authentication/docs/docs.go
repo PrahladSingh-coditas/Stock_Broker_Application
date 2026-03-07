@@ -282,6 +282,9 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         },

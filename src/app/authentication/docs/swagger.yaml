@@ -73,6 +73,8 @@ definitions:
     properties:
       message:
         type: string
+      token:
+        type: string
     type: object
   models.ErrorAPIResponse:
     properties:

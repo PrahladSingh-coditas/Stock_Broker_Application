@@ -5,6 +5,7 @@ import (
 	"authentication/models"
 	"authentication/repository"
 	"context"
+	"errors"
 	"stock_broker_application/src/utils"
 	"time"
 
@@ -23,20 +24,27 @@ func NewValidateUserOtpService(repository repository.ValidateUserOtpRepository, 
 	}
 }
 
-func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) error {
+func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) (string, error) {
 
-	userFromDB, errGettingUserFromDB := service.repository.GetUserByUsername(spanCtx, service.db, bffValidateUserOtpRequest.Username)
-	if errGettingUserFromDB != nil {
-		return commons.UserNotFoundError
+	userFromDB, err := service.repository.GetUserByUsername(spanCtx, service.db, bffValidateUserOtpRequest.Username)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", commons.UserNotFoundError
+		}
+		return "", err
 	}
 
 	if !utils.CompareUserRequestOTP(userFromDB.OtpSent, bffValidateUserOtpRequest.Otp) {
-		return commons.IncorrectOTPError
+		return "", commons.IncorrectOTPError
 	}
 
 	if !utils.CheckOtpExpiry(userFromDB.OtpExpiresAt, time.Now()) {
-		return commons.OtpExpiredError
+		return "", commons.OtpExpiredError
 	}
 
-	return nil
+	token, err := utils.GeneratePasswordResetToken(userFromDB.Username)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }

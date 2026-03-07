@@ -62,14 +62,18 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 				if err.Tag() == "eqfield" {
 					errorMsg = constants.ErrConfirmPasswordMatch
 				}
+
 			case constants.FieldPanCard:
 				errorMsg = constants.ErrInvalidPanCard
 			case constants.FieldPhoneNumber:
 				errorMsg = constants.ErrInvalidPhoneNumber
 			case constants.FieldEmail:
 				errorMsg = constants.ErrInvalidEmail
+			case constants.FieldOtp:
+			case "numeric":
+				errorMsg = constants.ErrInvalidOtp
 			default:
-				errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
+				errorMsg = fmt.Sprintf(constants.ErrInvalidOtp, err.Field())
 			}
 		}
 
@@ -127,6 +131,7 @@ func init() {
 	bffValidator.RegisterValidation("panCard", panCardValidator)
 	bffValidator.RegisterValidation("strongPassword", strongPasswordValidator)
 	bffValidator.RegisterValidation("Email", IsEmailValid)
+
 }
 
 func GetBFFValidator() *validator.Validate {

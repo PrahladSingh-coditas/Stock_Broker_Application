@@ -22,6 +22,7 @@ const (
 	FieldPhoneNumber     = "PhoneNumber"
 	FieldEmail           = "Email"
 	FieldUsername        = "Username"
+	FieldOtp             = "Otp"
 )
 
 // Migration success Message

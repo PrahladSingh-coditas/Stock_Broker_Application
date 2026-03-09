@@ -3,12 +3,14 @@ package router
 import (
 	"authentication/business"
 	"authentication/commons/constants"
+	"authentication/middleware"
+
 	"authentication/docs"
 	"authentication/handlers"
-	"authentication/middleware"
 	"authentication/repository"
 
 	genericConstants "stock_broker_application/src/constants"
+	"stock_broker_application/src/utils"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -18,7 +20,6 @@ import (
 
 func GetRouter() *gin.Engine {
 	router := gin.New()
-	router.Use(middleware.AuthMiddleware())
 	router.Use(gin.Recovery())
 
 	docs.SwaggerInfo.Title = constants.SwaggerTitle
@@ -31,12 +32,34 @@ func GetRouter() *gin.Engine {
 		AllowHeaders: []string{genericConstants.Origin, genericConstants.ContentType, genericConstants.Authorization},
 	}))
 
+	//signup api
 	createUserRepository := repository.NewCreateUserRepository()
 	createUserService := business.NewCreateUserService(createUserRepository)
 	createUserHandler := handlers.NewCreateUserHandler(createUserService)
+
+	// signin api
+	SignInRepository := repository.NewSignInRepository()
+	SignInService := business.NewSignInService(SignInRepository)
+	SignInUserHandle := handlers.NewSignInUserHandler(SignInService)
+
+	//validate-otp
+	postgresClientDb := utils.GetPostgresClient().GormDB
+	verifyUserOtpRepository := repository.NewValidateUserOtpRepository()
+	verifyUserOtpService := business.NewValidateUserOtpService(verifyUserOtpRepository, postgresClientDb)
+	verifyUserOtpHandler := handlers.NewValidateUserOtpHandler(verifyUserOtpService)
+
+	//pasword-reset api
+	changePasswordRepository := repository.NewChangePasswordRepository()
+	changePasswordService := business.NewChangePasswordService(changePasswordRepository)
+	changePasswordHandler := handlers.NewChangePasswordHandler(changePasswordService)
+
 	authGroup := router.Group(constants.AuthRoutePrefix)
 	{
 		authGroup.POST(constants.Signup, createUserHandler.HandleCreaterUser)
+		authGroup.POST(constants.Signin, SignInUserHandle.HandleSignInUser)
+		authGroup.POST(constants.OtpValidate, verifyUserOtpHandler.HandleValidateUserOtp)
+		authGroup.POST(constants.ChangePassword, middleware.AuthMiddleware(), changePasswordHandler.HandleChangePassword)
+
 	}
 
 	return router

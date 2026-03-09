@@ -34,6 +34,17 @@ definitions:
     - phoneNumber
     - username
     type: object
+  models.BFFResetPasswordRequest:
+    properties:
+      confirm_password:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - confirm_password
+    - password
+    type: object
   models.BFFSignInRequest:
     properties:
       password:
@@ -93,6 +104,49 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Reset password using password reset token
+      parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Reset Password Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BFFResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: password reset successful
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Reset user password
+      tags:
+      - password-reset-api
   /api/auth/signin:
     post:
       consumes:

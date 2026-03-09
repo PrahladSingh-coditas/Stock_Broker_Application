@@ -71,7 +71,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 				},
 				Error: constants.AuthenticationFailedError,
 			}
-			ctx.IndentedJSON(http.StatusBadRequest, errorUserNotFoundResponse)
+			ctx.IndentedJSON(http.StatusNotFound, errorUserNotFoundResponse)
 			return
 		}
 

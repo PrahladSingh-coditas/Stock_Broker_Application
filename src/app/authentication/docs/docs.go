@@ -15,6 +15,70 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/auth/changepassword": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Authenticates user credentials and returns success if valid",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Change Password",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "User Change Password Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Password changed in successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input payload",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid Uername",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Authentication failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/forgotpassword": {
             "post": {
                 "description": "Authenticates user credentials to generate OTP for forgot password",
@@ -249,6 +313,26 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.BFFChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "confirmPassword",
+                "newpassword"
+            ],
+            "properties": {
+                "confirmPassword": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "SanjanaS@123"
+                },
+                "newpassword": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 8,
+                    "example": "SanjanaS@123"
+                }
+            }
+        },
         "models.BFFCreateUserRequest": {
             "type": "object",
             "required": [

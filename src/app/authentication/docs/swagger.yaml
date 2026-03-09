@@ -1,4 +1,19 @@
 definitions:
+  models.BFFChangePasswordRequest:
+    properties:
+      confirmPassword:
+        example: SanjanaS@123
+        minLength: 8
+        type: string
+      newpassword:
+        example: SanjanaS@123
+        maxLength: 20
+        minLength: 8
+        type: string
+    required:
+    - confirmPassword
+    - newpassword
+    type: object
   models.BFFCreateUserRequest:
     properties:
       confirmPassword:
@@ -107,6 +122,47 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/auth/changepassword:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates user credentials and returns success if valid
+      parameters:
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User Change Password Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BFFChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password changed in successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid input payload
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "401":
+          description: Invalid Uername
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "500":
+          description: Authentication failed
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+      security:
+      - BearerAuth: []
+      summary: Change Password
+      tags:
+      - User
   /api/auth/forgotpassword:
     post:
       consumes:

@@ -18,12 +18,12 @@ import (
 
 func GetRouter() *gin.Engine {
 	router := gin.New()
-	router.Use(middleware.AuthMiddleware())
 	router.Use(gin.Recovery())
 
 	docs.SwaggerInfo.Title = constants.SwaggerTitle
 
 	router.GET(constants.SwaggerRoute, ginSwagger.WrapHandler(files.Handler))
+	//router.Use(middleware.AuthMiddleware())
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{genericConstants.AllowedOrigin},
@@ -47,13 +47,26 @@ func GetRouter() *gin.Engine {
 	verifyUserOtpService := business.NewValidateUserOtpService(verifyUserOtpRepository)
 	verifyUserOtpHandler := handlers.NewValidateUserOtpHandler(verifyUserOtpService)
 
-	authGroup := router.Group(constants.AuthRoutePrefix)
-	{
-		authGroup.POST(constants.Signup, createUserHandler.HandleCreaterUser)
-		authGroup.POST(constants.Signin, signinUserHandler.HandleSigninUser)
-		authGroup.POST(constants.ForgotPassword, forgotPasswordHandler.HandleForgotPassword)
-		authGroup.POST(constants.ValidateOtp, verifyUserOtpHandler.HandleValidateUserOtp)
-	}
+	changePasswordRepository := repository.NewChangePasswordRepository()
+	changePasswordService := business.NewChangePasswordService(changePasswordRepository)
+	changePasswordHandler := handlers.NewChangePasswordHandler(changePasswordService)
 
+	/*
+		authGroup := router.Group(constants.AuthRoutePrefix)
+		{
+			authGroup.Use(middleware.AuthMiddleware())
+			authGroup.POST(constants.ChangePassword, changePasswordHandler.HandleChangePassword)
+		}
+	*/
+
+	v1Group := router.Group(constants.V1RoutePrefix)
+	{
+		v1Group.POST(constants.Signup, createUserHandler.HandleCreaterUser)
+		v1Group.POST(constants.Signin, signinUserHandler.HandleSigninUser)
+		v1Group.POST(constants.ForgotPassword, forgotPasswordHandler.HandleForgotPassword)
+		v1Group.POST(constants.ValidateOtp, verifyUserOtpHandler.HandleValidateUserOtp)
+		v1Group.POST(constants.ChangePassword, middleware.AuthMiddleware() , changePasswordHandler.HandleChangePassword)
+
+	}
 	return router
 }

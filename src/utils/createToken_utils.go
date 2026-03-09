@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"stock_broker_application/src/constants"
 	"stock_broker_application/src/models"
 	"stock_broker_application/src/utils/configs"
@@ -46,4 +47,24 @@ func InitJWTConfig(configPath string) error {
 		return err
 	}
 	return nil
+}
+
+func ValidateToken(tokenString string) (string, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("invalid signing method")
+		}
+		return []byte(secretKey.AccessSecretKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		username, ok := claims["username"].(string)
+		if !ok {
+			return "", errors.New("username missing in token")
+		}
+		return username, nil
+	}
+	return "", errors.New("Invalid token")
 }

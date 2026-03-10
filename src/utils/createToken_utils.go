@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"log"
 	"stock_broker_application/src/constants"
 	"stock_broker_application/src/models"
 	"stock_broker_application/src/utils/configs"
@@ -18,7 +19,7 @@ func GenerateToken(username string) (string, string, error) {
 		"username": username,
 		"purpose":  "reset-password",
 		"iat":      time.Now().Unix(),
-		"exp":      time.Now().Add(time.Minute * 15).Unix(),
+		"exp":      time.Now().Add(time.Minute * 60).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(secretKey.AccessSecretKey))
@@ -30,7 +31,7 @@ func GenerateToken(username string) (string, string, error) {
 		"username": username,
 		"purpose":  "reset-password",
 		"iat":      time.Now().Unix(),
-		"exp":      time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"exp":      time.Now().Add(time.Minute * 60).Unix(),
 	})
 
 	refreshTokenString, err := refreshToken.SignedString([]byte(secretKey.RefreshSecretKey))
@@ -56,6 +57,7 @@ func ValidateToken(tokenString string) (string, error) {
 		}
 		return []byte(secretKey.AccessSecretKey), nil
 	})
+	log.Println(err)
 	if err != nil {
 		return "", err
 	}

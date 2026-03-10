@@ -63,4 +63,7 @@ const (
 	OtpExpiredError      = "OTP Expired"
 	SigninFailedError    = "Signin Failed"
 	TokenGenerationError = "Error in Generating Token"
+	IncorrectOTPError = "Incorrect OTP"
+	OtpExpiredError   = "OTP Expired"
+	SigninFailedError = "Signin Failed"
 )

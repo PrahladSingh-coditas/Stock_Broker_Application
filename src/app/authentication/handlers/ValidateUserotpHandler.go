@@ -23,6 +23,7 @@ func NewValidateUserOtpHandler(service *business.ValidateUserOtpService) *Valida
 	}
 }
 
+// This handler function deals with occuring errors and returns appropriate status code or response otherwise
 // Handles user OTP validation
 // @Summary Validates user OTP
 // @Description Validates user OTP and return clear success/ failure message
@@ -63,6 +64,10 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 	if err != nil {
 		if errors.Is(err, errors.New(constants.UserNotFoundError)) {
 			err := genericModels.ErrorAPIResponse{
+	err := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
+	if err != nil {
+		if errors.Is(err, errors.New(constants.UserNotFoundError)) {
+			errorUserNotFoundResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.Username,
 					ErrorMessage: constants.UserNotFoundError,
@@ -70,6 +75,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 				Error: constants.AuthenticationFailedError,
 			}
 			ctx.IndentedJSON(http.StatusNotFound, err)
+			ctx.IndentedJSON(http.StatusNotFound, errorUserNotFoundResponse)
 			return
 		}
 

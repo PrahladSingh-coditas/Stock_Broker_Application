@@ -2,6 +2,7 @@ package business
 
 import (
 	"authentication/commons/constants"
+	"authentication/commons/constants"
 	"authentication/models"
 	"authentication/repository"
 	"context"
@@ -30,24 +31,23 @@ func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, span
 	userFromDB, err := service.repository.GetUserByUsername(spanCtx, client, bffValidateUserOtpRequest.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", commons.UserNotFoundError
+			return "", errors.New(constants.UserNotFoundError)
 		}
 		return "", err
 	}
 
 	if !utils.CompareUserRequestOTP(userFromDB.OtpSent, bffValidateUserOtpRequest.Otp) {
-		return "", commons.IncorrectOTPError 
+		return "", errors.New(constants.IncorrectOTPError)
 	}
 
 	if !utils.CheckOtpExpiry(userFromDB.OtpExpiresAt, time.Now()) {
-		return "", commons.OtpExpiredError 
+		return "", errors.New(constants.OtpExpiredError)
 	}
 
-	access_token, _, _err := utils.GenerateToken(bffValidateUserOtpRequest.Username)
-	if _err != nil {
-		return "", commons.TokenGenerationError
+	token, _, err := utils.GenerateToken(bffValidateUserOtpRequest.Username)
+	if err != nil {
+		return "", errors.New(constants.TokenGenerationError)
 	}
 
-	return access_token, nil
+	return token, nil
 }
-  

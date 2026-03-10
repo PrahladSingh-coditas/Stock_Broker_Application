@@ -12,7 +12,6 @@ const (
 	Fieldemail     = "email"
 	FieldUsername  = "username = ?"
 	FieldPassword  = "password"
-	Username       = "username"
 )
 
 // Success message for user
@@ -24,7 +23,6 @@ const (
 	ForgotPasswordGenerateOtpSuccessMsg = "Forgot password OTP sent successfully, will expire in 2 minutes"
 	OtpValidatedSuccessMsg              = "OTP Validation Successful"
 	TokenGeneratedSuccessMsg            = "Token Generated Successfully"
-	PasswordChangeSuccessMsg            = "User Password Changed Successfully"
 )
 
 //Swagger Titile
@@ -46,4 +44,5 @@ const (
 	Username = "username"
 	Password = "password"
 	Otp      = "OTP"
+	Token    = "token"
 )

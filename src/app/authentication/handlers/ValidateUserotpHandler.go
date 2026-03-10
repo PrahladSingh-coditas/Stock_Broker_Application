@@ -43,6 +43,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 	if err := ctx.ShouldBind(&bffValidateUserOtpRequest); err != nil {
 		errorMessage := genericModels.ErrorMessage{
 			Key:          err.(*json.UnmarshalTypeError).Field,
+			Key:          err.(*json.UnmarshalTypeError).Field,
 			ErrorMessage: constants.ErrUnexpectedValue,
 		}
 
@@ -55,6 +56,8 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 
 	if err := validations.GetBFFValidator().Struct(&bffValidateUserOtpRequest); err != nil {
 		validationErrors, _ := validations.FormatValidationErrors(err)
+	if err := validations.GetBFFValidator().Struct(&bffValidateUserOtpRequest); err != nil {
+		validationErrors, _ := validations.FormatValidationErrors(err)
 		ctx.IndentedJSON(http.StatusBadRequest, validationErrors)
 		return
 	}
@@ -64,6 +67,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 		if errors.Is(err, errors.New(constants.UserNotFoundError)) {
 			err := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
+					Key:          constants.Username,
 					Key:          constants.Username,
 					ErrorMessage: constants.UserNotFoundError,
 				},
@@ -75,19 +79,26 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 
 		if errors.Is(err, errors.New(constants.IncorrectOTPError)) {
 			err := genericModels.ErrorAPIResponse{
+		if errors.Is(err, errors.New(constants.IncorrectOTPError)) {
+			err := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
+					Key:          constants.Otp,
 					Key:          constants.Otp,
 					ErrorMessage: constants.IncorrectOTPError,
 				},
 				Error: constants.AuthenticationFailedError,
 			}
 			ctx.IndentedJSON(http.StatusUnauthorized, err)
+			ctx.IndentedJSON(http.StatusUnauthorized, err)
 			return
 		}
 
 		if errors.Is(err, errors.New(constants.OtpExpiredError)) {
 			err := genericModels.ErrorAPIResponse{
+		if errors.Is(err, errors.New(constants.OtpExpiredError)) {
+			err := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
+					Key:          constants.Otp,
 					Key:          constants.Otp,
 					ErrorMessage: constants.OtpExpiredError,
 				},

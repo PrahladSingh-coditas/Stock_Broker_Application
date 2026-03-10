@@ -38,3 +38,10 @@ const (
 	Secure   = true
 	HttpOnly = true
 )
+
+const (
+	Username = "username"
+	Password = "password"
+	Otp      = "OTP"
+	Token    = "token"
+)

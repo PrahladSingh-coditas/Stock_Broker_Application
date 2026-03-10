@@ -121,6 +121,9 @@ definitions:
     type: object
 info:
   contact: {}
+  description: Omnenest backend for watchlist micro-service (Middleware layer).
+  title: omnenest-backend
+  version: "1.0"
 paths:
   /api/auth/changepassword:
     post:
@@ -128,11 +131,6 @@ paths:
       - application/json
       description: Authenticates user credentials and returns success if valid
       parameters:
-      - description: Bearer
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: User Change Password Request
         in: body
         name: request
@@ -316,4 +314,10 @@ paths:
       summary: Validates user OTP
       tags:
       - User
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+    x-extension-openapi: '{"example": "value on a json format"}'
 swagger: "2.0"

@@ -27,7 +27,6 @@ func NewChangePasswordHandler(service *business.ChangePasswordService) *ChangePa
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "Bearer"
 // @Security BearerAuth
 // @Param request body models.BFFChangePasswordRequest true "User Change Password Request"
 // @Success 200 {string} string "Password changed in successfully"

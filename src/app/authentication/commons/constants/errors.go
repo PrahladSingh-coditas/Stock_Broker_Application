@@ -39,8 +39,10 @@ const (
 
 //Signin and Token generation Errors
 const (
-	ErrInvalidEmailorPassword = "invalid email or password"
-	ErrPasswordMismatch       = "password does not match %w"
-	ErrAuthenticationFailed   = "authentication failed"
-	ErrTokenGenerationFailed  = "failed to generate authentication tokens %s"
+	UserNotFoundError            = "user not found"               // try to find by username
+	InvalidUsernamePasswordError = "invalid username or password" //invalid userame or password
+	PasswordMismatchError        = "password does not match %w"
+	AuthenticationFailedError    = "authentication failed"
+	TokenGenerationFailedError   = "failed to generate authentication tokens %s"
+	MissingCredentialsError      = "username and password are required"
 )

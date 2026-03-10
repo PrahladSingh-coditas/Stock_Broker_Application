@@ -36,7 +36,6 @@ func NewCreateUserHandler(service *business.CreateUserService) *CreaterUserHandl
 // @Failure 500 {object} models.ErrorAPIResponse "Internal Server Error"
 // @Router /api/auth/signup [post]
 func (controller *CreaterUserHandler) HandleCreaterUser(ctx *gin.Context) {
-
 	var bffCreateUserRequest models.BFFCreateUserRequest
 	if err := ctx.ShouldBind(&bffCreateUserRequest); err != nil {
 		errorMsgs := genericModels.ErrorMessage{Key: err.(*json.UnmarshalTypeError).Field, ErrorMessage: constants.ErrUnexpectedValue}
@@ -46,13 +45,11 @@ func (controller *CreaterUserHandler) HandleCreaterUser(ctx *gin.Context) {
 		})
 		return
 	}
-
 	if err := validations.GetBFFValidator().Struct(&bffCreateUserRequest); err != nil {
 		validationErros, _ := validations.FormatValidationErrors(err)
 		ctx.IndentedJSON(http.StatusBadRequest, validationErros)
 		return
 	}
-
 	err := controller.service.CreateNewUser(ctx, ctx.Request.Context(), bffCreateUserRequest)
 	if err != nil {
 		if strings.Contains(err.Error(), constants.ErrDuplicateEntry) {
@@ -72,7 +69,5 @@ func (controller *CreaterUserHandler) HandleCreaterUser(ctx *gin.Context) {
 		ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
 		return
 	}
-
 	ctx.IndentedJSON(http.StatusCreated, constants.UserCreationSuccessMsg)
-
 }

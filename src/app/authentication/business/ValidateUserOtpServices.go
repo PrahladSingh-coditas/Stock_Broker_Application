@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"stock_broker_application/src/utils"
+	"strconv"
 	"time"
 
 	"gorm.io/gorm"
@@ -34,8 +35,12 @@ func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, span
 		return err
 	}
 
-	if !utils.CompareUserRequestOTP(userFromDB.OtpSent, bffValidateUserOtpRequest.Otp) {
-		return commons.IncorrectOTPError //errors.New(constants.ErrIncorrectOtp)
+	parsedOTP, err := strconv.ParseUint(bffValidateUserOtpRequest.Otp, 10, 64)
+	if err != nil {
+		return err
+	}
+	if userFromDB.OtpSent != parsedOTP {
+		return commons.IncorrectOTPError
 	}
 
 	if !utils.CheckOtpExpiry(userFromDB.OtpExpiresAt, time.Now()) {

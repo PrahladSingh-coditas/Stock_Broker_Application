@@ -59,9 +59,9 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 		return
 	}
 
-	errWhileOtpValidation := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
-	if errWhileOtpValidation != nil {
-		if errors.Is(errWhileOtpValidation, commons.UserNotFoundError) {
+	err := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
+	if err != nil {
+		if errors.Is(err, commons.UserNotFoundError) {
 			errorUserNotFoundResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          commons.Username,
@@ -73,7 +73,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 			return
 		}
 
-		if errors.Is(errWhileOtpValidation, commons.IncorrectOTPError) {
+		if errors.Is(err, commons.IncorrectOTPError) {
 			errorIncorrectOtpResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          commons.Otp,
@@ -85,7 +85,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 			return
 		}
 
-		if errors.Is(errWhileOtpValidation, commons.OtpExpiredError) {
+		if errors.Is(err, commons.OtpExpiredError) {
 			errorExpiredOtpResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          commons.Otp,

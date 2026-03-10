@@ -2,7 +2,6 @@ package business
 
 import (
 	"authentication/commons/constants"
-	"authentication/commons/constants"
 	"authentication/models"
 	"authentication/repository"
 	"context"
@@ -36,11 +35,15 @@ func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, span
 		return "", err
 	}
 
-	if !utils.CompareUserRequestOTP(userFromDB.OtpSent, bffValidateUserOtpRequest.Otp) {
+	otp, err := strconv.ParseUint(bffValidateUserOtpRequest.Otp, 10, 64)
+	if err != nil {
+		return "", err
+	}
+	if otp != userFromDB.OtpSent {
 		return "", errors.New(constants.IncorrectOTPError)
 	}
 
-	if !utils.CheckOtpExpiry(userFromDB.OtpExpiresAt, time.Now()) {
+	if userFromDB.OtpExpiresAt > uint64(time.Now().Unix()) {
 		return "", errors.New(constants.OtpExpiredError)
 	}
 

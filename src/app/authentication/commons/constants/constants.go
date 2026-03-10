@@ -21,6 +21,7 @@ const (
 	CredentialMatchSuccessMsg           = "Credential matched successfully"
 	ForgotPasswordGenerateOtpSuccessMsg = "Forgot password OTP sent successfully, will expire in 2 minutes"
 	OtpValidatedSuccessMsg              = "OTP Validation Successful"
+	TokenGeneratedSuccessMsg            = "Token Generated Successfully"
 )
 
 //Swagger Titile
@@ -42,4 +43,5 @@ const (
 	Username = "username"
 	Password = "password"
 	Otp      = "OTP"
+	Token    = "token"
 )

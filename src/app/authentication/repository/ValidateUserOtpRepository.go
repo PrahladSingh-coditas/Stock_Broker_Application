@@ -4,7 +4,9 @@ import (
 	"authentication/commons/constants"
 	"context"
 	genericModels "stock_broker_application/src/models"
+	"time"
 
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -20,10 +22,19 @@ func NewValidateUserOtpRepository() *validateUserOtpRepository {
 
 // this function takes username from request(from service), fetces the user from db and returns the user
 func (repo *validateUserOtpRepository) GetUserByUsername(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error) {
+
+	start := time.Now()
+	logger := logrus.New()
+
 	var user genericModels.User
 	result := db.WithContext(ctx).Table(constants.UsersTableName).Where(constants.FieldUsername, username).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
+
+	logger.WithFields(logrus.Fields{
+		"latency": time.Since(start).Milliseconds(),
+	}).Info(constants.OtpValidatedSuccessMsg)
+
 	return &user, nil
 }

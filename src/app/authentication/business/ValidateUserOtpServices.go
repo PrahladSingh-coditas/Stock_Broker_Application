@@ -2,6 +2,7 @@ package business
 
 import (
 	"authentication/commons/constants"
+	"authentication/commons/constants"
 	"authentication/models"
 	"authentication/repository"
 	"context"
@@ -23,28 +24,30 @@ func NewValidateUserOtpService(repository repository.ValidateUserOtpRepository) 
 	}
 }
 
-// this function takes userRequest, fetches the user from db(via repository), performs all otp validations and returns error/ nil
-func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) error {
+// this function takes userRequest, fetches the user from db(via repository), performs all otp validations and returns access token and error/ nil
+func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) (string, error) {
 	postgresClinet := utils.GetPostgresClient()
 	client := postgresClinet.GormDB
 	userFromDB, err := service.repository.GetUserByUsername(spanCtx, client, bffValidateUserOtpRequest.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New(constants.UserNotFoundError)
+			return "", errors.New(constants.UserNotFoundError)
 		}
-		return err
+		return "", err
 	}
 
-	parsedOTP, err := strconv.ParseUint(bffValidateUserOtpRequest.Otp, 10, 64)
+	if !utils.CompareUserRequestOTP(userFromDB.OtpSent, bffValidateUserOtpRequest.Otp) {
+		return "", errors.New(constants.IncorrectOTPError)
+	}
+
+	if !utils.CheckOtpExpiry(userFromDB.OtpExpiresAt, time.Now()) {
+		return "", errors.New(constants.OtpExpiredError)
+	}
+
+	token, _, err := utils.GenerateToken(bffValidateUserOtpRequest.Username)
 	if err != nil {
-		return err
-	}
-	if userFromDB.OtpSent != parsedOTP {
-		return errors.New(constants.IncorrectOTPError)
+		return "", errors.New(constants.TokenGenerationError)
 	}
 
-	if userFromDB.OtpExpiresAt < uint64(time.Now().Unix()) {
-		return errors.New(constants.OtpExpiredError)
-	}
-	return nil
+	return token, nil
 }

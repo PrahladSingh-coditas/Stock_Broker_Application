@@ -263,33 +263,33 @@ const docTemplate = `{
                 "confirmPassword": {
                     "type": "string",
                     "minLength": 8,
-                    "example": "Secure@123"
+                    "example": "Sanjana@123"
                 },
                 "email": {
                     "type": "string",
-                    "example": "arijit@gmail.com"
+                    "example": "sanjana@gmail.com"
                 },
                 "panCard": {
                     "type": "string",
-                    "example": "EQZRP1234P"
+                    "example": "ABCDE1234F"
                 },
                 "password": {
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 8,
-                    "example": "Secure@123"
+                    "example": "Sanjana@123"
                 },
                 "phoneNumber": {
                     "type": "integer",
                     "maximum": 9999999999,
                     "minimum": 1000000000,
-                    "example": 7568912340
+                    "example": 8432805566
                 },
                 "username": {
                     "type": "string",
                     "maxLength": 32,
                     "minLength": 5,
-                    "example": "Arijit"
+                    "example": "Sanjana"
                 }
             }
         },
@@ -330,13 +330,13 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 8,
-                    "example": "Secure@123"
+                    "example": "Sanjana@123"
                 },
                 "username": {
                     "type": "string",
                     "maxLength": 32,
                     "minLength": 5,
-                    "example": "Arijit"
+                    "example": "Sanjana"
                 }
             }
         },
@@ -354,7 +354,7 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 32,
                     "minLength": 5,
-                    "example": "Arijit"
+                    "example": "Sanjana"
                 }
             }
         },
@@ -362,6 +362,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "message": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }

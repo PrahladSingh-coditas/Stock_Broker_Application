@@ -24,7 +24,7 @@ func NewValidateUserOtpHandler(service *business.ValidateUserOtpService) *Valida
 	}
 }
 
-// this fucntion handles user requests and responses by
+// This handler function deals with occuring errors and returns appropriate status code or response otherwise
 // Handles user OTP validation
 // @Summary Validates user OTP
 // @Description Validates user OTP and return clear success/ failure message
@@ -40,9 +40,9 @@ func NewValidateUserOtpHandler(service *business.ValidateUserOtpService) *Valida
 // @Router /api/auth/validateotp [post]
 func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context) {
 	var bffValidateUserOtpRequest models.BFFValidateUserOtpRequest
-	if errWhileBindingReq := ctx.ShouldBind(&bffValidateUserOtpRequest); errWhileBindingReq != nil {
+	if err := ctx.ShouldBind(&bffValidateUserOtpRequest); err != nil {
 		errorMessage := genericModels.ErrorMessage{
-			Key:          errWhileBindingReq.(*json.UnmarshalTypeError).Field,
+			Key:          err.(*json.UnmarshalTypeError).Field,
 			ErrorMessage: constants.ErrUnexpectedValue,
 		}
 
@@ -53,8 +53,8 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 		return
 	}
 
-	if errWhileValidations := validations.GetBFFValidator().Struct(&bffValidateUserOtpRequest); errWhileValidations != nil {
-		validationErrors, _ := validations.FormatValidationErrors(errWhileValidations)
+	if err := validations.GetBFFValidator().Struct(&bffValidateUserOtpRequest); err != nil {
+		validationErrors, _ := validations.FormatValidationErrors(err)
 		ctx.IndentedJSON(http.StatusBadRequest, validationErrors)
 		return
 	}

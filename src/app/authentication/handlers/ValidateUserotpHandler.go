@@ -23,7 +23,6 @@ func NewValidateUserOtpHandler(service *business.ValidateUserOtpService) *Valida
 	}
 }
 
-// this fucntion handles user requests and responses by
 // Handles user OTP validation
 // @Summary Validates user OTP
 // @Description Validates user OTP and return clear success/ failure message

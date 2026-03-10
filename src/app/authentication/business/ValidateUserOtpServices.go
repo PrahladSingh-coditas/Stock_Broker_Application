@@ -35,18 +35,17 @@ func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, span
 	}
 
 	if !utils.CompareUserRequestOTP(userFromDB.OtpSent, bffValidateUserOtpRequest.Otp) {
-		return "", commons.IncorrectOTPError 
+		return "", commons.IncorrectOTPError
 	}
 
 	if !utils.CheckOtpExpiry(userFromDB.OtpExpiresAt, time.Now()) {
-		return "", commons.OtpExpiredError 
+		return "", commons.OtpExpiredError
 	}
 
-	access_token, _, _err := utils.GenerateToken(bffValidateUserOtpRequest.Username)
-	if _err != nil {
+	token, _, err := utils.GenerateToken(bffValidateUserOtpRequest.Username)
+	if err != nil {
 		return "", commons.TokenGenerationError
 	}
 
-	return access_token, nil
+	return token, nil
 }
-  

@@ -1,7 +1,7 @@
 package business
 
 import (
-	"authentication/commons"
+	"authentication/commons/constants"
 	"authentication/models"
 	"authentication/repository"
 	"context"
@@ -30,7 +30,7 @@ func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, span
 	userFromDB, err := service.repository.GetUserByUsername(spanCtx, client, bffValidateUserOtpRequest.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return commons.UserNotFoundError
+			return errors.New(constants.UserNotFoundError)
 		}
 		return err
 	}
@@ -40,11 +40,11 @@ func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, span
 		return err
 	}
 	if userFromDB.OtpSent != parsedOTP {
-		return commons.IncorrectOTPError
+		return errors.New(constants.IncorrectOTPError)
 	}
 
-	if !utils.CheckOtpExpiry(userFromDB.OtpExpiresAt, time.Now()) {
-		return commons.OtpExpiredError //errors.New(constants.ErrExpiredOtp)
+	if userFromDB.OtpExpiresAt < uint64(time.Now().Unix()) {
+		return errors.New(constants.OtpExpiredError)
 	}
 	return nil
 }

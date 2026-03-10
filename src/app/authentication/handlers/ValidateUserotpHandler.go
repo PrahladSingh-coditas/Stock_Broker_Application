@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"authentication/business"
-	"authentication/commons"
 	"authentication/commons/constants"
 	"authentication/models"
 	"encoding/json"
@@ -61,10 +60,10 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 
 	err := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
 	if err != nil {
-		if errors.Is(err, commons.UserNotFoundError) {
+		if errors.Is(err, errors.New(constants.UserNotFoundError)) {
 			errorUserNotFoundResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
-					Key:          commons.Username,
+					Key:          constants.Username,
 					ErrorMessage: constants.UserNotFoundError,
 				},
 				Error: constants.AuthenticationFailedError,
@@ -73,27 +72,27 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 			return
 		}
 
-		if errors.Is(err, commons.IncorrectOTPError) {
-			errorIncorrectOtpResponse := genericModels.ErrorAPIResponse{
+		if errors.Is(err, errors.New(constants.IncorrectOTPError)) {
+			err := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
-					Key:          commons.Otp,
+					Key:          constants.Otp,
 					ErrorMessage: constants.IncorrectOTPError,
 				},
 				Error: constants.AuthenticationFailedError,
 			}
-			ctx.IndentedJSON(http.StatusUnauthorized, errorIncorrectOtpResponse)
+			ctx.IndentedJSON(http.StatusUnauthorized, err)
 			return
 		}
 
-		if errors.Is(err, commons.OtpExpiredError) {
-			errorExpiredOtpResponse := genericModels.ErrorAPIResponse{
+		if errors.Is(err, errors.New(constants.OtpExpiredError)) {
+			err := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
-					Key:          commons.Otp,
+					Key:          constants.Otp,
 					ErrorMessage: constants.OtpExpiredError,
 				},
 				Error: constants.AuthenticationFailedError,
 			}
-			ctx.IndentedJSON(http.StatusUnauthorized, errorExpiredOtpResponse)
+			ctx.IndentedJSON(http.StatusUnauthorized, err)
 			return
 		}
 

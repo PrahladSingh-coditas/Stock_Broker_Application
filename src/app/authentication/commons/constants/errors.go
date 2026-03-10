@@ -9,8 +9,9 @@ const (
 
 // Field Names (JSON/DB)
 const (
-	FieldPanCard = "panCard"
-	FieldEmail   = "email"
+	FieldPanCard     = "panCard"
+	FieldPhoneNumber = "phoneNumber"
+	FieldEmail       = "email"
 )
 
 // Duplicate Entry Errors
@@ -45,4 +46,13 @@ const (
 	AuthenticationFailedError    = "authentication failed"
 	TokenGenerationFailedError   = "failed to generate authentication tokens %s"
 	MissingCredentialsError      = "username and password are required"
+)
+
+// Forgot Password Errors
+const (
+	InvalidCredentialsError = "invalid pancard and phonenumber"
+	DataNotFoundError       = "no user match the credentials"
+	NoRecordsAffectedError  = "query had no effect on rows"
+	GenerateOtpError        = "error while generating otp"
+	DatabaseError           = "database error"
 )

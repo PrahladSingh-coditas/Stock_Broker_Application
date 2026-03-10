@@ -15,6 +15,70 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/auth/forgotpassword": {
+            "post": {
+                "description": "Authenticates user credentials to generate OTP for forgot password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Forgot Password",
+                "parameters": [
+                    {
+                        "description": "Request OTP for forgot password",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFForgotPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OTP Sent successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input payload",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Authentication failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "501": {
+                        "description": "Not Implemented",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/signin": {
             "post": {
                 "description": "Authenticates user credentials and returns success if valid",
@@ -168,6 +232,32 @@ const docTemplate = `{
                     "maxLength": 32,
                     "minLength": 5,
                     "example": "Arijit"
+                }
+            }
+        },
+        "models.BFFForgotPasswordRequest": {
+            "type": "object",
+            "required": [
+                "panCard",
+                "phoneNumber",
+                "username"
+            ],
+            "properties": {
+                "panCard": {
+                    "type": "string",
+                    "example": "ABCDE1234F"
+                },
+                "phoneNumber": {
+                    "type": "integer",
+                    "maximum": 9999999999,
+                    "minimum": 1000000000,
+                    "example": 8432805566
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 5,
+                    "example": "Sanjana"
                 }
             }
         },

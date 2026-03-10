@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"authentication/business"
-	"authentication/commons"
 	"authentication/commons/constants"
 	"authentication/models"
 	"encoding/json"
@@ -24,7 +23,7 @@ func NewValidateUserOtpHandler(service *business.ValidateUserOtpService) *Valida
 	}
 }
 
-// this fucntion handles user requests and responses by
+// This handler function deals with occuring errors and returns appropriate status code or response otherwise
 // Handles user OTP validation
 // @Summary Validates user OTP
 // @Description Validates user OTP and return clear success/ failure message
@@ -44,7 +43,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 	var bFFValidateUserOtpResponse models.BFFValidateUserOtpResponse
 	if errWhileBindingReq := ctx.ShouldBind(&bffValidateUserOtpRequest); errWhileBindingReq != nil {
 		errorMessage := genericModels.ErrorMessage{
-			Key:          errWhileBindingReq.(*json.UnmarshalTypeError).Field,
+			Key:          err.(*json.UnmarshalTypeError).Field,
 			ErrorMessage: constants.ErrUnexpectedValue,
 		}
 
@@ -55,8 +54,8 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 		return
 	}
 
-	if errWhileValidations := validations.GetBFFValidator().Struct(&bffValidateUserOtpRequest); errWhileValidations != nil {
-		validationErrors, _ := validations.FormatValidationErrors(errWhileValidations)
+	if err := validations.GetBFFValidator().Struct(&bffValidateUserOtpRequest); err != nil {
+		validationErrors, _ := validations.FormatValidationErrors(err)
 		ctx.IndentedJSON(http.StatusBadRequest, validationErrors)
 		return
 	}
@@ -66,31 +65,31 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 		if errors.Is(errWhileOtpValidation, commons.UserNotFoundError) {
 			errorUserNotFoundResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
-					Key:          commons.Username,
+					Key:          constants.Username,
 					ErrorMessage: constants.UserNotFoundError,
 				},
 				Error: constants.AuthenticationFailedError,
 			}
-			ctx.IndentedJSON(http.StatusBadRequest, errorUserNotFoundResponse)
+			ctx.IndentedJSON(http.StatusNotFound, errorUserNotFoundResponse)
 			return
 		}
 
 		if errors.Is(errWhileOtpValidation, commons.IncorrectOTPError) {
 			errorIncorrectOtpResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
-					Key:          commons.Otp,
+					Key:          constants.Otp,
 					ErrorMessage: constants.IncorrectOTPError,
 				},
 				Error: constants.AuthenticationFailedError,
 			}
-			ctx.IndentedJSON(http.StatusUnauthorized, errorIncorrectOtpResponse)
+			ctx.IndentedJSON(http.StatusUnauthorized, err)
 			return
 		}
 
 		if errors.Is(errWhileOtpValidation, commons.OtpExpiredError) {
 			errorExpiredOtpResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
-					Key:          commons.Otp,
+					Key:          constants.Otp,
 					ErrorMessage: constants.OtpExpiredError,
 				},
 				Error: constants.AuthenticationFailedError,

@@ -56,3 +56,10 @@ const (
 	GenerateOtpError        = "error while generating otp"
 	DatabaseError           = "database error"
 )
+
+//OTP Validation Errors
+const (
+	IncorrectOTPError = "Incorrect OTP"
+	OtpExpiredError   = "OTP Expired"
+	SigninFailedError = "Signin Failed"
+)

@@ -17,10 +17,13 @@ const (
 
 //Logger related fields
 const (
-	User    = "username"
-	Latency = "latency"
-	Otp     = "OTP"
-	Token   = "token"
+	User                 = "username"
+	Latency              = "latency"
+	Otp                  = "OTP"
+	Token                = "token"
+	Bearer               = "Bearer "
+	Subject              = "sub"
+	Purpose              = "purpose"
 )
 
 // Success message for user
@@ -30,6 +33,7 @@ const (
 	UserDataFetchedMsg     = "User data fetched successfully"
 	UserOtpFetchedMsg      = "User Otp fetched successfully"
 	OtpValidatedSuccessMsg = "OTP validated successfully"
+	PasswordUpdateMsg      = "Password updated successfully"
 )
 
 //Otp related messages

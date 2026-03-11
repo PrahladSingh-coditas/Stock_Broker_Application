@@ -42,7 +42,7 @@ const (
 
 const (
 	ErrWrongSigningAlgorithm = "wrong signing algorithm"
-	ErrParsingFailed         = "token parsing failed"
+	ErrParsingFailed         = "token parsing failed %w"
 	ErrTokenIsInvalid        = "invalid token"
 	ErrClaimMappingFailed    = "invalid token"
 	ErrTokenExpired          = "token expired"

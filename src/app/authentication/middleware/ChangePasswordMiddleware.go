@@ -31,12 +31,9 @@ func ChangePasswordMiddleware() gin.HandlerFunc {
 		token, err := utils.ParseToken(tokenString)
 
 		if err != nil {
-			if errors.Is(err, genericConstants.WrongSigningAlgorithmError) {
-				c.IndentedJSON(http.StatusUnauthorized, genericConstants.ErrWrongSigningAlgorithm)
-				c.Abort()
-				return
-			}
-			c.IndentedJSON(http.StatusUnauthorized, genericConstants.ErrParsingFailed)
+			c.IndentedJSON(http.StatusUnauthorized, gin.H{
+				"error": err.Error(),
+			})
 			c.Abort()
 			return
 		}
@@ -49,7 +46,7 @@ func ChangePasswordMiddleware() gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			c.IndentedJSON(http.StatusUnauthorized, genericConstants.TokenExpiredError)
+			c.IndentedJSON(http.StatusUnauthorized, genericConstants.ErrTokenIsInvalid)
 			c.Abort()
 			return
 		}
@@ -69,7 +66,7 @@ func ChangePasswordMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if purpose!=constants.PasswordResetPurpose {
+		if purpose != constants.PasswordResetPurpose {
 			c.IndentedJSON(http.StatusUnauthorized, constants.ErrPurposeNotMatched)
 			c.Abort()
 			return

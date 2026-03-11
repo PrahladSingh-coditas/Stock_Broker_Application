@@ -40,7 +40,7 @@ func ParseToken(tokenstring string) (*jwt.Token, error) {
 	})
 
 	if err != nil {
-		return nil, constants.ParsingFailedError
+		return nil, err
 	}
 
 	return token, nil

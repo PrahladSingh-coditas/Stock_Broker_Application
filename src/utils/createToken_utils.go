@@ -49,7 +49,7 @@ func ParseToken(tokenstring string) (*jwt.Token, error) {
 func VerifyToken(token *jwt.Token) (jwt.MapClaims, error) {
 
 	if !token.Valid {
-		return nil, constants.TokenInvalidError
+		return nil, constants.TokenExpiredError
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)

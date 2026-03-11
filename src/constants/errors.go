@@ -40,15 +40,16 @@ const (
 	ErrInvalidOtp         = "OTP must be of length 4 and numeric."
 )
 
-
 const (
 	ErrWrongSigningAlgorithm = "wrong signing algorithm"
-	ErrParsingFailed= "token parsing failed"
-	ErrTokenIsInvalid="invalid token"
-	ErrClaimMappingFailed="invalid token"
+	ErrParsingFailed         = "token parsing failed"
+	ErrTokenIsInvalid        = "invalid token"
+	ErrClaimMappingFailed    = "invalid token"
+	ErrTokenExpired          = "token expired"
 )
 
-var WrongSigningAlgorithmError=errors.New(ErrWrongSigningAlgorithm)
-var ParsingFailedError=errors.New(ErrParsingFailed)
-var TokenInvalidError=errors.New(ErrTokenIsInvalid)
-var ClaimMappingFailedError=errors.New(ErrClaimMappingFailed)
+var WrongSigningAlgorithmError = errors.New(ErrWrongSigningAlgorithm)
+var ParsingFailedError = errors.New(ErrParsingFailed)
+var TokenInvalidError = errors.New(ErrTokenIsInvalid)
+var ClaimMappingFailedError = errors.New(ErrClaimMappingFailed)
+var TokenExpiredError = errors.New(ErrTokenExpired)

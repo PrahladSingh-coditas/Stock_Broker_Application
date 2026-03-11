@@ -49,7 +49,7 @@ func ChangePasswordMiddleware() gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			c.IndentedJSON(http.StatusUnauthorized, genericConstants.ErrTokenIsInvalid)
+			c.IndentedJSON(http.StatusUnauthorized, genericConstants.TokenExpiredError)
 			c.Abort()
 			return
 		}

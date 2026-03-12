@@ -15,6 +15,7 @@ const (
 	OtpRegex         = "^[0-9]{4}$"
 )
 
+// columns in users
 const (
 	FieldPassword        = "Password"
 	FieldConfirmPassword = "ConfirmPassword"
@@ -24,6 +25,12 @@ const (
 	FieldEmail           = "Email"
 	FieldUsername        = "Username"
 	FieldOtp             = "Otp"
+)
+
+// columns for watchlists
+const (
+	FieldScripId     = "ScripId"
+	FieldWatchlistId = "WatchlistId"
 )
 
 // Migration success Message

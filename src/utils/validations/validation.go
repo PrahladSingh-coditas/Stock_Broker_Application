@@ -6,7 +6,7 @@ import (
 	"stock_broker_application/src/constants"
 	"stock_broker_application/src/models"
 	"strings"
-
+    
 	"github.com/dlclark/regexp2"
 	"github.com/go-playground/validator/v10"
 )
@@ -77,6 +77,10 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 				default:
 					errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 				}
+			case constants.FieldScripId:
+				errorMsg = fmt.Sprintf(constants.ErrFieldRequired, "scripId")
+			case constants.FieldWatchlistId:
+				errorMsg = fmt.Sprintf(constants.ErrFieldRequired, "watchlistId")
 			default:
 				errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 			}
@@ -135,6 +139,12 @@ func OtpValidator(f1 validator.FieldLevel) bool {
 	matched, _ := regexp.MatchString(constants.OtpRegex, f1.Field().String())
 	return matched
 }
+
+type Enum interface {
+	IsValid() bool
+}
+
+
 
 func init() {
 	bffValidator = validator.New()

@@ -43,7 +43,7 @@ func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, span
 		return "", errors.New(constants.IncorrectOTPError)
 	}
 
-	if userFromDB.OtpExpiresAt > uint64(time.Now().Unix()) {
+	if userFromDB.OtpExpiresAt < uint64(time.Now().Unix()) {
 		return "", errors.New(constants.OtpExpiredError)
 	}
 

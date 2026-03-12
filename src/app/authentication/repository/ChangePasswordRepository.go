@@ -27,6 +27,7 @@ func (user *changePasswordRepository) CheckUser(ctx context.Context, db *gorm.DB
 	start := time.Now()
 	logger := logrus.New()
 
+	//update password in database by new password
 	result := db.Model(&genericModels.User{}).
 		Where(constants.FieldUsername, username).
 		Update(constants.FieldPassword, password)

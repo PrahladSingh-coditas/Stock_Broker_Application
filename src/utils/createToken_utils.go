@@ -28,6 +28,39 @@ func GenerateToken(username string, purpose string) (string, error) {
 	return accessTokenString, nil
 }
 
+func ParseToken(tokenstring string) (*jwt.Token, error) {
+
+	token, err := jwt.Parse(tokenstring, func(t *jwt.Token) (interface{}, error) {
+
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, constants.WrongSigningAlgorithmError
+		}
+
+		return []byte(secretKey.AccessSecretKey), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return token, nil
+}
+
+func VerifyToken(token *jwt.Token) (jwt.MapClaims, error) {
+
+	if !token.Valid {
+		return nil, constants.TokenExpiredError
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if !ok {
+		return nil, constants.ClaimMappingFailedError
+	}
+
+	return claims, nil
+}
+
 func InitJWTConfig(configPath string) error {
 	var err error
 	secretKey, err = configs.LoadConfig[models.JWT](configPath, constants.JWT, constants.Yaml)

@@ -1,5 +1,7 @@
 package constants
 
+import "errors"
+
 // Database Transaction & Connection Errors
 const (
 	ErrBeginTx            = "failed to begin database transaction: %w"
@@ -37,3 +39,17 @@ const (
 	ErrInvalidEmail       = "Invalid value for Email"
 	ErrInvalidOtp         = "OTP must be of length 4 and numeric."
 )
+
+const (
+	ErrWrongSigningAlgorithm = "wrong signing algorithm"
+	ErrParsingFailed         = "token parsing failed %w"
+	ErrTokenIsInvalid        = "invalid token"
+	ErrClaimMappingFailed    = "invalid token"
+	ErrTokenExpired          = "token expired"
+)
+
+var WrongSigningAlgorithmError = errors.New(ErrWrongSigningAlgorithm)
+var ParsingFailedError = errors.New(ErrParsingFailed)
+var TokenInvalidError = errors.New(ErrTokenIsInvalid)
+var ClaimMappingFailedError = errors.New(ErrClaimMappingFailed)
+var TokenExpiredError = errors.New(ErrTokenExpired)

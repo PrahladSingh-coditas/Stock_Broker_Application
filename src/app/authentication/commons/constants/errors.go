@@ -56,16 +56,23 @@ const (
 
 //Otp related errors
 const (
-	ErrSignInFailed        = "failed to sign in user"
-	ErrOtpsMismatch        = "OTPs did not match"
-	ErrExpiredOtp          = "OTP expired"
-	ErrIncorrectOtp        = "entered OTP is not correct"
-	ErrInvalidOtp          = "OTP must be a 4 digit number"
-	ErrTokenCreationFailed = "token generation failed"
+	ErrSignInFailed            = "failed to sign in user"
+	ErrOtpsMismatch            = "OTPs did not match"
+	ErrExpiredOtp              = "OTP expired"
+	ErrIncorrectOtp            = "entered OTP is not correct"
+	ErrInvalidOtp              = "OTP must be a 4 digit number"
+	ErrTokenCreationFailed     = "token generation failed"
+	ErrHeaderMissing           = "Authorization header is missing"
+	ErrUsernameNotFoundInJWT   = "Username not found in JWT"
+	ErrPurposeNotFoundInHeader = "purpose not found inside the request"
+	ErrPurposeNotMatched       = "purpose is not matching"
 )
 
-var UserNotFoundError = errors.New(ErrUserNotFound)
+var UserNotFoundError = errors.New(ErrUserNotFoundMsg)
 var IncorrectPasswordError = errors.New(ErrIncorrectOtp)
 var IncorrectOTPError = errors.New(ErrOtpsMismatch)
 var OtpExpiredError = errors.New(ErrExpiredOtp)
 var TokenCreationFailedError = errors.New(ErrTokenCreationFailed)
+var DatabaseQueryError = errors.New(ErrDatabaseQueryErrorMsg)
+var PasswordEncryptFailedError = errors.New(ErrFailedToEncrypt)
+var UsernameNotFoundInJWTError = errors.New(ErrUsernameNotFoundInJWT)

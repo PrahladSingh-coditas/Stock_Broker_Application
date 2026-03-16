@@ -26,7 +26,7 @@ func (repo *validateUserOtpRepository) GetUserByUsername(ctx context.Context, db
 	logger := logrus.New()
 	var user genericModels.User
 	
-	result := db.WithContext(ctx).Table(constants.UsersTableName).Where(constants.UsernameCondtion, username).First(&user)
+	result := db.WithContext(ctx).Table(constants.UsersTableName).Where(constants.UsernameCondition, username).First(&user)
 
 	if result.Error != nil {
 		return nil, result.Error

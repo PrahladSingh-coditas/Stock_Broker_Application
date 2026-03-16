@@ -73,10 +73,10 @@ func (handler *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) {
 		return
 	}
 
-	err := handler.changePasswordService.ServiceChangePassword(ctx, ctx.Request.Context(), username, bffChangePasswordRequest.NewPassword)
+	err := handler.changePasswordService.ServiceChangePassword(ctx, ctx.Request.Context(), username, bffChangePasswordRequest.NewPassword, logger)
 
 	if err != nil {
-		if errors.Is(err, constants.PasswordEncryptFailedError) {
+		if errors.Is(err, errors.New(constants.ErrFailedToEncrypt)) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.Password,
@@ -92,7 +92,7 @@ func (handler *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) {
 
 			ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
 			return
-		} else if errors.Is(err, constants.DatabaseQueryError) {
+		} else if errors.Is(err,  errors.New(constants.ErrDatabaseQueryErrorMsg)) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Error: constants.ErrDatabaseQueryErrorMsg,
 			}
@@ -104,7 +104,7 @@ func (handler *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) {
 
 			ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
 			return
-		} else if errors.Is(err, constants.UserNotFoundError) {
+		} else if errors.Is(err, errors.New(constants.ErrUserNotFoundMsg)) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.User,

@@ -3,15 +3,14 @@ package repository
 import (
 	"authentication/commons/constants"
 	"context"
-	GenericUserModel "stock_broker_application/src/models"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
-type ChangePasswordReposioty interface {
-	UpdateUserPassword(ctx context.Context, db *gorm.DB, username string, NewHashedPassword string) error
+type ChangePasswordRepository interface {
+	UpdateUserPassword(ctx context.Context, db *gorm.DB, username string, NewHashedPassword string, logger *logrus.Logger) error
 }
 
 type changePasswordRepository struct{}
@@ -20,14 +19,16 @@ func NewChangePasswordRepository() *changePasswordRepository {
 	return &changePasswordRepository{}
 }
 
-func (repo *changePasswordRepository) UpdateUserPassword(ctx context.Context, db *gorm.DB, username string, NewHashedPassword string) error {
+func (repo *changePasswordRepository) UpdateUserPassword(ctx context.Context, db *gorm.DB, username string, newHashedPassword string, logger *logrus.Logger) error {
 
 	start := time.Now()
-	logger := logrus.New()
 
-	var user GenericUserModel.User
-	result := db.Model(&user).Where(constants.UsernameCondtion, username).Update(constants.Password, NewHashedPassword)
+	result := db.WithContext(ctx).Table(constants.UsersTableName).Where(constants.UsernameCondition, username).Update(constants.Password, newHashedPassword)
 
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	
 	if result.Error != nil {
 		return result.Error
 	}

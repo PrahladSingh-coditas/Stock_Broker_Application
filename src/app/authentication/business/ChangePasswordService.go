@@ -4,39 +4,41 @@ import (
 	"authentication/commons/constants"
 	"authentication/repository"
 	"context"
+	"errors"
 	"stock_broker_application/src/utils"
 
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
 type ChangePasswordService struct {
-	changePasswordReposioty repository.ChangePasswordReposioty
+	changePasswordReposioty repository.ChangePasswordRepository
 }
 
-func NewChangePasswordService(changePasswordReposioty repository.ChangePasswordReposioty) *ChangePasswordService {
+func NewChangePasswordService(changePasswordReposioty repository.ChangePasswordRepository) *ChangePasswordService {
 	return &ChangePasswordService{
 		changePasswordReposioty: changePasswordReposioty,
 	}
 }
 
-func (service *ChangePasswordService) ServiceChangePassword(ctx context.Context, spanCtx context.Context, username string, NewPassword string) error {
+func (service *ChangePasswordService) ServiceChangePassword(ctx context.Context, spanCtx context.Context, username string, newPassword string, logger *logrus.Logger) error {
 
 	postgresClinet := utils.GetPostgresClient()
 	tx := postgresClinet.GormDB
 
-	NewHashedPassword, err := utils.HashPassword(NewPassword)
+	newHashedPassword, err := utils.HashPassword(newPassword)
 
 	if err != nil {
-		return constants.PasswordEncryptFailedError
+		return errors.New(constants.ErrFailedToEncrypt)
 	}
 
-	errDuringUpdate := service.changePasswordReposioty.UpdateUserPassword(ctx, tx, username, NewHashedPassword)
+	err = service.changePasswordReposioty.UpdateUserPassword(ctx, tx, username, newHashedPassword, logger)
 
-	if errDuringUpdate != nil {
-		if errDuringUpdate == gorm.ErrRecordNotFound {
-			return constants.UserNotFoundError
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return errors.New(constants.ErrUserNotFoundMsg)
 		}
-		return constants.DatabaseQueryError
+		return errors.New(constants.ErrDatabaseQueryErrorMsg)
 	}
 
 	return nil

@@ -10,7 +10,7 @@ const (
 const (
 	UsersTableName   = "users"
 	Fieldemail       = "email"
-	UsernameCondtion = "username = ? "
+	UsernameCondition = "username = ? "
 	Password         = "password"
 	Database         = "database"
 )

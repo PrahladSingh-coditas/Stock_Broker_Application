@@ -29,7 +29,7 @@ func (user *signInUserRepository) SignInUser(ctx context.Context, db *gorm.DB, u
 
 	var fetchedUserData GenericUserModel.User
 
-	err := db.Where(constants.UsernameCondtion, username).First(&fetchedUserData)
+	err := db.Where(constants.UsernameCondition, username).First(&fetchedUserData)
 
 	if err.RowsAffected == 0 {
 		return nil, errors.New(constants.ErrUserNotFoundMsg)
@@ -52,7 +52,7 @@ func (repo *signInUserRepository) StoreOTP(ctx context.Context, db *gorm.DB, use
 	var user GenericUserModel.User
 
 	result := db.Model(&user).
-		Where(constants.UsernameCondtion, username).
+		Where(constants.UsernameCondition, username).
 		Updates(updates)
 
 	if result.RowsAffected == 0 {

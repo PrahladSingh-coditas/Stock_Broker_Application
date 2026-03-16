@@ -1,8 +1,12 @@
 package router
 
 import (
+	"watchlists/business"
 	"watchlists/commons/constants"
 	"watchlists/docs"
+	"watchlists/handlers"
+	"watchlists/middleware"
+	"watchlists/repository"
 
 	genericConstants "stock_broker_application/src/constants"
 
@@ -25,6 +29,16 @@ func GetRouter() *gin.Engine {
 		AllowMethods: []string{genericConstants.POST, genericConstants.GET},
 		AllowHeaders: []string{genericConstants.Origin, genericConstants.ContentType, genericConstants.Authorization},
 	}))
+
+	watchlistsRepository := repository.NewWatchlistsRepository()
+	watchlistsService := business.NewWatchlistsService(watchlistsRepository)
+	watchlistsHandler := handlers.NewWatchlistsHandler(watchlistsService)
+
+	authGroup := router.Group(constants.RoutePrefix)
+	{
+		authGroup.POST(constants.WatchlistADG, middleware.AuthMiddleware(), watchlistsHandler.HandleWatchlistADG)
+
+	}
 
 	return router
 }

@@ -9,6 +9,7 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
+	gorm.io/gorm v1.25.12
 	stock_broker_application v0.0.0-00010101000000-000000000000
 )
 
@@ -18,6 +19,7 @@ require (
 	github.com/bytedance/sonic v1.15.0 // indirect
 	github.com/bytedance/sonic/loader v0.5.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
+	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.12 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
@@ -76,7 +78,6 @@ require (
 	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/postgres v1.5.11 // indirect
-	gorm.io/gorm v1.25.12 // indirect
 )
 
 replace stock_broker_application => ../../../

@@ -6,6 +6,7 @@ import (
 	"authentication/repository"
 	"context"
 	"errors"
+	"fmt"
 	"stock_broker_application/src/utils"
 
 	"github.com/pingcap/log"
@@ -25,19 +26,28 @@ func (service *ChangePasswordService) ChangePassword(ctx context.Context, spanCt
 	postgresClinet := utils.GetPostgresClient()
 	client := postgresClinet.GormDB
 
-	hashPassword, err := utils.HashPassword(bffChangePasswordRequest.NewPassword)																													
-	if err != nil {
-		log.Info(constants.ErrFailedToEncrypt)
+	userDB, errs := service.changePasswordRepository.GetPassword(spanCtx, client, username)
+	if errs != nil {
+		if errs.Error() == constants.UserNotFoundError {
+			return errors.New(constants.UserNotFoundError)
+		}
+		fmt.Println("Error fetching user password:")
+		return errors.New(constants.AuthenticationFailedError)
 	}
 
-	new_password := hashPassword
-
-	errs := service.changePasswordRepository.CheckUser(spanCtx, client, username, new_password)
-	if errs != nil {
-		if errs.Error() == constants.NoRecordsAffectedError {
-			return errors.New(constants.NoRecordsAffectedError)
+	passwordMatch := utils.CompareHashPassword(userDB.Password, bffChangePasswordRequest.NewPassword)
+	if !passwordMatch {
+		hashPassword, err := utils.HashPassword(bffChangePasswordRequest.NewPassword)
+		if err != nil {
+			log.Info(constants.ErrFailedToEncrypt)
 		}
-		return errors.New(constants.AuthenticationFailedError)
+		new_password := hashPassword
+		err = service.changePasswordRepository.UpdatePassword(spanCtx, client, username, new_password)
+		if err != nil {
+			return fmt.Errorf(constants.PasswordChangeFailedError, err)
+		}
+	} else {
+		return fmt.Errorf(constants.SamePasswordError, errors.New(constants.ReEnterNewPasswordError))
 	}
 
 	return nil

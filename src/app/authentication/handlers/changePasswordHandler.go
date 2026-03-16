@@ -55,6 +55,15 @@ func (controller *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) 
 		return
 	}
 
+	// userbaneInterface, exists := ctx.Get(constants.Username)
+	// if !exists {
+	// 	ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+	// 		Error: constants.AuthenticationFailedError,
+	// 	})
+	// 	return
+	// }
+	// username := userbaneInterface.(string)
+
 	username := ctx.GetString(constants.Username)
 	err := controller.service.ChangePassword(ctx, ctx.Request.Context(), bffChangePasswordRequest, username)
 	if err != nil {

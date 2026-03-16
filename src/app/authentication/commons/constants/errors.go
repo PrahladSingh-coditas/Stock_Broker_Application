@@ -29,8 +29,8 @@ const (
 
 // Request Validation Errors
 const (
-	ErrInvalidPayload  = "invalid required payload"
-	ErrUnexpectedValue = "unexpected value for the field."
+	InvalidPayloadError  = "invalid required payload"
+	UnexpectedValueError = "unexpected value for the field."
 )
 
 //Encrypt & Decrypt Erros

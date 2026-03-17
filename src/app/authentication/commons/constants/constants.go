@@ -31,6 +31,8 @@ const (
 //success message for user otp validation
 const OtpValidatedSuccessMsg = "OTP validated successfully"
 
+//success message for password change
+const PasswordChangedSuccess = "Password changed successfully"
 
 //Swagger Titile
 const SwaggerTitle = "Stock Broker Application API"

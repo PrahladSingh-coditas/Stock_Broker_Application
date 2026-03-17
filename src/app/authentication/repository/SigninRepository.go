@@ -44,7 +44,8 @@ func (user *signinUserRepository) SigninNewUser(ctx context.Context, db *gorm.DB
 	return &ExistingUser, nil
 
 }
- // to do: combine both signin and otp queries:
+
+
 func (user *signinUserRepository) InsertOtpInDb(ctx context.Context, db *gorm.DB, bffSigninUserRequest models.BFFSigninUserRequest, otp uint64) error {
 	start := time.Now()
 	logger := logrus.New()
@@ -53,7 +54,7 @@ func (user *signinUserRepository) InsertOtpInDb(ctx context.Context, db *gorm.DB
 		Select("otpSent", "otpExpiresAt").
 		Updates(genericModels.User{
 			OtpSent:      otp,
-			OtpExpiresAt: uint64(time.Now().Unix()+120), 
+			OtpExpiresAt: uint64(time.Now().Unix() + 120),
 		})
 
 	if result.Error != nil {

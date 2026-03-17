@@ -1,4 +1,25 @@
 definitions:
+  models.BFFChangePasswordRequest:
+    properties:
+      confirmpassword:
+        example: Sakshi@123
+        minLength: 8
+        type: string
+      newpassword:
+        example: Sakshi@123
+        maxLength: 20
+        minLength: 8
+        type: string
+    required:
+    - confirmpassword
+    - newpassword
+    type: object
+  models.BFFChangePasswordResponse:
+    properties:
+      message:
+        example: password updated successfully
+        type: string
+    type: object
   models.BFFCreateUserRequest:
     properties:
       confirmPassword:
@@ -98,7 +119,50 @@ definitions:
     type: object
 info:
   contact: {}
+  description: Omnenest backend for watchlist micro-service (Middleware layer).
+  title: omnenest-backend
+  version: "1.0"
 paths:
+  /api/auth/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Change password and return message
+      parameters:
+      - description: Change Password Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BFFChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password changed successfully
+          schema:
+            $ref: '#/definitions/models.BFFChangePasswordResponse'
+        "400":
+          description: Invalid Input Payload
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "401":
+          description: Password mismatch with confirm password
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "404":
+          description: Invalid Username
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+      security:
+      - BearerAuth: []
+      summary: Change password
+      tags:
+      - User
   /api/auth/signin:
     post:
       consumes:
@@ -202,4 +266,10 @@ paths:
       summary: Validates user OTP
       tags:
       - User
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+    x-extension-openapi: '{"example": "value on a json format"}'
 swagger: "2.0"

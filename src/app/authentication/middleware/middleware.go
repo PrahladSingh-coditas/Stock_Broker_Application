@@ -17,7 +17,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		start := time.Now()
 		log.Printf("Request: %s %s", c.Request.Method, c.Request.URL.Path)
 
-		authHeader := c.GetHeader("Authorization")
+		authHeader := c.GetHeader("Authorization") //it will extract header and check if its missing
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "Header not Found",

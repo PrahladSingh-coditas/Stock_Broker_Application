@@ -21,5 +21,21 @@ func main() {
 		return
 	}
 
+	if err := dbClient.GormDB.AutoMigrate(&models.Watchlists{}); err != nil {
+		log.Fatalf(constants.ErrDBMigrationFailed, err)
+		return
+	}
+	
+	if err := dbClient.GormDB.AutoMigrate(&models.ScripMaster{}); err != nil {
+		log.Fatalf(constants.ErrDBMigrationFailed, err)
+		return
+	}
+
+	if err := dbClient.GormDB.AutoMigrate(&models.WatchlistScrip{}); err != nil {
+		log.Fatalf(constants.ErrDBMigrationFailed, err)
+		return
+	}
+
+
 	log.Println(constants.MsgDBMigrationSuccess)
 }

@@ -18,22 +18,25 @@ type User struct {
 }
 
 type Watchlists struct {
-	Id            uint64    `gorm:"column:id;primaryKey" json:"watchlistId"`
-	UserId        uint64    `gorm:"column:user_id" json:"userId"`
-	WatchlistName string    `gorm:"column:watchlist_name" json:"watchlistName"`
-	ScripCount    uint64    `gorm:"column:scrip_count;primaryKey" json:"scripCount"`
-	LastUpdatedAt time.Time `gorm:"column:last_updated_at" json:"lastUpdatedAt"`
+	Id            uint64    `gorm:"column:id;primaryKey;autoIncrement" json:"watchlistId"`
+	UserId        uint64    `gorm:"column:user_id;not null" json:"userId"`
+	WatchlistName string    `gorm:"column:watchlist_name;not null" json:"watchlistName"`
+	ScripCount    uint64    `gorm:"column:scrip_count;default:0" json:"scripCount"`
+	LastUpdatedAt time.Time `gorm:"column:last_updated_at;not null" json:"lastUpdatedAt"`
 }
 
 type WatchlistScrip struct {
-	Id          uint64 `gorm:"column:id;primaryKey" json:"watchlistScripId"`
-	WatchlistId uint64 `gorm:"column:watchlist_id" json:"watchlistId"`
-	ScripId     string `gorm:"column:scrip_id" json:"scripId"`
+	Id          uint64 `gorm:"column:id;primaryKey;autoIncrement" json:"watchlistScripId"`
+	WatchlistId uint64 `gorm:"column:watchlist_id;not null;uniqueIndex:uq_watchlist_scrip" json:"watchlist_Id"`
+	ScripId     string `gorm:"column:scrip_id;not null;uniqueIndex:uq_watchlist_scrip" json:"scrip_Id"`
+
+	Watchlists  Watchlists  `gorm:"foreignKey:WatchlistId;references:Id"`
+	ScripMaster ScripMaster `gorm:"foreignKey:ScripId;references:Id"`
 }
 
 type ScripMaster struct {
-	Id        uint64 `gorm:"column:id;primaryKey" json:"scriptId"`
-	ScripName string `gorm:"column:scrip_name" json:"scripName"`
+	Id        string `gorm:"column:id;primaryKey" json:"scripId"`
+	ScripName string `gorm:"column:scrip_name;not null" json:"scripName"`
 }
 
 type DatabaseConfiguration struct {

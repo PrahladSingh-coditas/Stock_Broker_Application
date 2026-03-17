@@ -6,7 +6,7 @@ import (
 	"stock_broker_application/src/constants"
 	"stock_broker_application/src/models"
 	"strings"
-    
+
 	"github.com/dlclark/regexp2"
 	"github.com/go-playground/validator/v10"
 )
@@ -140,11 +140,9 @@ func OtpValidator(f1 validator.FieldLevel) bool {
 	return matched
 }
 
-type Enum interface {
-	IsValid() bool
-}
-
-
+// type Enum interface {
+// 	IsValid() bool
+// }
 
 func init() {
 	bffValidator = validator.New()

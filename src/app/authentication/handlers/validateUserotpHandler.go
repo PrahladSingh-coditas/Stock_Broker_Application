@@ -43,12 +43,12 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 	if err := ctx.ShouldBind(&bffValidateUserOtpRequest); err != nil {
 		errorMessage := genericModels.ErrorMessage{
 			Key:          err.(*json.UnmarshalTypeError).Field,
-			ErrorMessage: constants.ErrUnexpectedValue,
+			ErrorMessage: constants.UnexpectedValueError,
 		}
 
 		ctx.IndentedJSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
 			Message: errorMessage,
-			Error:   constants.ErrInvalidPayload,
+			Error:   constants.InvalidPayloadError,
 		})
 		return
 	}
@@ -72,7 +72,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 			ctx.IndentedJSON(http.StatusNotFound, err)
 			return
 		}
-		
+
 		if errors.Is(err, errors.New(constants.IncorrectOTPError)) {
 			err := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{

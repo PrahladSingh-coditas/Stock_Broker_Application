@@ -40,11 +40,11 @@ func (controller *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) 
 	if err := ctx.ShouldBind(&bffChangePasswordRequest); err != nil {
 		errorMsgs := genericModels.ErrorMessage{
 			Key:          "request",
-			ErrorMessage: constants.ErrInvalidPayload,
+			ErrorMessage: constants.InvalidPayloadError,
 		}
 		ctx.IndentedJSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
 			Message: errorMsgs,
-			Error:   constants.ErrInvalidPayload,
+			Error:   constants.InvalidPayloadError,
 		})
 		return
 	}
@@ -55,14 +55,36 @@ func (controller *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) 
 		return
 	}
 
-	usernameInterface, _ := ctx.Get(constants.Username)
-	username := usernameInterface.(string)
+	// userbaneInterface, exists := ctx.Get(constants.Username)
+	// if !exists {
+	// 	ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+	// 		Error: constants.AuthenticationFailedError,
+	// 	})
+	// 	return
+	// }
+	// username := userbaneInterface.(string)
+
+	username := ctx.GetString(constants.Username)
 	err := controller.service.ChangePassword(ctx, ctx.Request.Context(), bffChangePasswordRequest, username)
 	if err != nil {
 
-		if err.Error() == constants.NoRecordsAffectedError {
+		if err.Error() == constants.UserNotFoundError {
 			ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
-				Error: constants.NoRecordsAffectedError,
+				Error: constants.UserNotFoundError,
+			})
+			return
+		}
+
+		if err.Error() == constants.PasswordChangeFailedError {
+			ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+				Error: constants.PasswordChangeFailedError,
+			})
+			return
+		}
+		
+		if err.Error() == constants.SamePasswordError {
+			ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+				Error: constants.SamePasswordError,
 			})
 			return
 		}

@@ -42,11 +42,11 @@ func (controller *ForgotPasswordHandler) HandleForgotPassword(ctx *gin.Context) 
 	if err := ctx.ShouldBind(&bffForgotPasswordRequest); err != nil {
 		errorMsgs := genericModels.ErrorMessage{
 			Key:          "request",
-			ErrorMessage: constants.ErrInvalidPayload,
+			ErrorMessage: constants.InvalidPayloadError,
 		}
 		ctx.IndentedJSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
 			Message: errorMsgs,
-			Error:   constants.ErrInvalidPayload,
+			Error:   constants.InvalidPayloadError,
 		})
 		return
 	}

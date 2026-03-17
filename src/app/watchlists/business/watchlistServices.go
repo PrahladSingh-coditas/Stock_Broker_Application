@@ -52,56 +52,56 @@ func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx contex
 			return nil, errors.New(constants.AuthenticationFailedError)
 		}
 
-	// 	watchlistsDB, err := service.watchlistsRepository.GetValidWatchlists(spanCtx, client, users.ID, bffWatchlistsRequest.WatchlistIds)
-	// 	if err != nil {
-	// 		return nil, errors.New(constants.QueryError)
-	// 	}
+		watchlistsDB, err := service.watchlistsRepository.GetValidWatchlists(spanCtx, client, users.ID, bffWatchlistsRequest.WatchlistIds)
+		if err != nil {
+			return nil, errors.New(constants.QueryError)
+		}
 
-	// 	for _, wl := range watchlistsDB {
+		for _, wl := range watchlistsDB {
 
-	// 		if wl.ScripCount >= 10 {
-	// 			continue
-	// 		}
+			if wl.ScripCount >= 10 {
+				continue
+			}
 
-	// 		duplicate, _ := service.watchlistsRepository.CheckDuplicate(spanCtx, client, wl.Id, bffWatchlistsRequest.ScripId)
-	// 		if duplicate {
-	// 			continue
-	// 		}
+			duplicate, _ := service.watchlistsRepository.CheckDuplicate(spanCtx, client, wl.Id, bffWatchlistsRequest.ScripId)
+			if duplicate {
+				continue
+			}
 
-	// 		err := service.watchlistsRepository.InsertWatchlistScrip(spanCtx, client, wl.Id, bffWatchlistsRequest.ScripId)
-	// 		if err != nil {
-	// 			return nil, errors.New(constants.QueryError)
-	// 		}
-	// 	}
+			err := service.watchlistsRepository.InsertWatchlistScrip(spanCtx, client, wl.Id, bffWatchlistsRequest.ScripId)
+			if err != nil {
+				return nil, errors.New(constants.QueryError)
+			}
+		}
 
-	// 	watchlists, err := service.watchlistsRepository.GetUserWatchlists(spanCtx, client, users.ID, bffWatchlistsRequest.ScripId)
-	// 	if err != nil {
-	// 		return nil, errors.New(constants.QueryError)
-	// 	}
+		watchlists, err := service.watchlistsRepository.GetUserWatchlists(spanCtx, client, users.ID, bffWatchlistsRequest.ScripId)
+		if err != nil {
+			return nil, errors.New(constants.QueryError)
+		}
 
-	// 	return watchlists, nil
+		return watchlists, nil
 
-	// case models.DEL:
+	case models.DEL:
 
-	// 	watchlistsDB, err := service.watchlistsRepository.GetValidWatchlists(spanCtx, client, users.ID, bffWatchlistsRequest.WatchlistIds)
-	// 	if err != nil {
-	// 		return nil, errors.New(constants.QueryError)
-	// 	}
+		watchlistsDB, err := service.watchlistsRepository.GetValidWatchlists(spanCtx, client, users.ID, bffWatchlistsRequest.WatchlistIds)
+		if err != nil {
+			return nil, errors.New(constants.QueryError)
+		}
 
-	// 	for _, wl := range watchlistsDB {
+		for _, wl := range watchlistsDB {
 
-	// 		err := service.watchlistsRepository.DeleteWatchlistScrip(spanCtx, client, wl.Id, bffWatchlistsRequest.ScripId)
-	// 		if err != nil {
-	// 			return nil, errors.New(constants.QueryError)
-	// 		}
-	// 	}
+			err := service.watchlistsRepository.DeleteWatchlistScrip(spanCtx, client, wl.Id, bffWatchlistsRequest.ScripId)
+			if err != nil {
+				return nil, errors.New(constants.QueryError)
+			}
+		}
 
-	// 	watchlists, err := service.watchlistsRepository.GetUserWatchlists(spanCtx, client, users.ID, bffWatchlistsRequest.ScripId)
-	// 	if err != nil {
-	// 		return nil, errors.New(constants.QueryError)
-	// 	}
+		watchlists, err := service.watchlistsRepository.GetUserWatchlists(spanCtx, client, users.ID, bffWatchlistsRequest.ScripId)
+		if err != nil {
+			return nil, errors.New(constants.QueryError)
+		}
 
-	// 	return watchlists, nil
+		return watchlists, nil
 
 	case models.GET:
 		var watchlists []structModels.WatchlistWithId

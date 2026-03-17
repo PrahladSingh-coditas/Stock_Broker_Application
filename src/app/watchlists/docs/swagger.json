@@ -6,7 +6,165 @@
         "contact": {},
         "version": "1.0"
     },
-    "paths": {},
+    "paths": {
+        "/api/watch/watchlists": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Performs ADD, GET or DELETE Operation Based on ActionType",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Executed ADG Operations",
+                "parameters": [
+                    {
+                        "description": "Watchlist ADG Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFAdgToWatchlistRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ADG Request Successful",
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFAdgToWatchlistResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input payload",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "DataBase Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User does not exist",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.ActionType": {
+            "type": "string",
+            "enum": [
+                "ADD",
+                "DEL",
+                "GET"
+            ],
+            "x-enum-varnames": [
+                "ADD",
+                "DEL",
+                "GET"
+            ]
+        },
+        "models.BFFAdgToWatchlistRequest": {
+            "type": "object",
+            "required": [
+                "action",
+                "scripId",
+                "watchlistIds"
+            ],
+            "properties": {
+                "action": {
+                    "$ref": "#/definitions/models.ActionType"
+                },
+                "scripId": {
+                    "type": "string"
+                },
+                "watchlistIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "models.BFFAdgToWatchlistResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "$ref": "#/definitions/models.ActionType"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "watchlistNames": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WatchlistWithId"
+                    }
+                }
+            }
+        },
+        "models.ErrorAPIResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "errors": {
+                    "$ref": "#/definitions/models.ErrorMessage"
+                }
+            }
+        },
+        "models.ErrorMessage": {
+            "type": "object",
+            "properties": {
+                "errorMessage": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.WatchlistWithId": {
+            "type": "object",
+            "properties": {
+                "watchlist_ID": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "watchlist_Name": {
+                    "type": "string"
+                }
+            }
+        }
+    },
     "securityDefinitions": {
         "BearerAuth": {
             "type": "apiKey",

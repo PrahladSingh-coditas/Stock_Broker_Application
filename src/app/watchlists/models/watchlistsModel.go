@@ -5,7 +5,7 @@ import "strings"
 type BFFAdgToWatchlistRequest struct {
 	Action       ActionType `json:"action" validate:"required"`
 	ScripId      string     `json:"scripId" validate:"required"`
-	WatchlistIds []uint64   `json:"watchlistIds" validate:"required"`
+	WatchlistIds []uint64   `json:"watchlistIds,omitempty"`
 }
 
 type ActionType string

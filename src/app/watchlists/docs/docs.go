@@ -97,20 +97,15 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "action",
-                "scripId"
+                "scripId",
+                "watchlistIds"
             ],
             "properties": {
                 "action": {
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.ActionType"
-                        }
-                    ],
-                    "example": "GET"
+                    "$ref": "#/definitions/models.ActionType"
                 },
                 "scripId": {
-                    "type": "string",
-                    "example": "RELI"
+                    "type": "string"
                 },
                 "watchlistIds": {
                     "type": "array",

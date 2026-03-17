@@ -17,6 +17,10 @@ type WatchlistsRepository interface {
 	GetUserId(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error)
 	GetUserWatchlists(ctx context.Context, db *gorm.DB, userId uint64, scripId string) ([]structModels.WatchlistWithId, error)
 	CheckScripExists(ctx context.Context, db *gorm.DB, scripId string) (bool, error)
+	GetValidWatchlists(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64) ([]genericModels.Watchlists, error)
+	CheckDuplicate(ctx context.Context, db *gorm.DB, watchlistId uint64, scripId string) (bool, error)
+	InsertWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistId uint64, scripId string) error
+	DeleteWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistId uint64, scripId string) error
 }
 
 type watchlistsRepository struct{}
@@ -96,4 +100,40 @@ func (user *watchlistsRepository) CheckScripExists(ctx context.Context, db *gorm
 
 	return true, nil
 
+}
+
+func (repo *watchlistsRepository) GetValidWatchlists(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64) ([]genericModels.Watchlists, error) {
+
+	var watchlists []genericModels.Watchlists
+
+	err := db.Table(constants.WatclistsTableName).
+		Where(constants.FieldWatchUserId+" = ? AND "+constants.FieldWatchlistId+" IN ?", userId, watchlistIds).
+		Find(&watchlists).Error
+
+	return watchlists, err
+}
+func (repo *watchlistsRepository) CheckDuplicate(ctx context.Context, db *gorm.DB, watchlistId uint64, scripId string) (bool, error) {
+
+	var count int64
+
+	err := db.Table(constants.WatchScripTableName).
+		Where(constants.FieldWatchId+" = ? AND "+constants.FieldWScripId+" = ?", watchlistId, scripId).
+		Count(&count).Error
+
+	return count > 0, err
+}
+func (repo *watchlistsRepository) InsertWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistId uint64, scripId string) error {
+
+	insert := genericModels.WatchlistScrip{
+		WatchlistId: watchlistId,
+		ScripId:     scripId,
+	}
+
+	return db.Table(constants.WatchScripTableName).Create(&insert).Error
+}
+func (repo *watchlistsRepository) DeleteWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistId uint64, scripId string) error {
+
+	return db.Table(constants.WatchScripTableName).
+		Where(constants.FieldWatchId+" = ? AND "+constants.FieldWScripId+" = ?", watchlistId, scripId).
+		Delete(&genericModels.WatchlistScrip{}).Error
 }

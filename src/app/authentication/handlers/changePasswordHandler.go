@@ -75,6 +75,20 @@ func (controller *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) 
 			return
 		}
 
+		if err.Error() == constants.PasswordChangeFailedError {
+			ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+				Error: constants.PasswordChangeFailedError,
+			})
+			return
+		}
+		
+		if err.Error() == constants.SamePasswordError {
+			ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+				Error: constants.SamePasswordError,
+			})
+			return
+		}
+
 		ctx.IndentedJSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
 			Error: constants.AuthenticationFailedError,
 		})

@@ -47,7 +47,7 @@ func (service *ChangePasswordService) ChangePassword(ctx context.Context, spanCt
 			return fmt.Errorf(constants.PasswordChangeFailedError, err)
 		}
 	} else {
-		return fmt.Errorf(constants.SamePasswordError, errors.New(constants.ReEnterNewPasswordError))
+		return errors.New(constants.SamePasswordError)
 	}
 
 	return nil

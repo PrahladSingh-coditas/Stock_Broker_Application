@@ -47,7 +47,7 @@ const (
 	TokenGenerationFailedError   = "failed to generate authentication tokens %s"
 	MissingCredentialsError      = "username and password are required"
 	PasswordChangeFailedError    = "failed to change password: %s"
-	SamePasswordError            = "new password cannot be the same as the old password: %s"
+	SamePasswordError            = "new password cannot be the same as the old password"
 	ReEnterNewPasswordError      = "re-enter new password"
 )
 

@@ -29,7 +29,7 @@ func (user *changePasswordRepository) GetPassword(ctx context.Context, db *gorm.
 	logger := logrus.New()
 
 	var User genericModels.User
-	//update password in database by new password
+	//get old password from db by username
 	result := db.WithContext(ctx).
 		Table(constants.UsersTableName).
 		Where(constants.FieldUsername, username).
@@ -40,13 +40,12 @@ func (user *changePasswordRepository) GetPassword(ctx context.Context, db *gorm.
 			return nil, errors.New(constants.UserNotFoundError)
 
 		}
-		fmt.Println("Error Occurred while fetching user password")
 		return nil, fmt.Errorf("%s: %w", constants.AuthenticationFailedError, result.Error)
 	}
 
 	logger.WithFields(logrus.Fields{
 		"latency": time.Since(start).Milliseconds(),
-	}).Info(constants.PasswordChangeSuccessMsg)
+	}).Info(constants.UserReadSuccessMsg)
 
 	return &User, nil
 }
@@ -57,7 +56,7 @@ func (user *changePasswordRepository) UpdatePassword(ctx context.Context, db *go
 	logger := logrus.New()
 
 	//update password in database by new password
-	result := db.Model(&genericModels.User{}).
+	result := db.WithContext(ctx).Table(constants.UsersTableName).
 		Where(constants.FieldUsername, username).
 		Update(constants.FieldPassword, password)
 

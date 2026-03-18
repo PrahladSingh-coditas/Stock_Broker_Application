@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"authentication/business"
+	"authentication/commons/constants"
 	"authentication/models"
 
 	"github.com/gin-gonic/gin"
@@ -19,16 +20,18 @@ func NewChangePasswordHandler(service *business.ChangePasswordService) *ChangePa
 
 // HandleChangePassword godoc
 // @Summary Reset user password
-// @Description Reset password using password reset token
+// @Description Reset password
 // @Tags password-reset-api
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "Bearer"
+// @Param Authorization header string true "Bearer <token>"
 // @Security BearerAuth
 // @Param request body models.BFFResetPasswordRequest true "Reset Password Request"
-// @Success 200 {object} map[string]string "password reset successful"
-// @Failure 400 {object} map[string]string "bad request"
-// @Failure 500 {object} map[string]string "internal server error"
+// @Success 200 {object} models.ErrorAPIResponse "password reset successful"
+// @Failure 400 {object} models.ErrorAPIResponse "bad request"
+// @Failure 401 {object} models.ErrorAPIResponse "unauthorized"
+// @Failure 401 {object} models.ErrorAPIResponse "passwords miss match"
+// @Failure 500 {object} models.ErrorAPIResponse "internal server error"
 // @Router /api/auth/reset-password [post]
 func (controller *ChangePasswordHandler) HandleChangePassword(c *gin.Context) {
 	var req models.BFFResetPasswordRequest
@@ -38,7 +41,7 @@ func (controller *ChangePasswordHandler) HandleChangePassword(c *gin.Context) {
 		return
 	}
 	if req.Password != req.ConfirmPassword {
-		c.IndentedJSON(400, gin.H{"error": "Passwords do not match"})
+		c.IndentedJSON(400, gin.H{"error": "Passwords miss match"})
 		return
 	}
 
@@ -57,7 +60,7 @@ func (controller *ChangePasswordHandler) HandleChangePassword(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"message": "password reset successful",
+		"message": constants.PasswordChangeSuccessMsg,
 	})
 
 }

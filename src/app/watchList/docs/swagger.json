@@ -1,0 +1,157 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Omnenest backend for watchlist micro-service (Middleware layer).",
+        "title": "omnenest-backend",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {
+        "/api/watchlist/watchlist-api": {
+            "post": {
+                "description": "Add, Delete or Get scrips in watchlists",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Watchlist"
+                ],
+                "summary": "Manage watchlist scrips",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Watchlist Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFAdgToWatchListRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFAdgToWatchlistResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.ActionType": {
+            "type": "string",
+            "enum": [
+                "ADD",
+                "DEL",
+                "GET"
+            ],
+            "x-enum-varnames": [
+                "ADD",
+                "DEL",
+                "GET"
+            ]
+        },
+        "models.BFFAdgToWatchListRequest": {
+            "type": "object",
+            "required": [
+                "action",
+                "scripId"
+            ],
+            "properties": {
+                "action": {
+                    "$ref": "#/definitions/models.ActionType"
+                },
+                "scripId": {
+                    "type": "string"
+                },
+                "watchlistIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "models.BFFAdgToWatchlistResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "$ref": "#/definitions/models.ActionType"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "watchlistNames": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WatchListWithId"
+                    }
+                }
+            }
+        },
+        "models.WatchListWithId": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "watchlistName": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "x-extension-openapi": "{\"example\": \"value on a json format\"}"
+        }
+    }
+}

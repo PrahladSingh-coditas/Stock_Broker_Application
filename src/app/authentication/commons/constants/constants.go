@@ -4,6 +4,7 @@ package constants
 const (
 	ServiceName       = "authentication"
 	PortDefaultValude = 8080
+	PortWatchValude   = 8000
 )
 
 // Database table name & field names for users
@@ -15,9 +16,10 @@ const (
 
 // Success message for user
 const (
-	UserCreationSuccessMsg = "User created successfully"
-	UserLoggedInSuccessMsg = "User Signin in successfully"
-	OtpValidatedSuccessMsg = "OTP validated successfully"
+	UserCreationSuccessMsg   = "User created successfully"
+	UserLoggedInSuccessMsg   = "User Signin in successfully"
+	OtpValidatedSuccessMsg   = "OTP validated successfully"
+	PasswordChangeSuccessMsg = "Password Changed Successfully"
 )
 
 // error

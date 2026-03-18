@@ -44,7 +44,7 @@ func (user *createUserRepository) CreateNewUser(ctx context.Context, db *gorm.DB
 		Email:       bffCreateUserRequest.Email,
 	}
 
-	result := db.WithContext(ctx).Table(constants.UsersTableName).Create(&NewUser)
+	result := db.WithContext(ctx).Debug().Table(constants.UsersTableName).Create(&NewUser)
 	if result.Error != nil {
 		errorMsgs := result.Error.Error()
 		if strings.Contains(errorMsgs, constants.ErrUniqueConstraintViolation) {

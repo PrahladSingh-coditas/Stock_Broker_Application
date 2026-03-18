@@ -44,9 +44,9 @@ func GetRouter() *gin.Engine {
 
 	//validate-otp
 	postgresClientDb := utils.GetPostgresClient().GormDB
-	verifyUserOtpRepository := repository.NewValidateUserOtpRepository()
-	verifyUserOtpService := business.NewValidateUserOtpService(verifyUserOtpRepository, postgresClientDb)
-	verifyUserOtpHandler := handlers.NewValidateUserOtpHandler(verifyUserOtpService)
+	validateUserOtpRepository := repository.NewValidateUserOtpRepository()
+	validateUserOtpService := business.NewValidateUserOtpService(validateUserOtpRepository, postgresClientDb)
+	validateUserOtpHandler := handlers.NewValidateUserOtpHandler(validateUserOtpService)
 
 	//pasword-reset api
 	changePasswordRepository := repository.NewChangePasswordRepository()
@@ -57,9 +57,8 @@ func GetRouter() *gin.Engine {
 	{
 		authGroup.POST(constants.Signup, createUserHandler.HandleCreaterUser)
 		authGroup.POST(constants.Signin, SignInUserHandle.HandleSignInUser)
-		authGroup.POST(constants.OtpValidate, verifyUserOtpHandler.HandleValidateUserOtp)
+		authGroup.POST(constants.ValidateOtp, validateUserOtpHandler.HandleValidateUserOtp)
 		authGroup.POST(constants.ChangePassword, middleware.AuthMiddleware(), changePasswordHandler.HandleChangePassword)
-
 	}
 
 	return router

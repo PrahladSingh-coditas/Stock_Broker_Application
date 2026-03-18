@@ -39,7 +39,6 @@ definitions:
       confirm_password:
         type: string
       password:
-        minLength: 8
         type: string
     required:
     - confirm_password
@@ -108,9 +107,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Reset password using password reset token
+      description: Reset password
       parameters:
-      - description: Bearer
+      - description: Bearer <token>
         in: header
         name: Authorization
         required: true
@@ -127,21 +126,19 @@ paths:
         "200":
           description: password reset successful
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorAPIResponse'
         "400":
           description: bad request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "401":
+          description: passwords miss match
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
         "500":
           description: internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorAPIResponse'
       security:
       - BearerAuth: []
       summary: Reset user password

@@ -58,9 +58,9 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 		return
 	}
 
-	token, errWhileOtpValidation := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
-	if errWhileOtpValidation != nil {
-		if errors.Is(errWhileOtpValidation, commons.UserNotFoundError) {
+	token, err := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
+	if err != nil {
+		if errors.Is(err, commons.UserNotFoundError) {
 			errorUserNotFoundResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          commons.Username,
@@ -68,11 +68,11 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 				},
 				Error: constants.ErrAuthenticationFailed,
 			}
-			ctx.IndentedJSON(http.StatusBadRequest, errorUserNotFoundResponse)
+			ctx.IndentedJSON(http.StatusNotFound, errorUserNotFoundResponse)
 			return
 		}
 
-		if errors.Is(errWhileOtpValidation, commons.IncorrectOTPError) {
+		if errors.Is(err, commons.IncorrectOTPError) {
 			errorIncorrectOtpResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          commons.Otp,
@@ -80,11 +80,11 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 				},
 				Error: constants.ErrAuthenticationFailed,
 			}
-			ctx.IndentedJSON(http.StatusBadRequest, errorIncorrectOtpResponse)
+			ctx.IndentedJSON(http.StatusUnauthorized, errorIncorrectOtpResponse)
 			return
 		}
 
-		if errors.Is(errWhileOtpValidation, commons.OtpExpiredError) {
+		if errors.Is(err, commons.OtpExpiredError) {
 			errorExpiredOtpResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          commons.Otp,
@@ -92,7 +92,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 				},
 				Error: constants.ErrAuthenticationFailed,
 			}
-			ctx.IndentedJSON(http.StatusBadRequest, errorExpiredOtpResponse)
+			ctx.IndentedJSON(http.StatusUnauthorized, errorExpiredOtpResponse)
 			return
 		}
 

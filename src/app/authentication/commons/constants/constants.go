@@ -19,7 +19,7 @@ const(
 // Success message for user login
 const (
 	UserCreationSuccessMsg = "User created successfully"
-	UserLoggedInSuccessMsg = "User logged in successfully"
+	UserLoggedInSuccessMsg = "success"
 )
 
 //success message for user otp generation

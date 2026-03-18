@@ -78,8 +78,7 @@ func (controller *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) 
 	}
 
 	username := ctx.GetString("username")
-	// usernameInterface, _ := ctx.Get(commons.Username)
-	// username := usernameInterface.(string)
+	
 
 	err := controller.service.ChangePassword(ctx, ctx.Request.Context(), username, bffChangePasswordRequest.NewPassword, bffChangePasswordRequest.ConfirmPassword)
 

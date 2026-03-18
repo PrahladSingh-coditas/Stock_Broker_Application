@@ -18,6 +18,7 @@ const (
 const (
 	FieldPassword        = "Password"
 	FieldConfirmPassword = "ConfirmPassword"
+	FieldNewPassword     = "NewPassword"
 	FieldPanCard         = "PanCard"
 	FieldStrongPassword  = "strongPassword"
 	FieldPhoneNumber     = "PhoneNumber"

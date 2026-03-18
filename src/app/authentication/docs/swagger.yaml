@@ -3,7 +3,6 @@ definitions:
     properties:
       confirmpassword:
         example: Sakshi@123
-        minLength: 8
         type: string
       newpassword:
         example: Sakshi@123
@@ -88,7 +87,7 @@ definitions:
       otp:
         type: string
       username:
-        example: Arijit
+        example: Sakshi
         maxLength: 32
         minLength: 5
         type: string

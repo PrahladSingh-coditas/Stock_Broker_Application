@@ -40,26 +40,26 @@ const (
 //Signin and Token generation Errors
 const (
 	ErrInvalidEmailorPassword = "invalid email or password"
-	ErrPasswordMismatch       = "password does not match "
+	ErrPasswordMismatch       = "passwords do not match "
 	ErrAuthenticationFailed   = "authentication failed"
 	ErrTokenGenerationFailed  = "failed to generate authentication tokens "
-	ErrInternalServer = "internal server error"
-	ErrUserNotFound = "user not found"
+	ErrInternalServer         = "internal server error"
+	ErrUserNotFound           = "user not found"
+	ErrNoRowsAffected         = "database error, no row affected"
 )
 
-const(
+const (
 	ErrBinding = "failed to bind"
 )
 
 //otp generation error
-const(
+const (
 	ErrOtpFailed = "failed to generate otp"
 )
 
-
 //otp validation errors
 const (
-	ErrSignInFailed      = "failed to sign in user" 
+	ErrSignInFailed      = "failed to sign in user"
 	ErrIncorrectPassword = "entered password is not correct"
 	ErrOtpsMismatch      = "OTPs did not match"
 	ErrExpiredOtp        = "OTP expired"
@@ -67,4 +67,4 @@ const (
 	ErrInvalidOtp        = "OTP must be a 4 digit number"
 )
 
-//token generation errors
+//

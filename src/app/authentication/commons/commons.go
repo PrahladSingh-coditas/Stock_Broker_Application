@@ -20,4 +20,5 @@ const (
 	Password = "password"
 	Otp      = "OTP"
 	Token    = "token"
+	Subject  = "sub"
 )

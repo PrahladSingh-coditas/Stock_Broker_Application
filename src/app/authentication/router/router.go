@@ -18,7 +18,7 @@ import (
 
 func GetRouter() *gin.Engine { // it basically gives a gin engine
 	router := gin.New()
-	router.Use(middleware.AuthMiddleware())
+	//router.Use(middleware.AuthMiddleware())
 	router.Use(gin.Recovery())
 
 	docs.SwaggerInfo.Title = constants.SwaggerTitle //prints title
@@ -44,12 +44,19 @@ func GetRouter() *gin.Engine { // it basically gives a gin engine
 	verifyUserOtpService := business.NewValidateUserOtpService(verifyUserOtpRepository)
 	verifyUserOtpHandler := handlers.NewValidateUserOtpHandler(verifyUserOtpService)
 
+	//change password
+	changePasswordRepository:= repository.NewChangePasswordRepository()
+	changePasswordService := business.NewChangePasswordService(changePasswordRepository)
+	changePasswordHandler := handlers.NewChangePasswordHandler(changePasswordService)
+
 	authGroup := router.Group(constants.AuthRoutePrefix)
 	{
 		authGroup.POST(constants.Signup, createUserHandler.HandleCreaterUser)
 		authGroup.POST(constants.Signin, signinHandler.HandleSigninUser)
 
 		authGroup.POST(constants.Validateotp, verifyUserOtpHandler.HandleValidateUserOtp)
+
+		authGroup.POST(constants.ChangePassword, middleware.AuthMiddleware(), changePasswordHandler.HandleChangePassword)
 	}
 
 	return router

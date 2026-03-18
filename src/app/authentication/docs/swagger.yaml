@@ -34,6 +34,28 @@ definitions:
     - phoneNumber
     - username
     type: object
+  models.BFFSignInRequest:
+    properties:
+      password:
+        example: Secure@123
+        maxLength: 20
+        minLength: 8
+        type: string
+      username:
+        example: Arijit
+        maxLength: 32
+        minLength: 5
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.BFFSignInResponse:
+    properties:
+      message:
+        example: Signed in successfully
+        type: string
+    type: object
   models.ErrorAPIResponse:
     properties:
       error:
@@ -51,6 +73,44 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates user and returns message
+      parameters:
+      - description: User Sign-in Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BFFSignInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Signin successful
+          schema:
+            $ref: '#/definitions/models.BFFSignInResponse'
+        "400":
+          description: Invalid input payload
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "404":
+          description: User Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+      summary: User Sign-in
+      tags:
+      - User
   /api/auth/signup:
     post:
       consumes:

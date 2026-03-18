@@ -42,7 +42,7 @@ func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, span
 		return "", commons.OtpExpiredError
 	}
 
-	token, err := utils.GeneratePasswordResetToken(userFromDB.Username)
+	token, _, err := utils.GenerateToken(userFromDB.Username)
 	if err != nil {
 		return "", err
 	}

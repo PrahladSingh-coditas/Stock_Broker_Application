@@ -3,7 +3,7 @@ package repository
 import (
 	"authentication/commons/constants"
 	"context"
-	"fmt"
+	"errors"
 	genericModels "stock_broker_application/src/models"
 
 	"gorm.io/gorm"
@@ -24,7 +24,11 @@ func (repo *validateUserOtpRepository) GetUserByUsername(ctx context.Context, db
 	var user genericModels.User
 	result := db.WithContext(ctx).Table(constants.UsersTableName).Where(constants.Username, username).First(&user)
 	if result.Error != nil {
-		return nil, fmt.Errorf(constants.ErrUserNotFound)
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil,
+				errors.New(constants.ErrUsernameNotFound)
+		}
+		return nil, result.Error
 	}
 
 	return &user, nil

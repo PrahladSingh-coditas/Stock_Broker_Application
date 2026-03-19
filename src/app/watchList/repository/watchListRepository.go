@@ -17,6 +17,10 @@ type WatchListRepository interface {
 	GetWatchlistsByIDs(userID uint64, watchlistIDs []uint64) ([]models.Watchlist, error)
 
 	IsScripInWatchlist(watchlistID uint64, scripID string) (bool, error)
+
+	DeleteScripFromWatchlist(watchlistID uint64, scripID string) error
+
+	GetWatchlistsContainingScrip(userID uint64, scripID string) ([]models.Watchlist, error)
 }
 
 type watchListRepository struct {
@@ -30,7 +34,6 @@ func NewWatchlistRepository(db *gorm.DB) *watchListRepository {
 }
 
 func (repo *watchListRepository) GetUserByUsername(username string) (*models.User, error) {
-
 	var user models.User
 
 	err := repo.db.
@@ -40,12 +43,10 @@ func (repo *watchListRepository) GetUserByUsername(username string) (*models.Use
 	if err != nil {
 		return nil, err
 	}
-
 	return &user, nil
 }
 
 func (repo *watchListRepository) AddScripToWatchlist(watchlistID uint64, scripID string) error {
-
 	tx := repo.db.Begin()
 
 	res := tx.Table("watchlists").
@@ -71,21 +72,17 @@ func (repo *watchListRepository) AddScripToWatchlist(watchlistID uint64, scripID
 		tx.Rollback()
 		return err
 	}
-
 	return tx.Commit().Error
 
 }
 
 func (repo *watchListRepository) GetWatchlistsByIDs(userID uint64, watchlistIDs []uint64) ([]models.Watchlist, error) {
-
 	var watchlists []models.Watchlist
 
 	err := repo.db.Debug().
 		Where("user_id = ? AND id IN ?", userID, watchlistIDs).
 		Find(&watchlists).Error
-
 	//userID not belong to user or no watchlist found for given ids
-
 	return watchlists, err
 }
 
@@ -110,4 +107,53 @@ func (repo *watchListRepository) IsScripExists(scripID string) (bool, error) {
 		Count(&count).Error
 
 	return count > 0, err
+}
+
+// DELETE SCRIP FROM WATCHLIST
+func (repo *watchListRepository) DeleteScripFromWatchlist(watchlistID uint64, scripID string) error {
+
+	tx := repo.db.Begin()
+
+	// Delete
+	res := tx.Table("watchlist_scrips").Debug().
+		Where("watchlist_id = ? AND scrip_id = ?", watchlistID, scripID).
+		Delete(&models.WatchlistScrips{})
+
+	if res.Error != nil {
+		tx.Rollback()
+		return res.Error
+	}
+
+	// If nothing deleted → no need to decrement
+	if res.RowsAffected == 0 {
+		tx.Rollback()
+		return nil
+	}
+
+	//  Decrement count
+	err := tx.Table("watchlists").Debug().
+		Where("id = ?", watchlistID).
+		Update("scrip_count", gorm.Expr("scrip_count - ?", 1)).Error
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+// GET WATCHLISTS CONTAINING SCRIP
+func (repo *watchListRepository) GetWatchlistsContainingScrip(userID uint64, scripID string) ([]models.Watchlist, error) {
+
+	var result []models.Watchlist
+
+	err := repo.db.
+		Table("watchlists").Debug().
+		Select("watchlists.id, watchlists.watchlist_name").
+		Joins("JOIN watchlist_scrips ON watchlists.id = watchlist_scrips.watchlist_id").
+		Where("watchlists.user_id = ? AND watchlist_scrips.scrip_id = ?", userID, scripID).
+		Scan(&result).Error
+
+	return result, err
 }

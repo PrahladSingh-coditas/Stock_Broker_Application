@@ -30,6 +30,10 @@ func (controller *watchlistService) HandleWatchlist(username string, req models.
 
 	case models.ADD:
 		return controller.handleAdd(user.ID, req)
+	case models.DEL:
+		return controller.handleDelete(user.ID, req)
+	case models.GET:
+		return controller.handleGet(user.ID, req)
 
 	default:
 		return nil, errors.New("invalid action")
@@ -82,5 +86,80 @@ func (controller *watchlistService) handleAdd(userID uint64, req models.BFFAdgTo
 		Action:          models.ADD,
 		WatchlistWithId: result,
 		Warning:         warnings,
+	}, nil
+}
+
+func (controller *watchlistService) handleDelete(userID uint64, req models.BFFAdgToWatchListRequest) (*models.BFFAdgToWatchlistResponse, error) {
+
+	result := make([]models.WatchListWithId, 0)
+	warnings := make([]string, 0)
+
+	// Validate watchlists belong to user
+	watchlists, err := controller.repo.GetWatchlistsByIDs(userID, req.WatchlistIds)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(watchlists) != len(req.WatchlistIds) {
+		return nil, errors.New("one or more watchlists do not belong to user")
+	}
+
+	// Loop through watchlists
+	for _, wl := range watchlists {
+
+		// Check if scrip exists in watchlist
+		exists, err := controller.repo.IsScripInWatchlist(wl.ID, req.ScripId)
+		if err != nil {
+			return nil, err
+		}
+
+		if !exists {
+			warnings = append(warnings,
+				"scrip not found in "+wl.WatchlistName)
+			continue
+		}
+
+		// Delete + decrement count
+		err = controller.repo.DeleteScripFromWatchlist(wl.ID, req.ScripId)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, models.WatchListWithId{
+			ID:            wl.ID,
+			WatchListName: wl.WatchlistName,
+		})
+	}
+
+	return &models.BFFAdgToWatchlistResponse{
+		Status:          "success",
+		Action:          models.DEL,
+		WatchlistWithId: result,
+		Warning:         warnings,
+	}, nil
+
+}
+
+func (controller *watchlistService) handleGet(userID uint64, req models.BFFAdgToWatchListRequest) (*models.BFFAdgToWatchlistResponse, error) {
+
+	result := make([]models.WatchListWithId, 0)
+
+	watchlists, err := controller.repo.GetWatchlistsContainingScrip(userID, req.ScripId)
+	if err != nil {
+		return nil, err
+	}
+
+	for wl := range watchlists {
+		result = append(result, models.WatchListWithId{
+			ID:            watchlists[wl].ID,
+			WatchListName: watchlists[wl].WatchlistName,
+		})
+	}
+
+	return &models.BFFAdgToWatchlistResponse{
+		Status:          "success",
+		Action:          models.GET,
+		WatchlistWithId: result,
+		Warning:         []string{},
 	}, nil
 }

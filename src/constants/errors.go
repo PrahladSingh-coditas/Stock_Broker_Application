@@ -29,10 +29,12 @@ const (
 )
 
 const (
-	ErrInvalidValue       = "invalid value for %s"
-	ErrInvalidPanCard     = "Invalid PAN card format. It should be 5 uppercase letters, followed by 4 digits, and 1 uppercase letter."
-	ErrInvalidPhoneNumber = "Phone number must be exactly 10 digits long and contain only numbers."
-	ErrFieldRequired      = "%s is required."
-	ErrInvalidEmail       = "Invalid value for Email"
+	ErrInvalidValue         = "invalid value for %s"
+	ErrInvalidPanCard       = "Invalid PAN card format. It should be 5 uppercase letters, followed by 4 digits, and 1 uppercase letter."
+	ErrInvalidPhoneNumber   = "Phone number must be exactly 10 digits long and contain only numbers."
+	ErrFieldRequired        = "%s is required."
+	ErrFieldRequiredIf      = "%s is required when %s is %s."
+	ErrFieldExcludedIf      = "%s must be excluded when %s is %s."
+	ErrInvalidEmail         = "Invalid value for Email"
+	InvalidScripFormatError = "Invalid scripId format (%s). Eg: 'RELI_12345'"
 )
-

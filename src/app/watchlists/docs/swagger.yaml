@@ -12,17 +12,23 @@ definitions:
   models.BFFAdgToWatchlistRequest:
     properties:
       action:
-        $ref: '#/definitions/models.ActionType'
+        allOf:
+        - $ref: '#/definitions/models.ActionType'
+        example: GET
       scripId:
+        example: RELI_12345
         type: string
       watchlistIds:
+        example:
+        - 1
+        - 2
+        - 3
         items:
           type: integer
         type: array
     required:
     - action
     - scripId
-    - watchlistIds
     type: object
   models.BFFAdgToWatchlistResponse:
     properties:
@@ -55,10 +61,9 @@ definitions:
     type: object
   models.WatchlistWithId:
     properties:
-      watchlist_ID:
-        format: int64
+      watchlist_id:
         type: integer
-      watchlist_Name:
+      watchlist_name:
         type: string
     type: object
 info:

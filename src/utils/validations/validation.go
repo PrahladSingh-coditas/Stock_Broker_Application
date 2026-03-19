@@ -78,9 +78,16 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 					errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 				}
 			case constants.FieldScripId:
-				errorMsg = fmt.Sprintf(constants.ErrFieldRequired, "scripId")
+				switch err.Tag() {
+				case "required":
+					errorMsg = fmt.Sprintf(constants.ErrFieldRequired, "scripId")
+				case "scrip_format":
+					errorMsg = fmt.Sprintf(constants.InvalidScripFormatError, "scripId")
+				default:
+					errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
+				}
 			case constants.FieldWatchlistId:
-				errorMsg = fmt.Sprintf(constants.ErrFieldRequired, "watchlistId")
+				errorMsg = "watchlistIds should not be provided for GET and required for ADD/DEL"
 			default:
 				errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 			}
@@ -102,7 +109,7 @@ func panCardValidator(f1 validator.FieldLevel) bool {
 }
 
 func strongPasswordValidator(f1 validator.FieldLevel) bool {
-	re := regexp2.MustCompile(constants.PasswordRegex, 0) // Compile regex with PCRE support
+	re := regexp2.MustCompile(constants.PasswordRegex, 0)
 	matched, _ := re.MatchString(f1.Field().String())
 	return matched
 }
@@ -140,9 +147,47 @@ func OtpValidator(f1 validator.FieldLevel) bool {
 	return matched
 }
 
-// type Enum interface {
-// 	IsValid() bool
-// }
+func WatchlistIdsValidation(fl validator.FieldLevel) bool {
+	field := fl.Field()
+	parent := fl.Parent()
+
+	actionField := parent.FieldByName("Action")
+	if !actionField.IsValid() {
+		return false
+	}
+
+	action := strings.ToUpper(actionField.String())
+
+	watchlistIds, ok := field.Interface().([]uint64)
+	if !ok {
+		return false
+	}
+	if action == "GET" && len(watchlistIds) > 0 {
+		return false
+	}
+	if (action == "ADD" || action == "DEL") && len(watchlistIds) == 0 {
+		return false
+	}
+	return true
+}
+
+type Enum interface {
+	IsValid() bool
+}
+
+func ValidateEnum[E Enum](fl validator.FieldLevel) bool {
+	value := fl.Field().Interface().(E)
+	return value.IsValid()
+}
+
+func ValidateScripID(fl validator.FieldLevel) bool {
+	scripId := fl.Field().String()
+	if scripId == "" {
+		return false
+	}
+	pattern := regexp.MustCompile(constants.ScripIdRegex)
+	return pattern.MatchString(scripId)
+}
 
 func init() {
 	bffValidator = validator.New()
@@ -150,6 +195,9 @@ func init() {
 	bffValidator.RegisterValidation("strongPassword", strongPasswordValidator)
 	bffValidator.RegisterValidation("Email", IsEmailValid)
 	bffValidator.RegisterValidation("otp", OtpValidator)
+	bffValidator.RegisterValidation("enum", ValidateEnum[Enum])
+	bffValidator.RegisterValidation("watchlist_validation", WatchlistIdsValidation)
+	bffValidator.RegisterValidation("scrip_format", ValidateScripID)
 }
 
 func GetBFFValidator() *validator.Validate {

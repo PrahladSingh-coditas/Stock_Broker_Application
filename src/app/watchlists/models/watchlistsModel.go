@@ -3,9 +3,9 @@ package models
 import "strings"
 
 type BFFAdgToWatchlistRequest struct {
-	Action       ActionType `json:"action" validate:"required"`
-	ScripId      string     `json:"scripId" validate:"required"`
-	WatchlistIds []uint64   `json:"watchlistIds,omitempty"`
+	Action       ActionType `json:"action" example:"GET" validate:"required,enum"`
+	ScripId      string     `json:"scripId" example:"RELI_12345" validate:"required,scrip_format"`
+	WatchlistIds []uint64   `json:"watchlistIds" example:"1,2,3" validate:"watchlist_validation"`
 }
 
 type ActionType string
@@ -26,8 +26,8 @@ func (act ActionType) IsValid() bool {
 }
 
 type WatchlistWithId struct {
-	Watchlist_ID   int64
-	Watchlist_Name string
+	Watchlist_ID   int64  `json:"watchlist_id"`
+	Watchlist_Name string `json:"watchlist_name"`
 }
 
 type BFFAdgToWatchlistResponse struct {

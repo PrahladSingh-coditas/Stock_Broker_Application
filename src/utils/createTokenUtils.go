@@ -19,7 +19,7 @@ func GenerateToken(username string) (string, string, error) {
 		"username": username,
 		"purpose":  "reset-password",
 		"iat":      time.Now().Unix(),
-		"exp":      time.Now().Add(time.Minute * 60).Unix(),
+		"exp":      time.Now().Add(time.Hour * 600).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(secretKey.AccessSecretKey))

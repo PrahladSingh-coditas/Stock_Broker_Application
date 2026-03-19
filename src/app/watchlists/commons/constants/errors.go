@@ -38,6 +38,7 @@ const (
 	AuthenticationFailedError = "authentication failed"
 	QueryError                = "error in executing query"
 	InvalidActionTypeError    = "invalid action type, must be 'ADD' 'GET' or 'DEL'"
+	WatchlistNotFoundError    = "watchlist not found"
 )
 
 //error

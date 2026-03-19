@@ -3,7 +3,7 @@ package constants
 //Authentications API URL Keys
 const (
 	ServiceName       = "watchlists"
-	PortDefaultValude = 0
+	PortDefaultValude = 1000
 )
 
 //Swagger Titile
@@ -32,12 +32,12 @@ const (
 	FieldScripCount    = "scrip_count"
 
 	//scrip_master
-	ScripMasterTableName = "scrip_master"
+	ScripMasterTableName = "scrip_masters"
 	FieldScripId         = "id"
 	FieldScripName       = "scrip_name"
 
 	//watchlist_scrip
-	WatchScripTableName = "watchlist_scrip"
+	WatchScripTableName = "watchlist_scrips"
 	FieldWatchScripId   = "id"
 	FieldWatchId        = "watchlist_id"
 	FieldWScripId       = "scrip_id"

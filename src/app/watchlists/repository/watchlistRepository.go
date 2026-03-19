@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	genericModels "stock_broker_application/src/models"
 	"time"
 	"watchlists/commons/constants"
@@ -17,10 +18,11 @@ type WatchlistsRepository interface {
 	GetUserId(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error)
 	GetUserWatchlists(ctx context.Context, db *gorm.DB, userId uint64, scripId string) ([]structModels.WatchlistWithId, error)
 	CheckScripExists(ctx context.Context, db *gorm.DB, scripId string) (bool, error)
-	GetValidWatchlists(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64) ([]genericModels.Watchlists, error)
-	CheckDuplicate(ctx context.Context, db *gorm.DB, watchlistId uint64, scripId string) (bool, error)
-	InsertWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistId uint64, scripId string) error
-	DeleteWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistId uint64, scripId string) error
+	GetValidWatchlists(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64) ([]genericModels.Watchlists, []uint64, error)
+	CheckDuplicate(ctx context.Context, db *gorm.DB, capNotFullIds []uint64, scripId string) ([]uint64, []uint64, error)
+	InsertWatchlistScrip(ctx context.Context, db *gorm.DB, notDuplicates []uint64, scripId string) ([]uint64, error)
+	GetWatchlistDetails(ctx context.Context, db *gorm.DB, addedIds []uint64) ([]genericModels.Watchlists, error)
+	DeleteWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistIdNames []structModels.WatchlistWithId, scripId string) error
 }
 
 type watchlistsRepository struct{}
@@ -56,15 +58,16 @@ func (user *watchlistsRepository) GetUserId(ctx context.Context, db *gorm.DB, us
 	return &userDB, nil
 }
 
-func (user *watchlistsRepository) GetUserWatchlists(ctx context.Context, db *gorm.DB, userId uint64, scripId string) ([]structModels.WatchlistWithId, error) {
+func (repo *watchlistsRepository) GetUserWatchlists(ctx context.Context, db *gorm.DB, userId uint64, scripId string) ([]structModels.WatchlistWithId, error) {
 
 	start := time.Now()
 	logger := logrus.New()
 
 	var result []structModels.WatchlistWithId
 
-	err := db.Table(constants.WatclistsTableName+" as w").
-		Select("w."+constants.FieldWatchlistId+" as watchlist_id, w."+constants.FieldWatchlistName+" as watchlist_name").
+	err := db.WithContext(ctx).
+		Table(constants.WatclistsTableName+" as w").
+		Select("DISTINCT w."+constants.FieldWatchlistId+" as watchlist_id, w."+constants.FieldWatchlistName+" as watchlist_name").
 		Joins("JOIN "+constants.WatchScripTableName+" as ws ON ws."+constants.FieldWatchId+" = w."+constants.FieldWatchlistId).
 		Where("w."+constants.FieldWatchUserId+" = ? AND ws."+constants.FieldWScripId+" = ?", userId, scripId).
 		Scan(&result).Error
@@ -80,60 +83,165 @@ func (user *watchlistsRepository) CheckScripExists(ctx context.Context, db *gorm
 	start := time.Now()
 	logger := logrus.New()
 
-	var scripmasterDB genericModels.ScripMaster
-
-	result := db.WithContext(ctx).
+	var count int64
+	fmt.Println("Checking existence for scripId:", scripId, "hhhj")
+	err := db.WithContext(ctx).
 		Table(constants.ScripMasterTableName).
-		Where(constants.FieldScripId, scripId).
-		First(&scripmasterDB)
+		Where("id = ?", scripId).
+		Count(&count).Error
 
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return false, errors.New(constants.ScripIdNotFoundError)
-		}
-		return false, fmt.Errorf("%s: %w", constants.AuthenticationFailedError, result.Error)
+	if err != nil {
+		log.Println("Error:", err)
 	}
+
+	fmt.Println("Count:", count)
 
 	logger.WithFields(logrus.Fields{
 		"latency": time.Since(start).Milliseconds(),
+		"count":   count,
 	}).Info(constants.ScripIdExistsSuccessMsg)
 
-	return true, nil
-
+	return count > 0, nil
 }
 
-func (repo *watchlistsRepository) GetValidWatchlists(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64) ([]genericModels.Watchlists, error) {
+func (repo *watchlistsRepository) GetValidWatchlists(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64) ([]genericModels.Watchlists, []uint64, error) {
 
 	var watchlists []genericModels.Watchlists
 
-	err := db.Table(constants.WatclistsTableName).
-		Where(constants.FieldWatchUserId+" = ? AND "+constants.FieldWatchlistId+" IN ?", userId, watchlistIds).
+	err := db.WithContext(ctx).
+		Table(constants.WatclistsTableName).
+		Where("user_id = ? AND id IN ?", userId, watchlistIds).
 		Find(&watchlists).Error
 
-	return watchlists, err
-}
-func (repo *watchlistsRepository) CheckDuplicate(ctx context.Context, db *gorm.DB, watchlistId uint64, scripId string) (bool, error) {
-
-	var count int64
-
-	err := db.Table(constants.WatchScripTableName).
-		Where(constants.FieldWatchId+" = ? AND "+constants.FieldWScripId+" = ?", watchlistId, scripId).
-		Count(&count).Error
-
-	return count > 0, err
-}
-func (repo *watchlistsRepository) InsertWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistId uint64, scripId string) error {
-
-	insert := genericModels.WatchlistScrip{
-		WatchlistId: watchlistId,
-		ScripId:     scripId,
+	if err != nil {
+		return nil, nil, err
 	}
 
-	return db.Table(constants.WatchScripTableName).Create(&insert).Error
-}
-func (repo *watchlistsRepository) DeleteWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistId uint64, scripId string) error {
+	validMap := make(map[uint64]struct{})
+	for _, wl := range watchlists {
+		validMap[wl.Id] = struct{}{}
+	}
 
-	return db.Table(constants.WatchScripTableName).
-		Where(constants.FieldWatchId+" = ? AND "+constants.FieldWScripId+" = ?", watchlistId, scripId).
-		Delete(&genericModels.WatchlistScrip{}).Error
+	var notValid []uint64
+	for _, id := range watchlistIds {
+		if _, ok := validMap[id]; !ok {
+			notValid = append(notValid, id)
+		}
+	}
+
+	return watchlists, notValid, nil
+}
+
+func (repo *watchlistsRepository) CheckDuplicate(ctx context.Context, db *gorm.DB, ids []uint64, scripId string) ([]uint64, []uint64, error) {
+
+	var existing []genericModels.WatchlistScrips
+
+	err := db.WithContext(ctx).
+		Table(constants.WatchScripTableName).
+		Where("watchlist_id IN ? AND scrip_id = ?", ids, scripId).
+		Find(&existing).Error
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	dupMap := make(map[uint64]struct{})
+	for _, e := range existing {
+		dupMap[e.WatchlistId] = struct{}{}
+	}
+
+	var duplicates, notDuplicates []uint64
+	for _, id := range ids {
+		if _, ok := dupMap[id]; ok {
+			duplicates = append(duplicates, id)
+		} else {
+			notDuplicates = append(notDuplicates, id)
+		}
+	}
+
+	return duplicates, notDuplicates, nil
+}
+
+func (repo *watchlistsRepository) InsertWatchlistScrip(ctx context.Context, db *gorm.DB, ids []uint64, scripId string) ([]uint64, error) {
+
+	var added []uint64
+
+	for _, id := range ids {
+		var wl struct {
+			ScripCount int
+		}
+		err := db.WithContext(ctx).
+			Table(constants.WatclistsTableName).
+			Where("id = ?", id).
+			Select("scrip_count").
+			Take(&wl).Error
+		if err != nil {
+			return nil, err
+		}
+
+		if wl.ScripCount >= 10 {
+			continue
+		}
+
+		err = db.WithContext(ctx).
+			Table(constants.WatchScripTableName).
+			Create(&genericModels.WatchlistScrips{
+				WatchlistId: id,
+				ScripId:     scripId,
+			}).Error
+		if err != nil {
+			return nil, err
+		}
+
+		err = db.WithContext(ctx).
+			Table(constants.WatclistsTableName).
+			Where("id = ?", id).
+			Update("scrip_count", gorm.Expr("scrip_count + 1")).Error
+		if err != nil {
+			return nil, err
+		}
+
+		added = append(added, id)
+	}
+
+	return added, nil
+}
+
+func (repo *watchlistsRepository) GetWatchlistDetails(ctx context.Context, db *gorm.DB, ids []uint64) ([]genericModels.Watchlists, error) {
+
+	var watcheslists []genericModels.Watchlists
+
+	err := db.WithContext(ctx).
+		Table(constants.WatclistsTableName).
+		Where("id IN ?", ids).
+		Find(&watcheslists).Error
+
+	return watcheslists, err
+}
+
+func (repo *watchlistsRepository) DeleteWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistIdNames []structModels.WatchlistWithId, scripId string) error {
+	var watchlistIds []uint64
+	for _, wl := range watchlistIdNames {
+		watchlistIds = append(watchlistIds, uint64(wl.Watchlist_ID))
+	}
+
+	err := db.WithContext(ctx).
+		Table(constants.WatchScripTableName).
+		Where(constants.FieldWatchId+" IN ? AND "+constants.FieldWScripId+" = ?", watchlistIds, scripId).
+		Delete(&genericModels.WatchlistScrips{}).Error
+
+	if err != nil {
+		return err
+	}
+	err = db.WithContext(ctx).
+		Table(constants.WatclistsTableName).
+		Where("id IN ?", watchlistIds).
+		Updates(map[string]interface{}{
+			"scrip_count":       gorm.Expr("scrip_count - 1"),
+			"last_updated  _at": gorm.Expr("NOW()"),
+		}).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

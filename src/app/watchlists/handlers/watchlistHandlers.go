@@ -39,84 +39,89 @@ func NewWatchlistsHandler(service *business.WatchlistsService) *WatchlistsHandle
 // @Router /api/watch/watchlists [post]
 func (controller *WatchlistsHandler) HandleWatchlistADG(ctx *gin.Context) {
 
-	var warnings []string
-	var bffWachlistRequest models.BFFAdgToWatchlistRequest
+	var req models.BFFAdgToWatchlistRequest
 
-	if err := ctx.ShouldBind(&bffWachlistRequest); err != nil {
+	if err := ctx.ShouldBind(&req); err != nil {
 
-		errorMessage := genericModels.ErrorMessage{
-			Key:          err.(*json.UnmarshalTypeError).Field,
-			ErrorMessage: constants.ErrUnexpectedValue,
+		var field string
+		if ute, ok := err.(*json.UnmarshalTypeError); ok {
+			field = ute.Field
 		}
 
-		warnings = append(warnings, constants.ErrUnexpectedValue)
-
-		ctx.IndentedJSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
-			Message: errorMessage,
-			Error:   constants.ErrInvalidPayload,
+		ctx.JSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
+			Message: genericModels.ErrorMessage{
+				Key:          field,
+				ErrorMessage: constants.ErrUnexpectedValue,
+			},
+			Error: constants.ErrInvalidPayload,
 		})
 		return
 	}
 
-	bffWachlistRequest.Action = models.ActionType(
-		strings.ToUpper(string(bffWachlistRequest.Action)),
-	)
+	req.Action = models.ActionType(strings.ToUpper(string(req.Action)))
 
-	if !bffWachlistRequest.Action.IsValid() {
-		ctx.IndentedJSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
-			Error: constants.InvalidActionTypeError,
-		})
-		return
-	}
-
-	switch bffWachlistRequest.Action {
-
-	case models.GET:
-		if len(bffWachlistRequest.WatchlistIds) > 0 {
-			ctx.IndentedJSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
-				Error: "watchlistIds should not be provided for GET action",
-			})
-			return
-		}
-
-	case models.ADD, models.DEL:
-		if len(bffWachlistRequest.WatchlistIds) == 0 {
-			ctx.IndentedJSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
-				Error: "watchlistIds required for ADD or DEL action",
-			})
-			return
-		}
-	}
-
-	if err := validations.GetBFFValidator().Struct(&bffWachlistRequest); err != nil {
+	if err := validations.GetBFFValidator().Struct(&req); err != nil {
 		validationErrors, _ := validations.FormatValidationErrors(err)
-		ctx.IndentedJSON(http.StatusBadRequest, validationErrors)
+		ctx.JSON(http.StatusBadRequest, validationErrors)
 		return
 	}
 
-	usernameInterface, _ := ctx.Get(constants.FieldUsername)
+	usernameInterface, exists := ctx.Get(constants.FieldUsername)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+			Error: constants.AuthenticationFailedError,
+		})
+		return
+	}
 	username := usernameInterface.(string)
 
-	watchlists, err := controller.service.Watchlists(
-		ctx,
-		ctx.Request.Context(),
-		bffWachlistRequest,
-		username,
-	)
+	watchlists, warnings, err := controller.service.Watchlists(ctx, ctx.Request.Context(), req, username)
 
 	if err != nil {
-		ctx.IndentedJSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
-			Error: constants.ServerError,
-		})
+
+		switch err.Error() {
+
+		case constants.UserNotFoundError:
+			ctx.JSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
+				Error: constants.UserNotFoundError,
+			})
+
+		case constants.ScripIdNotFoundError:
+			ctx.JSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
+				Error: constants.ScripIdNotFoundError,
+			})
+
+		case constants.WatchlistNotFoundError:
+			ctx.JSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
+				Error: constants.WatchlistNotFoundError,
+			})
+
+		case constants.QueryError:
+			ctx.JSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
+				Error: constants.QueryError,
+			})
+
+		default:
+			ctx.JSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
+				Error: constants.ServerError,
+			})
+		}
 		return
 	}
 
-	var response models.BFFAdgToWatchlistResponse
+	response := models.BFFAdgToWatchlistResponse{
+		Status:          constants.WatchlistSuccessMsg,
+		Action:          req.Action,
+		WatchlistWithId: watchlists,
+	}
 
-	response.Status = constants.WatchlistSuccessMsg
-	response.Action = bffWachlistRequest.Action
-	response.WatchlistWithId = watchlists
-	response.Warnings = []string{"No warnings!"}
+	if len(watchlists) > 0 {
+		response.WatchlistWithId = watchlists
+	}
 
-	ctx.IndentedJSON(http.StatusOK, response)
+	if len(warnings) > 0 {
+		response.Warnings = warnings
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }

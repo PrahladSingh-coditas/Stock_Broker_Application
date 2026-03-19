@@ -25,16 +25,16 @@ type Watchlists struct {
 	LastUpdatedAt time.Time `gorm:"column:last_updated_at;not null" json:"lastUpdatedAt"`
 }
 
-type WatchlistScrip struct {
+type WatchlistScrips struct {
 	Id          uint64 `gorm:"column:id;primaryKey;autoIncrement" json:"watchlistScripId"`
 	WatchlistId uint64 `gorm:"column:watchlist_id;not null;uniqueIndex:uq_watchlist_scrip" json:"watchlist_Id"`
 	ScripId     string `gorm:"column:scrip_id;not null;uniqueIndex:uq_watchlist_scrip" json:"scrip_Id"`
 
-	Watchlists  Watchlists  `gorm:"foreignKey:WatchlistId;references:Id"`
-	ScripMaster ScripMaster `gorm:"foreignKey:ScripId;references:Id"`
+	Watchlists  Watchlists   `gorm:"foreignKey:WatchlistId;references:Id"`
+	ScripMaster ScripMasters `gorm:"foreignKey:ScripId;references:Id"`
 }
 
-type ScripMaster struct {
+type ScripMasters struct {
 	Id        string `gorm:"column:id;primaryKey" json:"scripId"`
 	ScripName string `gorm:"column:scrip_name;not null" json:"scripName"`
 }

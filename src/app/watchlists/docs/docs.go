@@ -97,21 +97,31 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "action",
-                "scripId",
-                "watchlistIds"
+                "scripId"
             ],
             "properties": {
                 "action": {
-                    "$ref": "#/definitions/models.ActionType"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.ActionType"
+                        }
+                    ],
+                    "example": "GET"
                 },
                 "scripId": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "RELI_12345"
                 },
                 "watchlistIds": {
                     "type": "array",
                     "items": {
                         "type": "integer"
-                    }
+                    },
+                    "example": [
+                        1,
+                        2,
+                        3
+                    ]
                 }
             }
         },
@@ -163,11 +173,10 @@ const docTemplate = `{
         "models.WatchlistWithId": {
             "type": "object",
             "properties": {
-                "watchlist_ID": {
-                    "type": "integer",
-                    "format": "int64"
+                "watchlist_id": {
+                    "type": "integer"
                 },
-                "watchlist_Name": {
+                "watchlist_name": {
                     "type": "string"
                 }
             }

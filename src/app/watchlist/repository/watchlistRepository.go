@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"stock_broker_application/src/app/watchlist/commons/constants"
 	"stock_broker_application/src/app/watchlist/models"
 	genericModels "stock_broker_application/src/models"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type WatchlistRepository interface {
@@ -93,14 +95,27 @@ func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context,
 
 	if len(validWatchlistIds) > 0 {
 
+		var deletedScripsFromWatchlistIds []genericModels.WatchlistScrips
+
 		deleteResult := db.WithContext(ctx).
 			Table(constants.WatchlistScripsTableName).
+			Clauses(clause.Returning{}).
 			Where(constants.FieldWatchlistId+" IN ? AND "+constants.FieldScripId+" = ?", validWatchlistIds, scripId).
-			Delete(nil)
+			Delete(&deletedScripsFromWatchlistIds)
 
 		if deleteResult.Error != nil {
 			return nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
 		}
+
+		fmt.Println(deletedScripsFromWatchlistIds)
+
+		validWatchlistIds = []uint64{}
+
+		for _, record := range deletedScripsFromWatchlistIds {
+			validWatchlistIds = append(validWatchlistIds, record.WatchlistId)
+		}
+
+		fmt.Println(validWatchlistIds)
 
 		logger.WithFields(logrus.Fields{
 			constants.UserId:  userID,

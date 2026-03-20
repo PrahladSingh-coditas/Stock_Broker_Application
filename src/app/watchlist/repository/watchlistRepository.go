@@ -107,7 +107,6 @@ func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context,
 			return nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
 		}
 
-		fmt.Println(deletedScripsFromWatchlistIds)
 
 		validWatchlistIds = []uint64{}
 
@@ -115,7 +114,6 @@ func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context,
 			validWatchlistIds = append(validWatchlistIds, record.WatchlistId)
 		}
 
-		fmt.Println(validWatchlistIds)
 
 		logger.WithFields(logrus.Fields{
 			constants.UserId:  userID,

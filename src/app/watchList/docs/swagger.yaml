@@ -1,0 +1,127 @@
+definitions:
+  models.ActionType:
+    enum:
+    - ADD
+    - DEL
+    - GET
+    type: string
+    x-enum-varnames:
+    - ADD
+    - DEL
+    - GET
+  models.BFFAdgToWatchListRequest:
+    properties:
+      action:
+        $ref: '#/definitions/models.ActionType'
+      scripId:
+        type: string
+      watchlistIds:
+        items:
+          type: integer
+        type: array
+    required:
+    - action
+    - scripId
+    type: object
+  models.BFFAdgToWatchlistResponse:
+    properties:
+      action:
+        $ref: '#/definitions/models.ActionType'
+      message:
+        type: string
+      warnings:
+        items:
+          type: string
+        type: array
+      watchlistNames:
+        items:
+          $ref: '#/definitions/models.WatchListWithId'
+        type: array
+    type: object
+  models.WatchListWithId:
+    properties:
+      id:
+        type: integer
+      watchlistName:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Omnenest backend for watchlist micro-service (Middleware layer).
+  title: omnenest-backend
+  version: "1.0"
+paths:
+  /api/watchlist/watchlist-api:
+    post:
+      consumes:
+      - application/json
+      description: Add, Delete or Get scrips in watchlists
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Watchlist Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BFFAdgToWatchListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GET or DELETE success
+          schema:
+            $ref: '#/definitions/models.BFFAdgToWatchlistResponse'
+        "201":
+          description: ADD success
+          schema:
+            $ref: '#/definitions/models.BFFAdgToWatchlistResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Manage watchlist scrips
+      tags:
+      - Watchlist
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+    x-extension-openapi: '{"example": "value on a json format"}'
+swagger: "2.0"

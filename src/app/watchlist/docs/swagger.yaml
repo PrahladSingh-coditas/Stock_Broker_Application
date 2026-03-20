@@ -1,0 +1,124 @@
+definitions:
+  models.ActionType:
+    enum:
+    - ADD
+    - DEL
+    - GET
+    type: string
+    x-enum-varnames:
+    - ADD
+    - DEL
+    - GET
+  models.BFFAdgToWatchlistRequest:
+    properties:
+      action:
+        allOf:
+        - $ref: '#/definitions/models.ActionType'
+        example: GET
+      scrip_id:
+        example: JIO_123
+        type: string
+      watchlist_id:
+        example:
+        - 0
+        items:
+          type: integer
+        type: array
+    required:
+    - action
+    - scrip_id
+    type: object
+  models.BFFAdgToWatchlistResponse:
+    properties:
+      action:
+        allOf:
+        - $ref: '#/definitions/models.ActionType'
+        example: GET
+      status:
+        example: fetched successfully!
+        type: string
+      warnings:
+        example:
+        - '[warnings!]'
+        items:
+          type: string
+        type: array
+      watchlist_with_id:
+        items:
+          $ref: '#/definitions/models.WatchlistWithID'
+        type: array
+    type: object
+  models.ErrorAPIResponse:
+    properties:
+      error:
+        type: string
+      errors:
+        $ref: '#/definitions/models.ErrorMessage'
+    type: object
+  models.ErrorMessage:
+    properties:
+      errorMessage:
+        type: string
+      key:
+        type: string
+    type: object
+  models.WatchlistWithID:
+    properties:
+      watchlist_id:
+        type: integer
+      watchlist_name:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: backend for watchlist micro-service
+  title: backend
+  version: "1.0"
+paths:
+  /api/watch/watchlist:
+    post:
+      consumes:
+      - application/json
+      description: Handles get, add, delete request for watchlists
+      parameters:
+      - description: ADD, GET, DEL request of watchlist
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BFFAdgToWatchlistRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: action completed successfully
+          schema:
+            $ref: '#/definitions/models.BFFAdgToWatchlistResponse'
+        "201":
+          description: Data added successfully
+          schema:
+            $ref: '#/definitions/models.BFFAdgToWatchlistResponse'
+        "400":
+          description: Invalid input payload
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "404":
+          description: User does not exist
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+      security:
+      - BearerAuth: []
+      summary: Add, Del, Get of watchlist
+      tags:
+      - User
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+    x-extension-openapi: '{"example": "value on a json format"}'
+swagger: "2.0"

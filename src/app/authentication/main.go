@@ -11,9 +11,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// @title omnenest-backend
+// @title backend
 // @version 1.0
-// @description Omnenest backend for watchlist micro-service (Middleware layer).
+// @description backend for Auth micro-service (Middleware layer).
 // @query.collection.format multi
 // @securityDefinitions.apikey BearerAuth
 // @in header

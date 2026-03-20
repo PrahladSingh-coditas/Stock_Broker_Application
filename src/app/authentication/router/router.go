@@ -55,5 +55,5 @@ func GetRouter() *gin.Engine {
 		authGroup.PATCH(constants.ChangePassword, middleware.ChangePasswordMiddleware(), changePasswordHandler.HandleChangePassword)
 	}
 
-	return router 
+	return router
 }

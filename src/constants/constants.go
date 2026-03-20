@@ -4,7 +4,7 @@ const (
 	RunningServerPort = "Running Server on port : %v"
 )
 
-const ConfigPath string ="Stock_Broker_Application/src/utils/configs/config.go"
+const ConfigPath string = "Stock_Broker_Application/src/utils/configs/config.go"
 
 const (
 	PANCardRegex     = `^[A-Z]{5}[0-9]{4}[A-Z]{1}$`
@@ -15,6 +15,7 @@ const (
 	SpecialCharRegex = `[@$!%*?&]`
 	LowercaseRegex   = `[a-z]`
 	OtpRegexp        = "^[0-9]{4}$"
+	ScripIdRegex     = "^[a-zA-Z]+_[0-9]+$"
 )
 
 const (
@@ -26,6 +27,10 @@ const (
 	FieldEmail           = "Email"
 	FieldUsername        = "Username"
 	FieldOtp             = "Otp"
+
+	FieldAction       = "Action"
+	FieldScripId      = "ScripId"
+	FieldWatchlistIds = "WatchlistIds"
 )
 
 // Migration success Message

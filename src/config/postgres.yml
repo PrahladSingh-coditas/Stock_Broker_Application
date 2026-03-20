@@ -1,7 +1,7 @@
-host: ep-blue-bird-a5e87ya0-pooler.us-east-2.aws.neon.tech
+host: localhost
 port: 5432
-username: admin
-password: npg_2GYaz9JujqKL
-dbName: stock-broker
-timezone: Asia/kolkata
-sslmode: require
+username: postgres
+password: mysql@1715
+dbName: postgres
+timezone: Asia/Kolkata
+sslmode: disable

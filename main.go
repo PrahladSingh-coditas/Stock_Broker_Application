@@ -16,7 +16,23 @@ func main() {
 
 	// Perform Migrations
 	dbClient := utils.GetPostgresClient()
+	
 	if err := dbClient.GormDB.AutoMigrate(&models.User{}); err != nil {
+		log.Fatalf(constants.ErrDBMigrationFailed, err)
+		return
+	}
+
+	if err := dbClient.GormDB.AutoMigrate(&models.Watchlists{}); err != nil {
+		log.Fatalf(constants.ErrDBMigrationFailed, err)
+		return
+	}
+
+	if err := dbClient.GormDB.AutoMigrate(&models.WatchlistScrips{}); err != nil {
+		log.Fatalf(constants.ErrDBMigrationFailed, err)
+		return
+	}
+
+	if err := dbClient.GormDB.AutoMigrate(&models.ScripMaster{}); err != nil {
 		log.Fatalf(constants.ErrDBMigrationFailed, err)
 		return
 	}

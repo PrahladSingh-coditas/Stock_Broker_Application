@@ -36,8 +36,15 @@ const (
 	ErrInvalidPanCard     = "Invalid PAN card format. It should be 5 uppercase letters, followed by 4 digits, and 1 uppercase letter."
 	ErrInvalidPhoneNumber = "Phone number must be exactly 10 digits long and contain only numbers."
 	ErrFieldRequired      = "%s is required."
+	ErrFieldNotRequired      = "%s is not required."
 	ErrInvalidEmail       = "Invalid value for Email"
 	ErrInvalidOtp         = "OTP must be of length 4 and numeric."
+)
+
+//watchlist Related 
+const (
+	ErrInvalidScripId="Invalid Scrip Id entered, It must be NSE_{company_code} or BSE_{comapany_code}"
+	ErrInvalidAction="Invalid Action entered, It must be GET or ADD or DEL only."
 )
 
 const (

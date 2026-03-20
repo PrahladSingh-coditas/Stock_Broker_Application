@@ -45,6 +45,12 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 		if err.Tag() == "required" {
 			fieldName = strings.ToLower(fieldName)
 			errorMsg = fmt.Sprintf(constants.ErrFieldRequired, fieldName)
+		} else if err.Tag() == "required_if" {
+			fieldName = strings.ToLower(fieldName)
+			errorMsg = fmt.Sprintf(constants.ErrFieldRequired, fieldName)
+		} else if err.Tag() == "excluded_if" {
+			fieldName = strings.ToLower(fieldName)
+			errorMsg = fmt.Sprintf(constants.ErrFieldNotRequired, fieldName)
 		} else {
 			switch err.Field() {
 			case constants.FieldPassword:
@@ -61,6 +67,10 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 				errorMsg = constants.ErrInvalidEmail
 			case constants.FieldOtp:
 				errorMsg = constants.ErrInvalidOtp
+			case constants.FieldAction:
+				errorMsg = constants.ErrInvalidAction
+			case constants.FieldScripId:
+				errorMsg = constants.ErrInvalidScripId
 			default:
 				errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 			}
@@ -120,12 +130,29 @@ func OtpValidator(f1 validator.FieldLevel) bool {
 	return matched
 }
 
+func ScripIdValidator(f1 validator.FieldLevel) bool {
+	matched, _ := regexp.MatchString(constants.ScripIdRegex, f1.Field().String())
+	return matched
+}
+
+type Enum interface {
+	IsValid() bool
+}
+
+// ValidateEnum is a validation function that checks if the value of a field implements the Enum interface and is valid.
+func ValidateEnum[E Enum](fl validator.FieldLevel) bool {
+	value := fl.Field().Interface().(E)
+	return value.IsValid()
+}
+
 func init() {
 	bffValidator = validator.New()
 	bffValidator.RegisterValidation("panCard", panCardValidator)
 	bffValidator.RegisterValidation("strongPassword", strongPasswordValidator)
 	bffValidator.RegisterValidation("Email", IsEmailValid)
 	bffValidator.RegisterValidation("otp", OtpValidator)
+	bffValidator.RegisterValidation("idChecker", ScripIdValidator)
+	bffValidator.RegisterValidation("actionChecker", ValidateEnum[Enum])
 }
 
 func GetBFFValidator() *validator.Validate {

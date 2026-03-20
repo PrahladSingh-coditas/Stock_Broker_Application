@@ -112,7 +112,7 @@ func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context,
 				Table(constants.WatchlistTableName).
 				Where(constants.FieldId+" IN ?", validWatchlistIds).
 				Updates(map[string]interface{}{
-					constants.FieldScripCount:  gorm.Expr("GREATEST(scrip_count - 1, 0)"),
+					constants.FieldScripCount:  gorm.Expr("scrip_count - 1"),
 					constants.FieldLastUpdated: gorm.Expr("NOW()"),
 				})
 

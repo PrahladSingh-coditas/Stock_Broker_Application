@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
 	"stock_broker_application/src/app/watchlist/commons/constants"
 	"stock_broker_application/src/app/watchlist/models"
 	genericModels "stock_broker_application/src/models"
@@ -107,13 +106,11 @@ func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context,
 			return nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
 		}
 
-
 		validWatchlistIds = []uint64{}
 
 		for _, record := range deletedScripsFromWatchlistIds {
 			validWatchlistIds = append(validWatchlistIds, record.WatchlistId)
 		}
-
 
 		logger.WithFields(logrus.Fields{
 			constants.UserId:  userID,

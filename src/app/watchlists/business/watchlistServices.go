@@ -26,7 +26,7 @@ func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx contex
 	postgresClinet := utils.GetPostgresClient()
 	client := postgresClinet.GormDB
 
-	var watchlistIdNames []structModels.WatchlistWithId
+	// var watchlistIdNames []structModels.WatchlistWithId
 	var warnings []string
 	users, err := service.watchlistsRepository.GetUserId(spanCtx, client, username)
 	if err != nil {
@@ -57,6 +57,10 @@ func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx contex
 			return nil, nil, errors.New(constants.QueryError)
 		}
 
+		if len(watchlistsDB) == 0 {
+			return nil, nil, errors.New("User has none of the provided watchlistIds")
+		}
+
 		if len(notValidIds) > 0 {
 			warnings = append(warnings, fmt.Sprintf("Invalid watchlistIds skipped: %v", notValidIds))
 		}
@@ -73,67 +77,58 @@ func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx contex
 			return nil, warnings, nil
 		}
 
-		//unique check
-		duplicates, notDuplicates, err := service.watchlistsRepository.CheckDuplicate(
-			spanCtx, client, capNotFullIds, bffWatchlistsRequest.ScripId,
+		watchlistIdNames, err := service.watchlistsRepository.AddScripWithCTE(
+			spanCtx,
+			client,
+			users.ID,
+			capNotFullIds,
+			bffWatchlistsRequest.ScripId,
 		)
 		if err != nil {
-			return nil, nil, errors.New(constants.QueryError)
-		}
-		if len(duplicates) > 0 {
-			warnings = append(warnings, fmt.Sprintf("Already exists in watchlists: %v", duplicates))
-		}
+			if err.Error() == constants.UniqueConstraintViolationError {
+				var duplicateIds []uint64
 
-		if len(notDuplicates) == 0 {
-			return nil, warnings, nil
-		}
+				addedMap := make(map[uint64]struct{})
+				for _, wl := range watchlistIdNames {
+					addedMap[uint64(wl.Watchlist_ID)] = struct{}{}
+				}
 
-		addedIds, err := service.watchlistsRepository.InsertWatchlistScrip(
-			spanCtx, client, notDuplicates, bffWatchlistsRequest.ScripId,
-		)
-		if err != nil {
-			return nil, nil, errors.New(constants.QueryError)
-		}
+				for _, id := range capNotFullIds {
+					if _, ok := addedMap[id]; !ok {
+						duplicateIds = append(duplicateIds, id)
+					}
+				}
 
-		watches, err := service.watchlistsRepository.GetWatchlistDetails(spanCtx, client, addedIds)
-		if err != nil {
-			return nil, nil, errors.New(constants.QueryError)
-		}
-
-		for _, w := range watches {
-			watchlistIdNames = append(watchlistIdNames, structModels.WatchlistWithId{
-				Watchlist_ID:   int64(w.Id),
-				Watchlist_Name: w.WatchlistName,
-			})
+				if len(duplicateIds) > 0 {
+					warnings = append(warnings,
+						fmt.Sprintf("Scrip %s already exists in watchlist: %v",
+							bffWatchlistsRequest.ScripId,
+							duplicateIds,
+						),
+					)
+				}
+				return watchlistIdNames, warnings, nil
+			}
+			return nil, nil, err
 		}
 
 		return watchlistIdNames, warnings, nil
 
 	case models.DEL:
-		watchlistsDB, _, err := service.watchlistsRepository.GetValidWatchlists(
-			spanCtx, client, users.ID, bffWatchlistsRequest.WatchlistIds,
+
+		watchlists, err := service.watchlistsRepository.DeleteScripWithCTE(
+			spanCtx,
+			client,
+			users.ID,
+			bffWatchlistsRequest.WatchlistIds,
+			bffWatchlistsRequest.ScripId,
 		)
 		if err != nil {
 			return nil, nil, errors.New(constants.QueryError)
 		}
-		// for _, id := range notValidIds {
-		// 	warnings = append(warnings,
-		// 		fmt.Sprintf("Watchlist with id %d does not belong to the user hence skipped", id))
-		// }
-		if len(watchlistsDB) == 0 {
-			return nil, warnings, nil
-		}
 
-		var watchlists []structModels.WatchlistWithId
-		for _, wl := range watchlistsDB {
-			watchlists = append(watchlists, structModels.WatchlistWithId{
-				Watchlist_ID:   int64(wl.Id),
-				Watchlist_Name: wl.WatchlistName,
-			})
-			err := service.watchlistsRepository.DeleteWatchlistScrip(spanCtx, client, watchlists, bffWatchlistsRequest.ScripId)
-			if err != nil {
-				return nil, nil, errors.New(constants.QueryError)
-			}
+		if len(watchlists) == 0 {
+			return nil, warnings, nil
 		}
 
 		return watchlists, warnings, nil

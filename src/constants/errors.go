@@ -36,5 +36,5 @@ const (
 	ErrFieldRequiredIf      = "%s is required when %s is %s."
 	ErrFieldExcludedIf      = "%s must be excluded when %s is %s."
 	ErrInvalidEmail         = "Invalid value for Email"
-	InvalidScripFormatError = "Invalid scripId format (%s). Eg: 'RELI_12345'"
+	InvalidScripFormatError = "Invalid scripId format (%s). Eg: 'NSE/BSE_2000'"
 )

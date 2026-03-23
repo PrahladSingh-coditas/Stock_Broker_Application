@@ -59,6 +59,7 @@ func (controller *WatchlistsHandler) HandleWatchlistADG(ctx *gin.Context) {
 	}
 
 	req.Action = models.ActionType(strings.ToUpper(string(req.Action)))
+	req.ScripId = strings.ToUpper(req.ScripId)
 
 	if err := validations.GetBFFValidator().Struct(&req); err != nil {
 		validationErrors, _ := validations.FormatValidationErrors(err)
@@ -68,8 +69,12 @@ func (controller *WatchlistsHandler) HandleWatchlistADG(ctx *gin.Context) {
 
 	usernameInterface, exists := ctx.Get(constants.FieldUsername)
 	if !exists {
-		ctx.JSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
-			Error: constants.AuthenticationFailedError,
+		ctx.JSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
+			Message: genericModels.ErrorMessage{
+				Key:          constants.FieldUsername,
+				ErrorMessage: constants.UserNotFoundError,
+			},
+			Error: constants.UserNotFoundError,
 		})
 		return
 	}
@@ -103,7 +108,7 @@ func (controller *WatchlistsHandler) HandleWatchlistADG(ctx *gin.Context) {
 
 		default:
 			ctx.JSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
-				Error: constants.ServerError,
+				Error: err.Error(),
 			})
 		}
 		return

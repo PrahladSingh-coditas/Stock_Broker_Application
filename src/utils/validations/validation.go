@@ -180,13 +180,14 @@ func ValidateEnum[E Enum](fl validator.FieldLevel) bool {
 	return value.IsValid()
 }
 
+var scripRegex = regexp.MustCompile(`(?i)^(NSE|BSE)_\d+$`)
+
 func ValidateScripID(fl validator.FieldLevel) bool {
 	scripId := fl.Field().String()
 	if scripId == "" {
 		return false
 	}
-	pattern := regexp.MustCompile(constants.ScripIdRegex)
-	return pattern.MatchString(scripId)
+	return scripRegex.MatchString(scripId)
 }
 
 func init() {

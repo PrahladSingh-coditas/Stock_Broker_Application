@@ -10,6 +10,8 @@ import (
 	"watchlists/commons/constants"
 	structModels "watchlists/models"
 
+	"github.com/lib/pq"
+
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -19,10 +21,13 @@ type WatchlistsRepository interface {
 	GetUserWatchlists(ctx context.Context, db *gorm.DB, userId uint64, scripId string) ([]structModels.WatchlistWithId, error)
 	CheckScripExists(ctx context.Context, db *gorm.DB, scripId string) (bool, error)
 	GetValidWatchlists(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64) ([]genericModels.Watchlists, []uint64, error)
-	CheckDuplicate(ctx context.Context, db *gorm.DB, capNotFullIds []uint64, scripId string) ([]uint64, []uint64, error)
-	InsertWatchlistScrip(ctx context.Context, db *gorm.DB, notDuplicates []uint64, scripId string) ([]uint64, error)
-	GetWatchlistDetails(ctx context.Context, db *gorm.DB, addedIds []uint64) ([]genericModels.Watchlists, error)
-	DeleteWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistIdNames []structModels.WatchlistWithId, scripId string) error
+	//CheckDuplicate(ctx context.Context, db *gorm.DB, capNotFullIds []uint64, scripId string) ([]uint64, []uint64, error)
+	//InsertWatchlistScrip(ctx context.Context, db *gorm.DB, notDuplicates []uint64, scripId string) ([]uint64, error)
+	//GetWatchlistDetails(ctx context.Context, db *gorm.DB, addedIds []uint64) ([]genericModels.Watchlists, error)
+	//DeleteWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistIdNames []structModels.WatchlistWithId, scripId string) error
+
+	AddScripWithCTE(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error)
+	DeleteScripWithCTE(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error)
 }
 
 type watchlistsRepository struct{}
@@ -84,7 +89,6 @@ func (user *watchlistsRepository) CheckScripExists(ctx context.Context, db *gorm
 	logger := logrus.New()
 
 	var count int64
-	fmt.Println("Checking existence for scripId:", scripId, "hhhj")
 	err := db.WithContext(ctx).
 		Table(constants.ScripMasterTableName).
 		Where("id = ?", scripId).
@@ -93,8 +97,6 @@ func (user *watchlistsRepository) CheckScripExists(ctx context.Context, db *gorm
 	if err != nil {
 		log.Println("Error:", err)
 	}
-
-	fmt.Println("Count:", count)
 
 	logger.WithFields(logrus.Fields{
 		"latency": time.Since(start).Milliseconds(),
@@ -132,93 +134,7 @@ func (repo *watchlistsRepository) GetValidWatchlists(ctx context.Context, db *go
 	return watchlists, notValid, nil
 }
 
-func (repo *watchlistsRepository) CheckDuplicate(ctx context.Context, db *gorm.DB, ids []uint64, scripId string) ([]uint64, []uint64, error) {
-
-	var existing []genericModels.WatchlistScrips
-
-	err := db.WithContext(ctx).
-		Table(constants.WatchScripTableName).
-		Where("watchlist_id IN ? AND scrip_id = ?", ids, scripId).
-		Find(&existing).Error
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	dupMap := make(map[uint64]struct{})
-	for _, e := range existing {
-		dupMap[e.WatchlistId] = struct{}{}
-	}
-
-	var duplicates, notDuplicates []uint64
-	for _, id := range ids {
-		if _, ok := dupMap[id]; ok {
-			duplicates = append(duplicates, id)
-		} else {
-			notDuplicates = append(notDuplicates, id)
-		}
-	}
-
-	return duplicates, notDuplicates, nil
-}
-
-func (repo *watchlistsRepository) InsertWatchlistScrip(ctx context.Context, db *gorm.DB, ids []uint64, scripId string) ([]uint64, error) {
-
-	var added []uint64
-
-	for _, id := range ids {
-		var wl struct {
-			ScripCount int
-		}
-		err := db.WithContext(ctx).
-			Table(constants.WatclistsTableName).
-			Where("id = ?", id).
-			Select("scrip_count").
-			Take(&wl).Error
-		if err != nil {
-			return nil, err
-		}
-
-		if wl.ScripCount >= 10 {
-			continue
-		}
-
-		err = db.WithContext(ctx).
-			Table(constants.WatchScripTableName).
-			Create(&genericModels.WatchlistScrips{
-				WatchlistId: id,
-				ScripId:     scripId,
-			}).Error
-		if err != nil {
-			return nil, err
-		}
-
-		err = db.WithContext(ctx).
-			Table(constants.WatclistsTableName).
-			Where("id = ?", id).
-			Update("scrip_count", gorm.Expr("scrip_count + 1")).Error
-		if err != nil {
-			return nil, err
-		}
-
-		added = append(added, id)
-	}
-
-	return added, nil
-}
-
-func (repo *watchlistsRepository) GetWatchlistDetails(ctx context.Context, db *gorm.DB, ids []uint64) ([]genericModels.Watchlists, error) {
-
-	var watcheslists []genericModels.Watchlists
-
-	err := db.WithContext(ctx).
-		Table(constants.WatclistsTableName).
-		Where("id IN ?", ids).
-		Find(&watcheslists).Error
-
-	return watcheslists, err
-}
-
+/*
 func (repo *watchlistsRepository) DeleteWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistIdNames []structModels.WatchlistWithId, scripId string) error {
 	var watchlistIds []uint64
 	for _, wl := range watchlistIdNames {
@@ -244,4 +160,85 @@ func (repo *watchlistsRepository) DeleteWatchlistScrip(ctx context.Context, db *
 		return err
 	}
 	return nil
+}
+*/
+
+func (repo *watchlistsRepository) AddScripWithCTE(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error) {
+
+	var result []structModels.WatchlistWithId
+
+	query := `
+    WITH valid_watchlists AS (
+        SELECT id, watchlist_name, scrip_count  
+        FROM watchlists
+        WHERE user_id = ?                 
+          AND id = ANY(?)
+    ),
+    capacity_ok AS (
+        SELECT *
+        FROM valid_watchlists
+        WHERE scrip_count < 10
+    ),
+    inserted AS (
+        INSERT INTO watchlist_scrips (watchlist_id, scrip_id)
+        SELECT id, ?
+        FROM capacity_ok
+        RETURNING watchlist_id
+    ),
+    updated AS (
+        UPDATE watchlists
+        SET scrip_count = scrip_count + 1,
+            last_updated_at = NOW()
+        WHERE id IN (SELECT watchlist_id FROM inserted)
+        RETURNING id, watchlist_name
+    )
+    SELECT id as watchlist_id, watchlist_name FROM updated;
+    `
+
+	err := db.WithContext(ctx).
+		Raw(query, userId, pq.Array(watchlistIds), scripId).
+		Scan(&result).Error
+
+	return result, err
+}
+
+func (repo *watchlistsRepository) DeleteScripWithCTE(
+	ctx context.Context,
+	db *gorm.DB,
+	userId uint64,
+	watchlistIds []uint64,
+	scripId string,
+) ([]structModels.WatchlistWithId, error) {
+
+	var result []structModels.WatchlistWithId
+
+	query := `
+    WITH valid_watchlists AS (
+    SELECT id 
+    FROM watchlists
+    WHERE user_id = ? AND id = ANY(?)
+),
+deleted AS (
+    DELETE FROM watchlist_scrips ws
+    USING valid_watchlists vw
+    WHERE ws.watchlist_id = vw.id
+      AND ws.scrip_id = ?
+    RETURNING ws.watchlist_id
+),
+updated AS (
+    UPDATE watchlists w 
+    SET scrip_count = scrip_count - 1,
+        last_updated_at = NOW()
+    FROM deleted d  
+    WHERE w.id = d.watchlist_id
+    RETURNING w.id, w.watchlist_name
+)
+SELECT id as watchlist_id, watchlist_name FROM updated;
+    `
+
+	err := db.WithContext(ctx).
+		Raw(query, userId, pq.Array(watchlistIds), scripId).
+		Scan(&result).Error
+
+	return result, err
 }

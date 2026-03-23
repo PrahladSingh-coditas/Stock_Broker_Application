@@ -12,6 +12,7 @@ const (
 	ErrDuplicateEntry    = "already exists"
 	ErrUsernameExists    = "usernamealready exists"
 	ErrUserAlreadyExists = "user already exists"
+	ScripIdExists        = "there is unique constraint scripId already exists"
 )
 
 // General Errors
@@ -33,12 +34,14 @@ const (
 
 //Signin and Token generation Errors
 const (
-	ScripIdNotFoundError      = "scripId not found"
-	UserNotFoundError         = "user not found" // try to find by username
-	AuthenticationFailedError = "authentication failed"
-	QueryError                = "error in executing query"
-	InvalidActionTypeError    = "invalid action type, must be 'ADD' 'GET' or 'DEL'"
-	WatchlistNotFoundError    = "watchlist not found"
+	ScripIdNotFoundError           = "scripId not found"
+	UserNotFoundError              = "user not found" // try to find by username
+	AuthenticationFailedError      = "authentication failed"
+	QueryError                     = "error in executing query"
+	InvalidActionTypeError         = "invalid action type, must be 'ADD' 'GET' or 'DEL'"
+	WatchlistNotFoundError         = "watchlist not found"
+	UniqueConstraintViolationError = "ERROR: duplicate key value violates unique constraint \"uq_watchlist_scrip\" (SQLSTATE 23505)"
+	// UserIdNotFoundError            = "userId not found"
 )
 
 //error

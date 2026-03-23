@@ -5,7 +5,7 @@ const (
 )
 
 const (
-	ScripIdRegex     = `^[A-Z]{2,5}_[0-9]{3,6}$`
+	ScripIdRegex     = `(?i)^(NSE|BSE)_\d+$`
 	PANCardRegex     = `^[A-Z]{5}[0-9]{4}[A-Z]{1}$`
 	PasswordRegex    = `^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$`
 	EmailRegex       = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$`

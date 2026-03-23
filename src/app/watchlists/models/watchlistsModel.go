@@ -4,7 +4,7 @@ import "strings"
 
 type BFFAdgToWatchlistRequest struct {
 	Action       ActionType `json:"action" example:"GET" validate:"required,enum"`
-	ScripId      string     `json:"scripId" example:"RELI_12345" validate:"required,scrip_format"`
+	ScripId      string     `json:"scripId" example:"BSE_2001" validate:"required,scrip_format"`
 	WatchlistIds []uint64   `json:"watchlistIds" example:"1,2,3" validate:"watchlist_validation"`
 }
 

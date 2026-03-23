@@ -25,7 +25,7 @@ func NewWatchlistService(watchlistRepository repository.WatchlistRepository) *Wa
 
 func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx context.Context, logger *logrus.Logger, bffAdgToWatchlistRequest models.BFFAdgToWatchlistRequest, username string) (error, []models.WatchlistWithID, []string) {
 	postgresClinet := utils.GetPostgresClient()
-	tx := postgresClinet.GormDB
+	tx := postgresClinet.GormDB.Begin()
 	var watchlistsWithId []models.WatchlistWithID
 	var warnings []string
 
@@ -48,6 +48,7 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 	case models.DEL:
 		validWatchlistIds, err := service.watchlistRepository.DeleteScripsFromWatchlists(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.WatchlistIds, bffAdgToWatchlistRequest.ScripId)
 		if err != nil {
+			tx.Rollback()
 			return err, nil, nil
 		}
 
@@ -66,6 +67,7 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 	case models.ADD:
 		addedWatchlistIds, skippedWatchlistIds, limitExceededWatchlistIds, err := service.watchlistRepository.AddScripsToWatchlists(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.WatchlistIds, bffAdgToWatchlistRequest.ScripId)
 		if err != nil {
+			tx.Rollback()
 			return err, nil, nil
 		}
 
@@ -86,6 +88,7 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 		warnings = append(warnings, constants.NoWarningsMsg)
 	}
 
-	return nil, watchlistsWithId, warnings
+	tx.Commit()
 
+	return nil, watchlistsWithId, warnings
 }

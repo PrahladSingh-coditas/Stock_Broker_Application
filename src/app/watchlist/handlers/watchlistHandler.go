@@ -78,7 +78,7 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 
 	bffAdgToWatchlistRequest.Action = models.ActionType(strings.ToUpper(string(bffAdgToWatchlistRequest.Action)))
 
-	err, watchlistWithId, warnings := controller.service.ServiceWatchlist(ctx, ctx.Request.Context(), bffAdgToWatchlistRequest, username)
+	err, watchlistWithId, warnings := controller.service.ServiceWatchlist(ctx, ctx.Request.Context(),logger, bffAdgToWatchlistRequest, username)
 
 	if err != nil {
 		fmt.Println(err)

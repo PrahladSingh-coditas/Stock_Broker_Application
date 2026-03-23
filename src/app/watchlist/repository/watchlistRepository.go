@@ -14,10 +14,10 @@ import (
 )
 
 type WatchlistRepository interface {
-	GetWatchlistsWithId(ctx context.Context, db *gorm.DB, userID uint64, scripId string) ([]models.WatchlistWithID, error)
-	GetUserIdByUsername(ctx context.Context, db *gorm.DB, username string) (*uint64, error)
-	DeleteScripsFromWatchlists(ctx context.Context, db *gorm.DB, userID uint64, watchlistIds []uint64, scripId string) ([]uint64, error)
-	AddScripsToWatchlists(ctx context.Context, db *gorm.DB, userID uint64, watchlistIds []uint64, scripId string) ([]uint64, []uint64, []uint64, error)
+	GetWatchlistsWithId(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, scripId string) ([]models.WatchlistWithID, error)
+	GetUserIdByUsername(ctx context.Context, db *gorm.DB, logger *logrus.Logger, username string) (*uint64, error)
+	DeleteScripsFromWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) ([]uint64, error)
+	AddScripsToWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) ([]uint64, []uint64, []uint64, error)
 }
 
 type watchlistRepository struct{}
@@ -26,9 +26,8 @@ func NewWatchlistRepository() *watchlistRepository {
 	return &watchlistRepository{}
 }
 
-func (repo *watchlistRepository) GetUserIdByUsername(ctx context.Context, db *gorm.DB, username string) (*uint64, error) {
+func (repo *watchlistRepository) GetUserIdByUsername(ctx context.Context, db *gorm.DB, logger *logrus.Logger, username string) (*uint64, error) {
 	start := time.Now()
-	logger := logrus.New()
 
 	var user genericModels.User
 	result := db.WithContext(ctx).Table(constants.UsersTableName).Where(constants.UsernameCondition, username).First(&user)
@@ -49,10 +48,9 @@ func (repo *watchlistRepository) GetUserIdByUsername(ctx context.Context, db *go
 	return &user.ID, nil
 }
 
-func (repo *watchlistRepository) GetWatchlistsWithId(ctx context.Context, db *gorm.DB, userID uint64, scripId string) ([]models.WatchlistWithID, error) {
+func (repo *watchlistRepository) GetWatchlistsWithId(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, scripId string) ([]models.WatchlistWithID, error) {
 	var watchlistWithId []models.WatchlistWithID
 	start := time.Now()
-	logger := logrus.New()
 
 	result := db.WithContext(ctx).Table(constants.WatchlistTableName).
 		Select(constants.WatchlistTableName+"."+constants.FieldId+","+constants.WatchlistTableName+"."+constants.FieldwatchlistName).
@@ -72,11 +70,10 @@ func (repo *watchlistRepository) GetWatchlistsWithId(ctx context.Context, db *go
 	return watchlistWithId, nil
 }
 
-func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context, db *gorm.DB, userID uint64, watchlistIds []uint64, scripId string) ([]uint64, error) {
+func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) ([]uint64, error) {
 	var validWatchlistIds []uint64
 
 	start := time.Now()
-	logger := logrus.New()
 
 	result := db.WithContext(ctx).
 		Table(constants.WatchlistTableName).
@@ -140,16 +137,15 @@ func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context,
 	return validWatchlistIds, nil
 }
 
-func (repo *watchlistRepository) AddScripsToWatchlists(ctx context.Context, db *gorm.DB, userID uint64, watchlistIds []uint64, scripId string) ([]uint64, []uint64, []uint64, error) {
+func (repo *watchlistRepository) AddScripsToWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) ([]uint64, []uint64, []uint64, error) {
+	start := time.Now()
 	var validWatchlistIds []uint64
 	var count int64
-	start := time.Now()
-	logger := logrus.New()
 
 	//Checking the scrip ID here.
 	result := db.WithContext(ctx).
-		Table("scrip_masters").
-		Where("id = ?", scripId).
+		Table(constants.WatchlistScripMasterTableName).
+		Where(constants.FieldId+" = ?", scripId).
 		Count(&count)
 
 	if result.Error != nil {
@@ -249,6 +245,7 @@ func (repo *watchlistRepository) AddScripsToWatchlists(ctx context.Context, db *
 		if result.Error != nil {
 			return nil, nil, nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
 		}
+		
 		addedWatchlistIds = append(addedWatchlistIds, w.WatchlistId)
 		logger.WithFields(logrus.Fields{
 			constants.UserId:  userID,

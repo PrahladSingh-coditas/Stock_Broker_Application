@@ -16,7 +16,7 @@ definitions:
         - $ref: '#/definitions/models.ActionType'
         example: GET
       scripId:
-        example: RELI_12345
+        example: BSE_2001
         type: string
       watchlistIds:
         example:

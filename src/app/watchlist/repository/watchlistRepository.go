@@ -10,7 +10,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type WatchlistRepository interface {
@@ -75,10 +74,26 @@ func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context,
 
 	start := time.Now()
 
-	result := db.WithContext(ctx).
-		Table(constants.WatchlistTableName).
-		Where(constants.FieldId+" IN ? AND "+constants.FielduserId+" = ?", watchlistIds, userID).
-		Pluck(constants.FieldId, &validWatchlistIds)
+	query := `
+		WITH valid_ids AS (
+			SELECT id
+			FROM watchlists
+			WHERE id IN ? AND user_id = ?
+		),
+		deleteScrips AS (
+			DELETE FROM watchlist_scrips
+			WHERE watchlist_id IN (SELECT id FROM valid_ids) AND scrip_id =?
+			RETURNING watchlist_id
+		),
+		updateScripCount AS (
+			UPDATE watchlists
+			SET scrip_count=scrip_count-1, last_updated=NOW()
+			WHERE id IN (SELECT watchlist_id FROM deleteScrips)
+		)
+		SELECT watchlist_id FROM deleteScrips
+	`
+
+	result := db.WithContext(ctx).Raw(query, watchlistIds, userID, scripId).Scan(&validWatchlistIds)
 
 	if result.Error != nil {
 		return nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
@@ -87,52 +102,7 @@ func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context,
 	logger.WithFields(logrus.Fields{
 		constants.UserId:  userID,
 		constants.Latency: time.Since(start).Milliseconds(),
-	}).Info("Watchlist IDs validated successfully")
-
-	if len(validWatchlistIds) > 0 {
-
-		var deletedScripsFromWatchlistIds []genericModels.WatchlistScrips
-
-		deleteResult := db.WithContext(ctx).
-			Table(constants.WatchlistScripsTableName).
-			Clauses(clause.Returning{}).
-			Where(constants.FieldWatchlistId+" IN ? AND "+constants.FieldScripId+" = ?", validWatchlistIds, scripId).
-			Delete(&deletedScripsFromWatchlistIds)
-
-		if deleteResult.Error != nil {
-			return nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
-		}
-
-		validWatchlistIds = []uint64{}
-
-		for _, record := range deletedScripsFromWatchlistIds {
-			validWatchlistIds = append(validWatchlistIds, record.WatchlistId)
-		}
-
-		logger.WithFields(logrus.Fields{
-			constants.UserId:  userID,
-			constants.Latency: time.Since(start).Milliseconds(),
-		}).Info("Scrip removed from watchlists successfully")
-
-		if deleteResult.RowsAffected > 0 {
-			result = db.WithContext(ctx).
-				Table(constants.WatchlistTableName).
-				Where(constants.FieldId+" IN ?", validWatchlistIds).
-				Updates(map[string]interface{}{
-					constants.FieldScripCount:  gorm.Expr("scrip_count - 1"),
-					constants.FieldLastUpdated: gorm.Expr("NOW()"),
-				})
-
-			if result.Error != nil {
-				return nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
-			}
-
-			logger.WithFields(logrus.Fields{
-				constants.UserId:  userID,
-				constants.Latency: time.Since(start).Milliseconds(),
-			}).Info("Watchlist scrip count updated successfully")
-		}
-	}
+	}).Info("Watchlist IDs Deleted successfully")
 
 	return validWatchlistIds, nil
 }
@@ -240,12 +210,15 @@ func (repo *watchlistRepository) AddScripsToWatchlists(ctx context.Context, db *
 		result = db.WithContext(ctx).
 			Table(constants.WatchlistTableName).
 			Where(constants.FieldId+" = ?", w.WatchlistId).
-			Update(constants.FieldScripCount, gorm.Expr("scrip_count + 1"))
+			Updates(map[string]interface{}{
+				constants.FieldScripCount: gorm.Expr("scrip_count + 1"),
+				constants.FieldLastUpdated: gorm.Expr("NOW()"),
+			})
 
 		if result.Error != nil {
 			return nil, nil, nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
 		}
-		
+
 		addedWatchlistIds = append(addedWatchlistIds, w.WatchlistId)
 		logger.WithFields(logrus.Fields{
 			constants.UserId:  userID,
@@ -255,3 +228,5 @@ func (repo *watchlistRepository) AddScripsToWatchlists(ctx context.Context, db *
 
 	return addedWatchlistIds, SkipppedWatchlistIds, limitExceededWatchlistIds, nil
 }
+
+

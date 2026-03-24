@@ -21,10 +21,6 @@ type WatchlistsRepository interface {
 	GetUserWatchlists(ctx context.Context, db *gorm.DB, userId uint64, scripId string) ([]structModels.WatchlistWithId, error)
 	CheckScripExists(ctx context.Context, db *gorm.DB, scripId string) (bool, error)
 	GetValidWatchlists(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64) ([]genericModels.Watchlists, []uint64, error)
-	//CheckDuplicate(ctx context.Context, db *gorm.DB, capNotFullIds []uint64, scripId string) ([]uint64, []uint64, error)
-	//InsertWatchlistScrip(ctx context.Context, db *gorm.DB, notDuplicates []uint64, scripId string) ([]uint64, error)
-	//GetWatchlistDetails(ctx context.Context, db *gorm.DB, addedIds []uint64) ([]genericModels.Watchlists, error)
-	//DeleteWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistIdNames []structModels.WatchlistWithId, scripId string) error
 
 	AddScripWithCTE(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error)
 	DeleteScripWithCTE(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error)
@@ -134,69 +130,32 @@ func (repo *watchlistsRepository) GetValidWatchlists(ctx context.Context, db *go
 	return watchlists, notValid, nil
 }
 
-/*
-func (repo *watchlistsRepository) DeleteWatchlistScrip(ctx context.Context, db *gorm.DB, watchlistIdNames []structModels.WatchlistWithId, scripId string) error {
-	var watchlistIds []uint64
-	for _, wl := range watchlistIdNames {
-		watchlistIds = append(watchlistIds, uint64(wl.Watchlist_ID))
-	}
-
-	err := db.WithContext(ctx).
-		Table(constants.WatchScripTableName).
-		Where(constants.FieldWatchId+" IN ? AND "+constants.FieldWScripId+" = ?", watchlistIds, scripId).
-		Delete(&genericModels.WatchlistScrips{}).Error
-
-	if err != nil {
-		return err
-	}
-	err = db.WithContext(ctx).
-		Table(constants.WatclistsTableName).
-		Where("id IN ?", watchlistIds).
-		Updates(map[string]interface{}{
-			"scrip_count":       gorm.Expr("scrip_count - 1"),
-			"last_updated  _at": gorm.Expr("NOW()"),
-		}).Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
-*/
-
 func (repo *watchlistsRepository) AddScripWithCTE(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error) {
 
 	var result []structModels.WatchlistWithId
 
 	query := `
-    WITH valid_watchlists AS (
-        SELECT id, watchlist_name, scrip_count  
-        FROM watchlists
-        WHERE user_id = ?                 
-          AND id = ANY(?)
-    ),
-    capacity_ok AS (
-        SELECT *
-        FROM valid_watchlists
-        WHERE scrip_count < 10
-    ),
-    inserted AS (
-        INSERT INTO watchlist_scrips (watchlist_id, scrip_id)
-        SELECT id, ?
-        FROM capacity_ok
-        RETURNING watchlist_id
-    ),
-    updated AS (
-        UPDATE watchlists
-        SET scrip_count = scrip_count + 1,
-            last_updated_at = NOW()
-        WHERE id IN (SELECT watchlist_id FROM inserted)
-        RETURNING id, watchlist_name
-    )
-    SELECT id as watchlist_id, watchlist_name FROM updated;
+    WITH inserted AS (
+		INSERT INTO watchlist_scrips (watchlist_id, scrip_id)
+		SELECT wl.id, ?
+		FROM watchlists wl
+		WHERE wl.user_id = ?
+		AND wl.id = ANY(?)
+		RETURNING watchlist_id
+	),
+	updated AS (
+		UPDATE watchlists
+		SET scrip_count = scrip_count + 1,
+			last_updated_at = NOW()
+		WHERE id IN (SELECT watchlist_id FROM inserted)
+		RETURNING id, watchlist_name
+	)
+	SELECT id AS watchlist_id, watchlist_name
+	FROM updated;
     `
 
 	err := db.WithContext(ctx).
-		Raw(query, userId, pq.Array(watchlistIds), scripId).
+		Raw(query, scripId, userId, pq.Array(watchlistIds)).
 		Scan(&result).Error
 
 	return result, err
@@ -213,31 +172,28 @@ func (repo *watchlistsRepository) DeleteScripWithCTE(
 	var result []structModels.WatchlistWithId
 
 	query := `
-    WITH valid_watchlists AS (
-    SELECT id 
-    FROM watchlists
-    WHERE user_id = ? AND id = ANY(?)
-),
-deleted AS (
-    DELETE FROM watchlist_scrips ws
-    USING valid_watchlists vw
-    WHERE ws.watchlist_id = vw.id
-      AND ws.scrip_id = ?
-    RETURNING ws.watchlist_id
-),
-updated AS (
-    UPDATE watchlists w 
-    SET scrip_count = scrip_count - 1,
-        last_updated_at = NOW()
-    FROM deleted d  
-    WHERE w.id = d.watchlist_id
-    RETURNING w.id, w.watchlist_name
-)
-SELECT id as watchlist_id, watchlist_name FROM updated;
+    WITH deleted AS (
+		DELETE FROM watchlist_scrips ws
+		WHERE ws.watchlist_id = ANY(?)
+			AND ws.scrip_id = ?
+			AND ws.watchlist_id IN (
+				SELECT id FROM watchlists WHERE user_id = ?
+			)
+		RETURNING ws.watchlist_id
+	),
+	updated AS (
+		UPDATE watchlists w 
+		SET scrip_count = scrip_count - 1,
+			last_updated_at = NOW()
+		FROM deleted d  
+		WHERE w.id = d.watchlist_id
+		RETURNING w.id, w.watchlist_name
+	)
+	SELECT id as watchlist_id, watchlist_name FROM updated;
     `
 
 	err := db.WithContext(ctx).
-		Raw(query, userId, pq.Array(watchlistIds), scripId).
+		Raw(query, pq.Array(watchlistIds), scripId, userId).
 		Scan(&result).Error
 
 	return result, err

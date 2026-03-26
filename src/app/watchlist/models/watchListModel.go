@@ -20,6 +20,13 @@ type BFFAdgToWatchlistResponse struct {
 	Warnings        []string          `json:"warnings" example:"[warnings!]"`
 }
 
+type ResultListsForADD struct {
+	LimitExceededWatchlistIds []int64 `gorm:"column:limit_exceeded_ids"`
+	AddedWatchlistIds         []int64 `gorm:"column:added_ids"`
+	SkippedWatchlistIds       []int64 `gorm:"column:skipped_ids"`
+	ScripCount                int64   `gorm:"column:scrip_count"`
+}
+
 type ActionType string
 
 const (

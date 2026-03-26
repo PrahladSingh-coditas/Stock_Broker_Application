@@ -8,6 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/lib/pq v1.12.0
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/viper v1.20.0
 	github.com/swaggo/files v1.0.1

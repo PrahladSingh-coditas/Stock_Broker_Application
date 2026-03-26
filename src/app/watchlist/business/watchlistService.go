@@ -23,7 +23,7 @@ func NewWatchlistService(watchlistRepository repository.WatchlistRepository) *Wa
 	}
 }
 
-func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx context.Context, logger *logrus.Logger, bffAdgToWatchlistRequest models.BFFAdgToWatchlistRequest, username string) (error, []models.WatchlistWithID, []string) {
+func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx context.Context, logger *logrus.Logger, bffAdgToWatchlistRequest models.BFFAdgToWatchlistRequest, username string) ([]models.WatchlistWithID, []string, error) {
 	postgresClinet := utils.GetPostgresClient()
 	tx := postgresClinet.GormDB.Begin()
 	var watchlistsWithId []models.WatchlistWithID
@@ -32,24 +32,24 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 	userId, err := service.watchlistRepository.GetUserIdByUsername(ctx, tx, logger, username)
 
 	if err != nil {
-		return err, nil, nil
+		return nil, nil, err
 	}
 
 	switch bffAdgToWatchlistRequest.Action {
 	case models.GET:
 		watchlistsWithId, err = service.watchlistRepository.GetWatchlistsWithId(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.ScripId)
 		if err != nil {
-			return err, nil, nil
+			return nil, nil, errors.New(constants.ErrNoWatchlistForScripMsg)
 		}
 
 		if len(watchlistsWithId) == 0 {
-			return errors.New(constants.ErrNoWatchlistForScripMsg), nil, nil
+			return nil, nil, errors.New(constants.ErrNoWatchlistForScripMsg)
 		}
 	case models.DEL:
 		validWatchlistIds, err := service.watchlistRepository.DeleteScripsFromWatchlists(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.WatchlistIds, bffAdgToWatchlistRequest.ScripId)
 		if err != nil {
 			tx.Rollback()
-			return err, nil, nil
+			return nil, nil, err
 		}
 
 		for _, id := range validWatchlistIds {
@@ -59,28 +59,40 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 		}
 
 		if len(validWatchlistIds) == 0 {
-			return errors.New(constants.ErrNoWatchlistForScripMsg), nil, nil
+			return nil, nil, errors.New(constants.ErrNoWatchlistForScripMsg)
 		} else if len(validWatchlistIds) != len(bffAdgToWatchlistRequest.WatchlistIds) {
 			warnings = append(warnings, "some watchlist ids were invalid")
 		}
 
 	case models.ADD:
-		addedWatchlistIds, skippedWatchlistIds, limitExceededWatchlistIds, err := service.watchlistRepository.AddScripsToWatchlists(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.WatchlistIds, bffAdgToWatchlistRequest.ScripId)
+		result, err := service.watchlistRepository.AddScripsToWatchlists(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.WatchlistIds, bffAdgToWatchlistRequest.ScripId)
 		if err != nil {
 			tx.Rollback()
-			return err, nil, nil
+			return nil, nil, err
 		}
 
-		if len(addedWatchlistIds) == 0 {
+		if result.ScripCount == 0 {
+			return nil, nil, errors.New(constants.ErrScripNotFoundMsg)
+		}
+
+		if len(result.AddedWatchlistIds) == 0 {
 			warnings = append(warnings, constants.NoScripAddedToWatchlistMsg)
 		}
 
-		if len(skippedWatchlistIds) > 0 {
+		if len(result.SkippedWatchlistIds) > 0 {
 			warnings = append(warnings, constants.AlreadyExistsInSomeWatchlistMsg)
 		}
 
-		if len(limitExceededWatchlistIds) > 0 {
+		if len(result.LimitExceededWatchlistIds) > 0 {
 			warnings = append(warnings, constants.SomeWatchlistsReachedMaxLimitMsg)
+		}
+
+		if len(result.AddedWatchlistIds)!=0 {
+			for _,id:=range result.AddedWatchlistIds {
+				watchlistsWithId = append(watchlistsWithId, models.WatchlistWithID{
+				WatchlistId:uint64(id),
+			})
+			}
 		}
 	}
 
@@ -90,5 +102,5 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 
 	tx.Commit()
 
-	return nil, watchlistsWithId, warnings
+	return watchlistsWithId, warnings, nil
 }

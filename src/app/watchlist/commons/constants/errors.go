@@ -67,4 +67,21 @@ const (
 	ErrInvalidOtp        = "OTP must be a 4 digit number"
 )
 
-//
+//GET ERRORS
+const (
+	ErrInvalidAction     = "invalid action, must be ADD,DEL or GET"
+	ErrEmptyScripId      = "scripId is required"
+	ErrWatchlistNotFound = "watchlist not found in db"
+	ErrEmptyWatchlists   = "watchlistId is required"
+)
+
+//validation errors
+const (
+	ErrValidatingConstraints = "error in validating constraints"
+	ErrNoValidWatchlists     = "no valid watchlists found that satisfy the constraints"
+)
+
+//del errors
+const (
+	ErrNoWatchlistsToDelete = "No watchlists to delete"
+)

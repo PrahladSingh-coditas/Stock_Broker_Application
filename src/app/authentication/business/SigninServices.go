@@ -14,19 +14,19 @@ import (
 )
 
 type SigninUserService struct {
-	signinUserRepository repository.SigninUserRepository
+	signinUserRepository repository.SigninUserRepository//a service ka object(with type as repository.SigninUserRepository) that holds the repository so service can call repo ke functions
 }
 
-func NewSigninUserService(signinUserRepository repository.SigninUserRepository) *SigninUserService {
+func NewSigninUserService(signinUserRepository repository.SigninUserRepository) *SigninUserService { //funciton where the dependecny injection takes place
 	return &SigninUserService{
 		signinUserRepository: signinUserRepository,
 	}
 }
 
-func (service *SigninUserService) SigninUser(ctx context.Context, spanCtx context.Context, bffSigninUserRequest models.BFFSigninUserRequest) error {
+func (service *SigninUserService) SigninUser(ctx context.Context, spanCtx context.Context, bffSigninUserRequest models.BFFSigninUserRequest) error { //contains actual business logic
 	//returns struct of gorm
-	postgresClient := utils.GetPostgresClient()
-	client := postgresClient.GormDB
+	postgresClient := utils.GetPostgresClient() //contains DB connection
+	client := postgresClient.GormDB //taking the actual GORM DB ka instance form client
 
 	user, err := service.signinUserRepository.SigninNewUser(spanCtx, client, bffSigninUserRequest)
 	if err != nil {

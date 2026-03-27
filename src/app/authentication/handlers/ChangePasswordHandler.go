@@ -25,7 +25,7 @@ func NewChangePasswordHandler(service *business.ChangePasswordService) *ChangePa
 		service: service,
 	}
 }
-
+//[SDTAP SPSFF..R]
 // HandleSigninUser handles the user signin request.
 // @Summary Change password
 // @Description Change password and return message

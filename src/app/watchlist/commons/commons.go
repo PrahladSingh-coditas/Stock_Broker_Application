@@ -21,4 +21,7 @@ const (
 	Otp      = "OTP"
 	Token    = "token"
 	Subject  = "sub"
+	ScripId = "scripid"
+	Watchlist = "watchlist"
+	Action = "action"
 )

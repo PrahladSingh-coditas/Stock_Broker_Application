@@ -239,13 +239,11 @@ const docTemplate = `{
         "models.BFFChangePasswordRequest": {
             "type": "object",
             "required": [
-                "confirmpassword",
                 "newpassword"
             ],
             "properties": {
                 "confirmpassword": {
                     "type": "string",
-                    "minLength": 8,
                     "example": "Sakshi@123"
                 },
                 "newpassword": {
@@ -361,7 +359,7 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 32,
                     "minLength": 5,
-                    "example": "Arijit"
+                    "example": "Sakshi"
                 }
             }
         },

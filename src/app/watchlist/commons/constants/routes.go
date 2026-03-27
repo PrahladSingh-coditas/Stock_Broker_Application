@@ -1,8 +1,5 @@
 package constants
 
 const SwaggerRoute = "/swagger/*any"
-const AuthRoutePrefix = "/api/auth"
-const Signup = "/signup"
-const Signin = "/signin"
-const Validateotp = "/validate-otp"
-const ChangePassword = "/change-password"
+const RoutePrefix = "/api/watchlist"
+const WatchlistADG = "/watchlistADG"

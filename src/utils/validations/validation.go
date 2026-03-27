@@ -137,14 +137,26 @@ func OtpValidator(f1 validator.FieldLevel) bool {
 	return matched
 }
 
+
+type Enum interface {
+	IsValid() bool
+}
+
+func ValidateEnum[E Enum](fl validator.FieldLevel) bool {
+	value := fl.Field().Interface().(E)
+	return value.IsValid()
+}
+
 func init() {
 	bffValidator = validator.New()
 	bffValidator.RegisterValidation("panCard", panCardValidator)
 	bffValidator.RegisterValidation("strongPassword", strongPasswordValidator)
 	bffValidator.RegisterValidation("Email", IsEmailValid)
 	bffValidator.RegisterValidation("otp", OtpValidator)
+	bffValidator.RegisterValidation("checkAction", ValidateEnum[Enum])
 }
 
 func GetBFFValidator() *validator.Validate {
 	return bffValidator
 }
+

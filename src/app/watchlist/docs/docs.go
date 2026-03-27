@@ -15,14 +15,14 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/auth/change-password": {
+        "/api/watchlist/watchlistADG": {
             "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Change password and return message",
+                "description": "Performs Add,Delete,Get to watchlists",
                 "consumes": [
                     "application/json"
                 ],
@@ -32,23 +32,23 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Change password",
+                "summary": "Watchlist ADG",
                 "parameters": [
                     {
-                        "description": "Change Password Request",
+                        "description": "ADG to Watchlist Request",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.BFFChangePasswordRequest"
+                            "$ref": "#/definitions/models.BFFAdgToWatchlistRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Password changed successfully",
+                        "description": "ADG performed successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.BFFChangePasswordResponse"
+                            "$ref": "#/definitions/models.BFFAdgToWatchlistResponse"
                         }
                     },
                     "400": {
@@ -58,175 +58,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Password mismatch with confirm password",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorAPIResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Invalid Username",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorAPIResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorAPIResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/auth/signin": {
-            "post": {
-                "description": "Authenticate user and return JWT tokens",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Sign in user",
-                "parameters": [
-                    {
-                        "description": "Signin Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.BFFSigninUserRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.BFFSigninUserResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorAPIResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorAPIResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/auth/signup": {
-            "post": {
-                "description": "Handles user registration by validating input and storing user details",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Create a new user",
-                "parameters": [
-                    {
-                        "description": "User Registration Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.BFFCreateUserRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User created successfully",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input payload",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorAPIResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "User already exists",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorAPIResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorAPIResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/auth/validate-otp": {
-            "post": {
-                "description": "Validates user OTP and return clear success/ failure message",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Validates user OTP",
-                "parameters": [
-                    {
-                        "description": "User OTP Validation Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.BFFValidateUserOtpRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OTP validation successful",
-                        "schema": {
-                            "$ref": "#/definitions/models.BFFValidateUserOtpResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input payload",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorAPIResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Case A: Incorrect OTP / Case B: Expired OTP",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorAPIResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "User does not exist",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorAPIResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
+                        "description": "Pass mismatch",
                         "schema": {
                             "$ref": "#/definitions/models.ErrorAPIResponse"
                         }
@@ -236,143 +68,60 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.BFFChangePasswordRequest": {
+        "models.ActionType": {
+            "type": "string",
+            "enum": [
+                "ADD",
+                "GET",
+                "DEL"
+            ],
+            "x-enum-varnames": [
+                "ADD",
+                "GET",
+                "DEL"
+            ]
+        },
+        "models.BFFAdgToWatchlistRequest": {
             "type": "object",
             "required": [
-                "confirmpassword",
-                "newpassword"
+                "action",
+                "scripId"
             ],
             "properties": {
-                "confirmpassword": {
-                    "type": "string",
-                    "minLength": 8,
-                    "example": "Sakshi@123"
+                "action": {
+                    "$ref": "#/definitions/models.ActionType"
                 },
-                "newpassword": {
-                    "type": "string",
-                    "maxLength": 20,
-                    "minLength": 8,
-                    "example": "Sakshi@123"
-                }
-            }
-        },
-        "models.BFFChangePasswordResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "password updated successfully"
-                }
-            }
-        },
-        "models.BFFCreateUserRequest": {
-            "type": "object",
-            "required": [
-                "confirmPassword",
-                "email",
-                "panCard",
-                "password",
-                "phoneNumber",
-                "username"
-            ],
-            "properties": {
-                "confirmPassword": {
-                    "type": "string",
-                    "minLength": 8,
-                    "example": "Sakshi@123"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "sakshi@gmail.com"
-                },
-                "panCard": {
-                    "type": "string",
-                    "example": "ABCDE1234S"
-                },
-                "password": {
-                    "type": "string",
-                    "maxLength": 20,
-                    "minLength": 8,
-                    "example": "Sakshi@123"
-                },
-                "phoneNumber": {
-                    "type": "integer",
-                    "maximum": 9999999999,
-                    "minimum": 1000000000,
-                    "example": 9876543210
-                },
-                "username": {
-                    "type": "string",
-                    "maxLength": 32,
-                    "minLength": 5,
-                    "example": "Sakshi"
-                }
-            }
-        },
-        "models.BFFSigninUserRequest": {
-            "type": "object",
-            "required": [
-                "password",
-                "username"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string",
-                    "maxLength": 20,
-                    "minLength": 8,
-                    "example": "Sakshi@123"
-                },
-                "username": {
-                    "type": "string",
-                    "maxLength": 32,
-                    "minLength": 5,
-                    "example": "Sakshi"
-                }
-            }
-        },
-        "models.BFFSigninUserResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "user logged in successfully"
-                },
-                "otpexpiresat": {
-                    "type": "string",
-                    "example": "otp expires in 2 minutes"
-                },
-                "otpsent": {
-                    "type": "string",
-                    "example": "otp generated successfully"
-                }
-            }
-        },
-        "models.BFFValidateUserOtpRequest": {
-            "type": "object",
-            "required": [
-                "otp",
-                "username"
-            ],
-            "properties": {
-                "otp": {
+                "scripId": {
                     "type": "string"
                 },
-                "username": {
-                    "type": "string",
-                    "maxLength": 32,
-                    "minLength": 5,
-                    "example": "Arijit"
+                "watchlistIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
-        "models.BFFValidateUserOtpResponse": {
+        "models.BFFAdgToWatchlistResponse": {
             "type": "object",
             "properties": {
+                "action": {
+                    "$ref": "#/definitions/models.ActionType"
+                },
                 "message": {
                     "type": "string"
                 },
-                "token": {
-                    "type": "string"
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "watchlistNames": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WatchlistWithId"
+                    }
                 }
             }
         },
@@ -394,6 +143,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "key": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.WatchlistWithId": {
+            "type": "object",
+            "properties": {
+                "watchlistId": {
+                    "type": "integer"
+                },
+                "watchlistName": {
                     "type": "string"
                 }
             }

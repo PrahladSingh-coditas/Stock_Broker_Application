@@ -44,8 +44,3 @@ const (
 	UniqueConstraintViolationError = "ERROR: duplicate key value violates unique constraint \"uq_watchlist_scrip\" (SQLSTATE 23505)"
 	RequestFailedError             = "request failed for %s actiontype"
 )
-
-//error
-const (
-	ServerError = "Something went wrong"
-)

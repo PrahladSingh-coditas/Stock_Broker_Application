@@ -3,6 +3,7 @@ package business
 import (
 	"context"
 	"errors"
+	"fmt"
 	"stock_broker_application/src/app/watchlist/commons/constants"
 	"stock_broker_application/src/app/watchlist/models"
 	"stock_broker_application/src/app/watchlist/repository"
@@ -46,21 +47,23 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 			return nil, nil, errors.New(constants.ErrNoWatchlistForScripMsg)
 		}
 	case models.DEL:
-		validWatchlistIds, err := service.watchlistRepository.DeleteScripsFromWatchlists(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.WatchlistIds, bffAdgToWatchlistRequest.ScripId)
+		resultListsForDEL, err := service.watchlistRepository.DeleteScripsFromWatchlists(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.WatchlistIds, bffAdgToWatchlistRequest.ScripId)
 		if err != nil {
 			tx.Rollback()
 			return nil, nil, err
 		}
 
-		for _, id := range validWatchlistIds {
+		for _, id := range resultListsForDEL.DeletedWatchlistIds {
 			watchlistsWithId = append(watchlistsWithId, models.WatchlistWithID{
-				WatchlistId: id,
+				WatchlistId: uint64(id),
 			})
 		}
 
-		if len(validWatchlistIds) == 0 {
+		fmt.Println(resultListsForDEL.ValidWatchlistIds)
+
+		if len(resultListsForDEL.ValidWatchlistIds) == 0 {
 			return nil, nil, errors.New(constants.ErrNoWatchlistForScripMsg)
-		} else if len(validWatchlistIds) != len(bffAdgToWatchlistRequest.WatchlistIds) {
+		} else if len(resultListsForDEL.ValidWatchlistIds) != len(bffAdgToWatchlistRequest.WatchlistIds) {
 			warnings = append(warnings, "some watchlist ids were invalid")
 		}
 
@@ -87,11 +90,11 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 			warnings = append(warnings, constants.SomeWatchlistsReachedMaxLimitMsg)
 		}
 
-		if len(result.AddedWatchlistIds)!=0 {
-			for _,id:=range result.AddedWatchlistIds {
+		if len(result.AddedWatchlistIds) != 0 {
+			for _, id := range result.AddedWatchlistIds {
 				watchlistsWithId = append(watchlistsWithId, models.WatchlistWithID{
-				WatchlistId:uint64(id),
-			})
+					WatchlistId: uint64(id),
+				})
 			}
 		}
 	}

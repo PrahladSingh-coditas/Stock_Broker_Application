@@ -27,6 +27,11 @@ type ResultListsForADD struct {
 	ScripCount                int64   `gorm:"column:scrip_count"`
 }
 
+type ResultListsForDEL struct {
+	ValidWatchlistIds   []int64 `gorm:"column:valid_ids"`
+	DeletedWatchlistIds []int64 `gorm:"column:deleted_ids"`
+}
+
 type ActionType string
 
 const (

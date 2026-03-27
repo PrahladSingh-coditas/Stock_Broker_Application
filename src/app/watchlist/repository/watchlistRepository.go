@@ -17,7 +17,7 @@ import (
 type WatchlistRepository interface {
 	GetWatchlistsWithId(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, scripId string) ([]models.WatchlistWithID, error)
 	GetUserIdByUsername(ctx context.Context, db *gorm.DB, logger *logrus.Logger, username string) (*uint64, error)
-	DeleteScripsFromWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) ([]uint64, error)
+	DeleteScripsFromWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) (*models.ResultListsForDEL, error)
 	AddScripsToWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) (*models.ResultListsForADD, error)
 }
 
@@ -71,8 +71,8 @@ func (repo *watchlistRepository) GetWatchlistsWithId(ctx context.Context, db *go
 	return watchlistWithId, nil
 }
 
-func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) ([]uint64, error) { 
-	var validWatchlistIds []uint64
+func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) (*models.ResultListsForDEL, error) {
+	var resultListsForDEL models.ResultListsForDEL
 
 	start := time.Now()
 
@@ -80,7 +80,7 @@ func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context,
 		WITH valid_ids AS (
 			SELECT id
 			FROM watchlists
-			WHERE id IN ? AND user_id = ?
+			WHERE id =ANY(?) AND user_id = ?
 		),
 		deleteScrips AS (
 			DELETE FROM watchlist_scrips
@@ -92,22 +92,24 @@ func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context,
 			SET scrip_count=scrip_count-1, last_updated=NOW()
 			WHERE id IN (SELECT watchlist_id FROM deleteScrips)
 		)
-		SELECT watchlist_id FROM deleteScrips
+		SELECT 
+		ARRAY(SELECT id FROM valid_ids) AS valid_ids,
+		ARRAY(SELECT watchlist_id FROM deleteScrips) AS deleted_ids
 	`
 
-	result := db.WithContext(ctx).Raw(query, watchlistIds, userID, scripId).Scan(&validWatchlistIds)
+	result := db.WithContext(ctx).Raw(query, pq.Array(watchlistIds), userID, scripId).Row().
+	Scan(pq.Array(&resultListsForDEL.ValidWatchlistIds),pq.Array(&resultListsForDEL.DeletedWatchlistIds))
 
-	if result.Error != nil {
+	if result != nil {
 		return nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
 	}
-
 
 	logger.WithFields(logrus.Fields{
 		constants.UserId:  userID,
 		constants.Latency: time.Since(start).Milliseconds(),
 	}).Info("Watchlist IDs Deleted successfully")
 
-	return validWatchlistIds, nil
+	return &resultListsForDEL, nil
 }
 
 func (repo *watchlistRepository) AddScripsToWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) (*models.ResultListsForADD, error) {
@@ -160,21 +162,15 @@ func (repo *watchlistRepository) AddScripsToWatchlists(ctx context.Context, db *
 
 	row := db.WithContext(ctx).Debug().Raw(query, pq.Array(watchlistIds), userID, scripId, scripId, constants.MaxScripsPerWatchlist, scripId).Row()
 
-
 	result := row.Scan(pq.Array(&resultWatchlistIds.AddedWatchlistIds),
 		pq.Array(&resultWatchlistIds.LimitExceededWatchlistIds),
 		pq.Array(&resultWatchlistIds.SkippedWatchlistIds),
 		&resultWatchlistIds.ScripCount)
 
-
-
 	if row == nil || result != nil {
 		fmt.Println("Returning Nil row error")
 		return nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
 	}
-
-
-	
 
 	logger.WithFields(logrus.Fields{
 		constants.UserId:  userID,

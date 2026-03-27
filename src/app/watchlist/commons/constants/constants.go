@@ -12,7 +12,7 @@ const (
 	Fieldemail     = "email"
 )
 
-const(
+const (
 	UsernameField = "username = ?"
 )
 
@@ -25,7 +25,7 @@ const (
 //success message for user otp generation
 const (
 	UserOtpGeneratedSuccess = "Otp generated successfully."
-	UserOtpExpiryMsg = "Otp will expire in 2 minutes."
+	UserOtpExpiryMsg        = "Otp will expire in 2 minutes."
 )
 
 //success message for user otp validation
@@ -51,3 +51,5 @@ const (
 
 //purpose for JWT
 const Purpose = "password_reset"
+
+const ActionTypeSuccess = "success"

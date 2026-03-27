@@ -32,7 +32,7 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 	//get user from db
 	user, err := service.watchlistRepository.GetUserFromDb(spanCtx, client, username)
 	if err != nil {
-		return nil, nil, errors.New("Couldnt find user")
+		return nil, nil, errors.New(constants.ErrUserNotFound)
 	}
 
 	switch actionType {
@@ -48,19 +48,32 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 
 		addedWatchlists, warningsResult, err := service.watchlistRepository.WatchlistAddOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest.ScripId, bffAdgToWatchlistRequest.WatchlistIds)
 		if err != nil {
-			return nil, nil, errors.New(constants.ErrNoRowsAffected)
+			return nil, nil, err
 		}
 
-		var warnings []string
+		var warningsAll []string
 		for _, w := range warningsResult {
 			msg := "Watchlist " + strconv.FormatUint(w.WatchlistId, 10) + ": " + w.Reason
-			warnings = append(warnings, msg)
+			warningsAll = append(warningsAll, msg)
 		}
-		if len(addedWatchlists) == 0 {
-			return addedWatchlists, warnings, nil
+		
+		var warningsNotOfUser []string
+		for _,val := range warningsAll{
+			if strings.Contains(val,constants.ErrWatchlistsNotOfUser){
+				warningsNotOfUser = append(warningsNotOfUser, val)
+			} else {
+				continue
+			}
 		}
 
-		return addedWatchlists, warnings, nil
+		if len(warningsNotOfUser) == len(bffAdgToWatchlistRequest.WatchlistIds){
+			return nil,nil,errors.New(constants.ErrWatchlistsNotOfUser)
+		} else{
+			return addedWatchlists,warningsAll,nil
+		}
+		
+
+		return addedWatchlists, warningsAll, nil
 
 	case models.DEL:
 		if strings.TrimSpace(bffAdgToWatchlistRequest.ScripId) == "" {
@@ -76,20 +89,32 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 			return nil, nil, err
 		}
 
-		var warnings []string
+		var warningsAll []string
 		for _, w := range warningsResult {
 			msg := "Watchlist " + strconv.FormatUint(w.WatchlistId, 10) + ": " + w.Reason
-			warnings = append(warnings, msg)
+			warningsAll = append(warningsAll, msg)
 		}
 
-		fmt.Println("warnings:", warnings)
+		fmt.Println("warnings:", warningsAll)
 		fmt.Println("deleted:", deletedWatchlists)
-		if len(deletedWatchlists) == 0 {
-			return deletedWatchlists, nil, nil
-		}
 		
 
-		return deletedWatchlists, warnings, nil
+		var warningsNotOfUser []string
+		for _,val := range warningsAll{
+			if strings.Contains(val,constants.ErrWatchlistsNotOfUser){
+				warningsNotOfUser = append(warningsNotOfUser, val)
+			} else {
+				continue
+			}
+		}
+		
+		if len(warningsNotOfUser) == len(bffAdgToWatchlistRequest.WatchlistIds){
+			return nil,nil,errors.New(constants.ErrWatchlistsNotOfUser)
+		} else{
+			return deletedWatchlists,warningsAll,nil
+		}
+
+		return deletedWatchlists, warningsAll, nil
 
 	case models.GET:
 
@@ -104,6 +129,12 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 
 		if len(WatchlistNamewithId) == 0 {
 			return nil, nil, errors.New(constants.ErrWatchlistNotFound)
+		}
+
+		var warnings []string
+		warnings = append(warnings,constants.ErrWatchlistNotRequired)
+		if len(bffAdgToWatchlistRequest.WatchlistIds) != 0 {
+			return WatchlistNamewithId, warnings,nil
 		}
 
 		return WatchlistNamewithId, nil, nil

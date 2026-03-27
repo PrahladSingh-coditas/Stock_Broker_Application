@@ -37,7 +37,7 @@ func NewWatchlistHandler(service *business.WatchlistService) *WatchlistHandler {
 // @Param request body models.BFFAdgToWatchlistRequest true "ADG to Watchlist Request"
 // @Success 200 {object} models.BFFAdgToWatchlistResponse "ADG performed successfully"
 // @Failure 400 {object} models.ErrorAPIResponse  "Invalid Input Payload"
-// @Failure 401 {object} models.ErrorAPIResponse "Pass mismatch"
+// @Failure 404 {object} models.ErrorAPIResponse "Watchlists not found"
 // @Router /api/watchlist/watchlistADG [post]
 func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 	start := time.Now()
@@ -160,7 +160,64 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 			ctx.IndentedJSON(http.StatusNotFound, errorResponse)
 			return
 		}
-		
+
+		//404 if no valid watchlists
+		if strings.Contains(errorString, constants.ErrNoValidWatchlists) {
+			errorResponse := genericModels.ErrorAPIResponse{
+				Message: genericModels.ErrorMessage{
+					Key:          commons.Watchlist,
+					ErrorMessage: constants.ErrNoValidWatchlists,
+				},
+				Error: constants.ErrAuthenticationFailed,
+			}
+
+			logger.WithFields(logrus.Fields{
+				"user":    username,
+				"latency": time.Since(start).Milliseconds(),
+			}).Info(constants.ErrWatchlistNotFound)
+
+			ctx.IndentedJSON(http.StatusNotFound, errorResponse)
+			return
+		}
+
+		//404 if all watchlists not of user
+		if strings.Contains(errorString, constants.ErrWatchlistsNotOfUser) {
+			errorResponse := genericModels.ErrorAPIResponse{
+				Message: genericModels.ErrorMessage{
+					Key:          commons.Watchlist,
+					ErrorMessage: constants.ErrWatchlistsNotOfUser,
+				},
+				Error: constants.ErrAuthenticationFailed,
+			}
+
+			logger.WithFields(logrus.Fields{
+				"user":    username,
+				"latency": time.Since(start).Milliseconds(),
+			}).Info(constants.ErrWatchlistNotFound)
+
+			ctx.IndentedJSON(http.StatusNotFound, errorResponse)
+			return
+		}
+
+		//404 if user not found
+		if strings.Contains(errorString, constants.ErrUserNotFound) {
+			errorResponse := genericModels.ErrorAPIResponse{
+				Message: genericModels.ErrorMessage{
+					Key:          commons.Username,
+					ErrorMessage: constants.ErrUserNotFound,
+				},
+				Error: constants.ErrAuthenticationFailed,
+			}
+
+			logger.WithFields(logrus.Fields{
+				"user":    username,
+				"latency": time.Since(start).Milliseconds(),
+			}).Info(constants.ErrWatchlistNotFound)
+
+			ctx.IndentedJSON(http.StatusNotFound, errorResponse)
+			return
+		}
+
 		//404 if any query error
 		if strings.Contains(errorString, constants.ErrNoRowsAffected) {
 			errorResponse := genericModels.ErrorAPIResponse{
@@ -180,19 +237,18 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 			return
 		}
 
-		
 		ctx.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	response := models.BFFAdgToWatchlistResponse{
-		Status:          "Used ActionType Successfully",
+		Status:          constants.ActionTypeSuccess,
 		Action:          bffAdgToWatchlistRequest.Action,
 		WatchlistWithId: watchlistNameWithId,
 	}
 
 	if len(watchlistNameWithId) == 0 {
-		response.Status = "No watchlists updated"
+		response.Status = constants.ErrNoWatchlistsUpdated
 	}
 
 	if len(watchlistNameWithId) > 0 {

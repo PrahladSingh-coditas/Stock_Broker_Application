@@ -57,8 +57,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.ErrorAPIResponse"
                         }
                     },
-                    "401": {
-                        "description": "Pass mismatch",
+                    "404": {
+                        "description": "Watchlists not found",
                         "schema": {
                             "$ref": "#/definitions/models.ErrorAPIResponse"
                         }

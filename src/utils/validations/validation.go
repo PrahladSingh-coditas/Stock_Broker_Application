@@ -78,6 +78,15 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 				default:
 					errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 				}
+			case constants.FieldScripId:
+				switch err.Tag() {
+				case "required":
+					errorMsg = fmt.Sprintf(constants.ErrFieldRequired, "scripId")
+				case "scripFormat":
+					errorMsg = "Incorrect scrip Id format"
+				default:
+					errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
+				}
 			default:
 				errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 			}
@@ -154,9 +163,19 @@ func init() {
 	bffValidator.RegisterValidation("Email", IsEmailValid)
 	bffValidator.RegisterValidation("otp", OtpValidator)
 	bffValidator.RegisterValidation("checkAction", ValidateEnum[Enum])
+	bffValidator.RegisterValidation("scripFormat",ValidateScripID)
 }
 
 func GetBFFValidator() *validator.Validate {
 	return bffValidator
 }
 
+var scripRegex = regexp.MustCompile(`(?i)^(NSE|BSE)_\d+$`)
+
+func ValidateScripID(fl validator.FieldLevel) bool {
+    scripId := fl.Field().String()
+    if scripId == "" {
+        return false
+    }
+    return scripRegex.MatchString(scripId)
+}

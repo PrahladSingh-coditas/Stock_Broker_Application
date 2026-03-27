@@ -69,19 +69,32 @@ const (
 
 //GET ERRORS
 const (
-	ErrInvalidAction     = "invalid action, must be ADD,DEL or GET"
-	ErrEmptyScripId      = "scripId is required"
-	ErrWatchlistNotFound = "watchlist not found in db"
-	ErrEmptyWatchlists   = "watchlistId is required"
+	ErrInvalidAction = "invalid action, must be ADD,DEL or GET"
+	ErrEmptyScripId  = "scripId is required"
+
+	ErrEmptyWatchlists      = "watchlistId is required"
+	ErrWatchlistNotRequired = "watchlistIds not required for get!"
 )
 
 //validation errors
 const (
 	ErrValidatingConstraints = "error in validating constraints"
 	ErrNoValidWatchlists     = "no valid watchlists found that satisfy the constraints"
+
+	ErrWatchlistNotFound   = "watchlist not found in db"
+	ErrWatchlistsNotOfUser = "watchlists does not belong to user"
+	ErrScripAlreadyExists  = "scrip already exists in watchlist"
+	ErrScripNotPresent     = "scrip not present in scrip_masters table"
+	ErrScripLimitExceeded  = "scrip limit exceeded(not allowed above 10)"
 )
+
+//add errors
 
 //del errors
 const (
 	ErrNoWatchlistsToDelete = "No watchlists to delete"
+)
+
+const (
+	ErrNoWatchlistsUpdated = "no watchlists updated"
 )

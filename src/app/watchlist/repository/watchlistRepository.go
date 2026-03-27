@@ -34,7 +34,8 @@ func (user *watchlistRepository) GetUserFromDb(ctx context.Context, db *gorm.DB,
 
 	var ExistingUser genericModels.User
 
-	result := db.WithContext(ctx).Table("users").
+	result := db.WithContext(ctx).Debug().
+	Table("users").
 		Where(constants.UsernameField, username).
 		First(&ExistingUser)
 
@@ -57,7 +58,7 @@ func (user *watchlistRepository) WatchlistGetOperation(ctx context.Context, db *
 
 	var WatchlistNamewithId []models.WatchlistWithId
 
-	result := db.WithContext(ctx).
+	result := db.WithContext(ctx).Debug().
 		Table("watchlists w").
 		Select(" DISTINCT w.id AS watchlist_id, w.watchlist_name as watchlist_name").
 		Joins("JOIN watchlist_scrips ws ON w.id = ws.watchlist_id").
@@ -134,14 +135,16 @@ func (repo *watchlistRepository) ValidateWatchlistOperation(ctx context.Context,
 
 		CASE
 			WHEN wu.watchlist_id IS NULL
-				THEN 'WATCHLIST_NOT_FOUND'
+				THEN ?
 			WHEN wu.user_id != ?
-				THEN 'WATCHLIST_NOT_OF_USER'
+				THEN ?
 			WHEN sp.watchlist_id IS NOT NULL
 				AND COALESCE(sc.total_scrips,0) < 10
-				THEN 'SCRIP_ALREADY_PRESENT(Duplicate)'
+				THEN ?
 			WHEN sp.watchlist_id IS NULL
-				THEN 'SCRIP_NOT_PRESENT'
+				THEN ?
+			WHEN COALESCE(sc.total_scrips,0) >= 10
+				THEN ?
 			ELSE 'OK'
 		END AS "Reason"
 
@@ -154,14 +157,21 @@ func (repo *watchlistRepository) ValidateWatchlistOperation(ctx context.Context,
 		ON sp.watchlist_id = i.watchlist_id;
 	`
 
-	err := db.Raw(
+	err := db.Debug().Raw(
 		query,
 		pq.Array(WatchlistIds),  // UNNEST
 		ScripId,      // scrip_exists
 		ScripId,      // scrip_present_check
 		UserId,       // CanInsert ownership
 		UserId,       // CanDelete ownership
-		UserId,       // Reason ownership
+
+		//reasons
+		constants.ErrWatchlistNotFound,
+		UserId,
+		constants.ErrWatchlistsNotOfUser,
+		constants.ErrScripAlreadyExists,
+		constants.ErrScripNotPresent,
+		constants.ErrScripLimitExceeded,
 	).Scan(&results).Error
 
 	if err != nil {
@@ -195,7 +205,8 @@ func (repo *watchlistRepository) WatchlistAddOperation(ctx context.Context, db *
 	if len(validWatchlists) == 0 {
 		return []models.WatchlistWithId{}, warnings, nil
 	}
-	logrus.Infof("Validation Results: %+v", validationResults)
+	
+
 	// append valid watchlists and their scipr ids to slice of struct
 	var records []models.WatchlistAndScrip
 	for _, id := range validWatchlists {
@@ -224,7 +235,8 @@ func (repo *watchlistRepository) WatchlistAddOperation(ctx context.Context, db *
 	`
 
 	var result []models.WatchlistWithId
-	err = db.WithContext(ctx).Raw(query, ScripId, validWatchlists).Scan(&result).Error
+	err = db.WithContext(ctx).Debug().
+	Raw(query, ScripId, validWatchlists).Scan(&result).Error
 
 	if err != nil {
 		return nil, nil, err
@@ -283,7 +295,8 @@ func (repo *watchlistRepository) WatchlistDeleteOperation(ctx context.Context, d
 	JOIN delete_from_watchlist_scrips d ON w.id = d.watchlist_id;
 	`
 
-	err = db.WithContext(ctx).Raw(query, validWatchlistIds, ScripId).Scan(&deletedWatchlists).Error
+	err = db.WithContext(ctx).Debug().
+	Raw(query, validWatchlistIds, ScripId).Scan(&deletedWatchlists).Error
 	if err != nil {
 		return nil, nil, err
 	}

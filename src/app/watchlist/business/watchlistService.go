@@ -38,13 +38,24 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 
 	switch bffAdgToWatchlistRequest.Action {
 	case models.GET:
-		watchlistsWithId, err = service.watchlistRepository.GetWatchlistsWithId(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.ScripId)
+		resultListsForGET, err := service.watchlistRepository.GetWatchlistsWithId(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.ScripId)
 		if err != nil {
 			return nil, nil, errors.New(constants.ErrNoWatchlistForScripMsg)
 		}
 
-		if len(watchlistsWithId) == 0 {
+		if resultListsForGET.ScripCheckCount ==0 {
+			return nil,nil,errors.New(constants.ErrScripNotFoundMsg)
+		}
+
+		if len(resultListsForGET.WatchlistId) == 0 {
 			return nil, nil, errors.New(constants.ErrNoWatchlistForScripMsg)
+		}
+
+		for i:=0 ;i<len(resultListsForGET.WatchlistId);i++ {
+			watchlistsWithId = append(watchlistsWithId, models.WatchlistWithID{
+				WatchlistId: uint64(resultListsForGET.WatchlistId[i]),
+				WatchlistName: resultListsForGET.WatchlistName[i],
+			})
 		}
 	case models.DEL:
 		resultListsForDEL, err := service.watchlistRepository.DeleteScripsFromWatchlists(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.WatchlistIds, bffAdgToWatchlistRequest.ScripId)

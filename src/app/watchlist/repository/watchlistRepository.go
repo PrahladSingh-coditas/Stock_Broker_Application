@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
 	"stock_broker_application/src/app/watchlist/commons/constants"
 	"stock_broker_application/src/app/watchlist/models"
 	genericModels "stock_broker_application/src/models"
@@ -15,7 +14,7 @@ import (
 )
 
 type WatchlistRepository interface {
-	GetWatchlistsWithId(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, scripId string) ([]models.WatchlistWithID, error)
+	GetWatchlistsWithId(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, scripId string) (*models.ResultListsForGET, error)
 	GetUserIdByUsername(ctx context.Context, db *gorm.DB, logger *logrus.Logger, username string) (*uint64, error)
 	DeleteScripsFromWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) (*models.ResultListsForDEL, error)
 	AddScripsToWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) (*models.ResultListsForADD, error)
@@ -49,17 +48,33 @@ func (repo *watchlistRepository) GetUserIdByUsername(ctx context.Context, db *go
 	return &user.ID, nil
 }
 
-func (repo *watchlistRepository) GetWatchlistsWithId(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, scripId string) ([]models.WatchlistWithID, error) {
-	var watchlistWithId []models.WatchlistWithID
+func (repo *watchlistRepository) GetWatchlistsWithId(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, scripId string) (*models.ResultListsForGET, error) {
+	var resultListsForGET models.ResultListsForGET
 	start := time.Now()
 
-	result := db.WithContext(ctx).Table(constants.WatchlistTableName).
-		Select(constants.WatchlistTableName+"."+constants.FieldId+","+constants.WatchlistTableName+"."+constants.FieldwatchlistName).
-		Joins("JOIN "+constants.WatchlistScripsTableName+" ON "+constants.WatchlistTableName+"."+constants.FieldId+"="+constants.WatchlistScripsTableName+"."+constants.FieldWatchlistId).
-		Where(constants.WatchlistTableName+"."+constants.FielduserId+"= ? AND "+constants.WatchlistScripsTableName+"."+constants.FieldScripId+"= ?", userID, scripId).
-		Scan(&watchlistWithId)
+	query:=`
+			WITH scrip_check AS (
+			SELECT COUNT(*) AS cnt
+			FROM scrip_masters
+			WHERE id = ?
+		),
+			get_ids AS(
+			SELECT w.id , w.watchlist_name
+			FROM watchlists w
+			JOIN watchlist_scrips ws ON w.id=ws.watchlist_id 
+			WHERE w.user_id = ? AND ws.scrip_id = ?
+		)
+			SELECT
+			ARRAY(SELECT id FROM get_ids) AS ids,
+			ARRAY(SELECT watchlist_name FROM get_ids) AS names,
+			(SELECT cnt FROM scrip_check) AS scrip_check
+		`
 
-	if result.Error != nil {
+	result := db.WithContext(ctx).Raw(query,scripId,userID,scripId).Row().Scan(pq.Array(&resultListsForGET.WatchlistId),pq.Array(&resultListsForGET.WatchlistName),&resultListsForGET.ScripCheckCount)
+
+		
+
+	if result != nil {
 		return nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
 	}
 
@@ -68,7 +83,7 @@ func (repo *watchlistRepository) GetWatchlistsWithId(ctx context.Context, db *go
 		constants.Latency: time.Since(start).Milliseconds(),
 	}).Info("Watchlists with given scripId retrieved successfully")
 
-	return watchlistWithId, nil
+	return &resultListsForGET, nil
 }
 
 func (repo *watchlistRepository) DeleteScripsFromWatchlists(ctx context.Context, db *gorm.DB, logger *logrus.Logger, userID uint64, watchlistIds []uint64, scripId string) (*models.ResultListsForDEL, error) {
@@ -168,7 +183,6 @@ func (repo *watchlistRepository) AddScripsToWatchlists(ctx context.Context, db *
 		&resultWatchlistIds.ScripCount)
 
 	if row == nil || result != nil {
-		fmt.Println("Returning Nil row error")
 		return nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
 	}
 

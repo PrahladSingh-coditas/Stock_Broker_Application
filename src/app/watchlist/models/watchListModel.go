@@ -32,6 +32,12 @@ type ResultListsForDEL struct {
 	DeletedWatchlistIds []int64 `gorm:"column:deleted_ids"`
 }
 
+type ResultListsForGET struct {
+	WatchlistId     []int64  `gorm:"column:ids"`
+	WatchlistName   []string `gorm:"column:names"`
+	ScripCheckCount int64    `gorm:"column:scrip_check"`
+}
+
 type ActionType string
 
 const (

@@ -7,6 +7,7 @@ import (
 	"stock_broker_application/src/utils/validations"
 	"strings"
 	"watchlists/business"
+	"watchlists/commons"
 	"watchlists/commons/constants"
 	"watchlists/models"
 
@@ -47,14 +48,7 @@ func (controller *WatchlistsHandler) HandleWatchlistADG(ctx *gin.Context) {
 		if ute, ok := err.(*json.UnmarshalTypeError); ok {
 			field = ute.Field
 		}
-
-		ctx.JSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
-			Message: genericModels.ErrorMessage{
-				Key:          field,
-				ErrorMessage: constants.ErrUnexpectedValue,
-			},
-			Error: constants.ErrInvalidPayload,
-		})
+		commons.ErrorResponse(field, constants.ErrUnexpectedValue, constants.ErrInvalidPayload, string(req.Action), ctx)
 		return
 	}
 
@@ -69,13 +63,7 @@ func (controller *WatchlistsHandler) HandleWatchlistADG(ctx *gin.Context) {
 
 	usernameInterface, exists := ctx.Get(constants.FieldUsername)
 	if !exists {
-		ctx.JSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
-			Message: genericModels.ErrorMessage{
-				Key:          constants.FieldUsername,
-				ErrorMessage: constants.UserNotFoundError,
-			},
-			Error: constants.UserNotFoundError,
-		})
+		commons.ErrorResponse(constants.FieldUsername, constants.UserNotFoundError, constants.UserNotFoundError, string(req.Action), ctx)
 		return
 	}
 	username := usernameInterface.(string)
@@ -87,28 +75,21 @@ func (controller *WatchlistsHandler) HandleWatchlistADG(ctx *gin.Context) {
 		switch err.Error() {
 
 		case constants.UserNotFoundError:
-			ctx.JSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
-				Error: constants.UserNotFoundError,
-			})
+			commons.ErrorResponse(constants.FieldUsername, constants.UserNotFoundError, constants.RequestFailedError, string(req.Action), ctx)
 
 		case constants.ScripIdNotFoundError:
-			ctx.JSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
-				Error: constants.ScripIdNotFoundError,
-			})
+			commons.ErrorResponse(constants.FieldScripId, constants.ScripIdNotFoundError, constants.RequestFailedError, string(req.Action), ctx)
 
 		case constants.WatchlistNotFoundError:
-			ctx.JSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
-				Error: constants.WatchlistNotFoundError,
-			})
+			commons.ErrorResponse(constants.FieldWatchlistId, constants.WatchlistNotFoundError, constants.RequestFailedError, string(req.Action), ctx)
 
 		case constants.QueryError:
-			ctx.JSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
-				Error: constants.QueryError,
-			})
+			commons.ErrorResponse(constants.Database, constants.QueryError, constants.RequestFailedError, string(req.Action), ctx)
 
 		default:
 			ctx.JSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
-				Error: err.Error(),
+				Message: genericModels.ErrorMessage{},
+				Error:   err.Error(),
 			})
 		}
 		return

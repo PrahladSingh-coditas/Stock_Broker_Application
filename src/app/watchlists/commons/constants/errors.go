@@ -13,6 +13,7 @@ const (
 	ErrUsernameExists    = "usernamealready exists"
 	ErrUserAlreadyExists = "user already exists"
 	ScripIdExists        = "there is unique constraint scripId already exists"
+	Database             = "query"
 )
 
 // General Errors
@@ -41,7 +42,7 @@ const (
 	InvalidActionTypeError         = "invalid action type, must be 'ADD' 'GET' or 'DEL'"
 	WatchlistNotFoundError         = "watchlist not found"
 	UniqueConstraintViolationError = "ERROR: duplicate key value violates unique constraint \"uq_watchlist_scrip\" (SQLSTATE 23505)"
-	// UserIdNotFoundError            = "userId not found"
+	RequestFailedError             = "request failed for %s actiontype"
 )
 
 //error

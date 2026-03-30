@@ -29,7 +29,7 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 
 	actionType := bffAdgToWatchlistRequest.Action
 
-	//get user from db
+	//get user from db and to extract and use user.ID in ADG operations
 	user, err := service.watchlistRepository.GetUserFromDb(spanCtx, client, username)
 	if err != nil {
 		return nil, nil, errors.New(constants.ErrUserNotFound)
@@ -38,15 +38,15 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 	switch actionType {
 	case models.ADD:
 
-		if strings.TrimSpace(bffAdgToWatchlistRequest.ScripId) == "" {
-			return nil, nil, errors.New(constants.ErrEmptyScripId)
-		}
+		// if strings.TrimSpace(bffAdgToWatchlistRequest.ScripId) == "" {
+		// 	return nil, nil, errors.New(constants.ErrEmptyScripId)
+		// }
 
-		if len(bffAdgToWatchlistRequest.WatchlistIds) == 0 {
-			return nil, nil, errors.New(constants.ErrEmptyWatchlists)
-		}
+		// if len(bffAdgToWatchlistRequest.WatchlistIds) == 0 {
+		// 	return nil, nil, errors.New(constants.ErrEmptyWatchlists)
+		// }
 
-		addedWatchlists, warningsResult, err := service.watchlistRepository.WatchlistAddOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest.ScripId, bffAdgToWatchlistRequest.WatchlistIds)
+		addedWatchlists, warningsResult, err := service.watchlistRepository.WatchlistAddOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -71,20 +71,17 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 		} else{
 			return addedWatchlists,warningsAll,nil
 		}
-		
-
-		return addedWatchlists, warningsAll, nil
 
 	case models.DEL:
-		if strings.TrimSpace(bffAdgToWatchlistRequest.ScripId) == "" {
-			return nil, nil, errors.New(constants.ErrEmptyScripId)
-		}
+		// if strings.TrimSpace(bffAdgToWatchlistRequest.ScripId) == "" {
+		// 	return nil, nil, errors.New(constants.ErrEmptyScripId)
+		// }
 
-		if len(bffAdgToWatchlistRequest.WatchlistIds) == 0 {
-			return nil, nil, errors.New(constants.ErrEmptyWatchlists)
-		}
+		// if len(bffAdgToWatchlistRequest.WatchlistIds) == 0 {
+		// 	return nil, nil, errors.New(constants.ErrEmptyWatchlists)
+		// }
 
-		deletedWatchlists, warningsResult, err := service.watchlistRepository.WatchlistDeleteOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest.ScripId, bffAdgToWatchlistRequest.WatchlistIds)
+		deletedWatchlists, warningsResult, err := service.watchlistRepository.WatchlistDeleteOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -114,15 +111,14 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 			return deletedWatchlists,warningsAll,nil
 		}
 
-		return deletedWatchlists, warningsAll, nil
 
 	case models.GET:
 
-		if strings.TrimSpace(bffAdgToWatchlistRequest.ScripId) == "" {
-			return nil, nil, errors.New(constants.ErrEmptyScripId)
-		}
+		// if strings.TrimSpace(bffAdgToWatchlistRequest.ScripId) == "" {
+		// 	return nil, nil, errors.New(constants.ErrEmptyScripId)
+		// }
 
-		WatchlistNamewithId, err := service.watchlistRepository.WatchlistGetOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest.ScripId)
+		WatchlistNamewithId, err := service.watchlistRepository.WatchlistGetOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest)
 		if err != nil {
 			return nil, nil, errors.New(constants.ErrNoRowsAffected)
 		}
@@ -144,5 +140,4 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 
 	}
 
-	return nil, nil, err
 }

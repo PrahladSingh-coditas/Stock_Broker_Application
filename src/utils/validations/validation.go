@@ -179,3 +179,11 @@ func ValidateScripID(fl validator.FieldLevel) bool {
     }
     return scripRegex.MatchString(scripId)
 }
+
+//validate if watchlists exist for add and del operations
+// func ValidateWatchlistExistence(f1 validator.FieldLevel) bool {
+// 	WatchlistWithId = f1.Field().CallSlice()
+
+
+
+// }

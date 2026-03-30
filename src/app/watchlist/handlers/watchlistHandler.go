@@ -82,52 +82,32 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 	username := ctx.GetString("username")
 
 	watchlistNameWithId, warnings, err := controller.service.Watchlist(ctx, ctx.Request.Context(), username, bffAdgToWatchlistRequest)
-
 	if err != nil {
 		errorString := err.Error()
 
-		// 400 error
-		if strings.Contains(errorString, constants.ErrEmptyScripId) {
-			errorResponse := genericModels.ErrorAPIResponse{
-				Message: genericModels.ErrorMessage{
-					Key:          commons.ScripId,
-					ErrorMessage: constants.ErrEmptyScripId,
-				},
-				Error: constants.ErrInvalidPayload,
-			}
-
-			logger.WithFields(logrus.Fields{
-				"user":    username,
-				"latency": time.Since(start).Milliseconds(),
-			}).Info(constants.ErrEmptyScripId)
-
-			ctx.IndentedJSON(http.StatusBadRequest, errorResponse)
-			return
-		}
-		// 400 error if watchlist ids empty
-		if strings.Contains(errorString, constants.ErrEmptyWatchlists) {
-			errorResponse := genericModels.ErrorAPIResponse{
-				Message: genericModels.ErrorMessage{
-					Key:          commons.Watchlist,
-					ErrorMessage: constants.ErrEmptyWatchlists,
-				},
-				Error: constants.ErrInvalidPayload,
-			}
-
-			logger.WithFields(logrus.Fields{
-				"user":    username,
-				"latency": time.Since(start).Milliseconds(),
-			}).Info(constants.ErrEmptyWatchlists)
-
-			ctx.IndentedJSON(http.StatusBadRequest, errorResponse)
-			return
-		}
+		//400 error	
+		// 400 error if watchlist ids empty		
 		//400 error if invalid action
-		if strings.Contains(errorString, constants.ErrInvalidAction) {
+		
+		if strings.Contains(errorString, constants.ErrEmptyScripId) || strings.Contains(errorString, constants.ErrEmptyWatchlists) || strings.Contains(errorString, constants.ErrInvalidAction) {
+			var key, errorMsg string
+
+			switch {
+			case strings.Contains(errorString, constants.ErrEmptyScripId):
+				key = commons.ScripId
+				errorMsg = constants.ErrEmptyScripId
+			case strings.Contains(errorString, constants.ErrEmptyWatchlists):
+				key = commons.Watchlist
+				errorMsg = constants.ErrEmptyWatchlists
+			case strings.Contains(errorString, constants.ErrInvalidAction):
+				key = commons.Action
+				errorMsg = constants.ErrInvalidAction
+			}
+
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
-					Key:          commons.Action,
-					ErrorMessage: constants.ErrInvalidAction,
+					Key:          key,
+					ErrorMessage: errorMsg,
 				},
 				Error: constants.ErrInvalidPayload,
 			}
@@ -135,95 +115,48 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 			logger.WithFields(logrus.Fields{
 				"user":    username,
 				"latency": time.Since(start).Milliseconds(),
-			}).Info(constants.ErrInvalidAction)
+			}).Info(errorString)
 
 			ctx.IndentedJSON(http.StatusBadRequest, errorResponse)
 			return
-
 		}
 
 		//404 if wrong watchlist entered
-		if strings.Contains(errorString, constants.ErrWatchlistNotFound) {
-			errorResponse := genericModels.ErrorAPIResponse{
-				Message: genericModels.ErrorMessage{
-					Key:          commons.ScripId,
-					ErrorMessage: constants.ErrWatchlistNotFound,
-				},
-				Error: constants.ErrAuthenticationFailed,
-			}
-
-			logger.WithFields(logrus.Fields{
-				"user":    username,
-				"latency": time.Since(start).Milliseconds(),
-			}).Info(constants.ErrWatchlistNotFound)
-
-			ctx.IndentedJSON(http.StatusNotFound, errorResponse)
-			return
-		}
-
 		//404 if no valid watchlists
-		if strings.Contains(errorString, constants.ErrNoValidWatchlists) {
-			errorResponse := genericModels.ErrorAPIResponse{
-				Message: genericModels.ErrorMessage{
-					Key:          commons.Watchlist,
-					ErrorMessage: constants.ErrNoValidWatchlists,
-				},
-				Error: constants.ErrAuthenticationFailed,
-			}
-
-			logger.WithFields(logrus.Fields{
-				"user":    username,
-				"latency": time.Since(start).Milliseconds(),
-			}).Info(constants.ErrWatchlistNotFound)
-
-			ctx.IndentedJSON(http.StatusNotFound, errorResponse)
-			return
-		}
-
 		//404 if all watchlists not of user
-		if strings.Contains(errorString, constants.ErrWatchlistsNotOfUser) {
-			errorResponse := genericModels.ErrorAPIResponse{
-				Message: genericModels.ErrorMessage{
-					Key:          commons.Watchlist,
-					ErrorMessage: constants.ErrWatchlistsNotOfUser,
-				},
-				Error: constants.ErrAuthenticationFailed,
-			}
-
-			logger.WithFields(logrus.Fields{
-				"user":    username,
-				"latency": time.Since(start).Milliseconds(),
-			}).Info(constants.ErrWatchlistNotFound)
-
-			ctx.IndentedJSON(http.StatusNotFound, errorResponse)
-			return
-		}
-
 		//404 if user not found
-		if strings.Contains(errorString, constants.ErrUserNotFound) {
-			errorResponse := genericModels.ErrorAPIResponse{
-				Message: genericModels.ErrorMessage{
-					Key:          commons.Username,
-					ErrorMessage: constants.ErrUserNotFound,
-				},
-				Error: constants.ErrAuthenticationFailed,
-			}
-
-			logger.WithFields(logrus.Fields{
-				"user":    username,
-				"latency": time.Since(start).Milliseconds(),
-			}).Info(constants.ErrWatchlistNotFound)
-
-			ctx.IndentedJSON(http.StatusNotFound, errorResponse)
-			return
-		}
-
 		//404 if any query error
-		if strings.Contains(errorString, constants.ErrNoRowsAffected) {
+		
+		if strings.Contains(errorString, constants.ErrWatchlistNotFound) ||
+			strings.Contains(errorString, constants.ErrNoValidWatchlists) ||
+			strings.Contains(errorString, constants.ErrWatchlistsNotOfUser) ||
+			strings.Contains(errorString, constants.ErrUserNotFound) ||
+			strings.Contains(errorString, constants.ErrNoRowsAffected) {
+
+			var key, errorMsg string
+
+			switch {
+			case strings.Contains(errorString, constants.ErrWatchlistNotFound):
+				key = commons.ScripId
+				errorMsg = constants.ErrWatchlistNotFound
+			case strings.Contains(errorString, constants.ErrNoValidWatchlists):
+				key = commons.Watchlist
+				errorMsg = constants.ErrNoValidWatchlists
+			case strings.Contains(errorString, constants.ErrWatchlistsNotOfUser):
+				key = commons.Watchlist
+				errorMsg = constants.ErrWatchlistsNotOfUser
+			case strings.Contains(errorString, constants.ErrUserNotFound):
+				key = commons.Username
+				errorMsg = constants.ErrUserNotFound
+			case strings.Contains(errorString, constants.ErrNoRowsAffected):
+				key = commons.Watchlist
+				errorMsg = constants.ErrNoRowsAffected
+			}
+
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
-					Key:          commons.Watchlist,
-					ErrorMessage: constants.ErrNoRowsAffected,
+					Key:          key,
+					ErrorMessage: errorMsg,
 				},
 				Error: constants.ErrAuthenticationFailed,
 			}
@@ -231,7 +164,7 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 			logger.WithFields(logrus.Fields{
 				"user":    username,
 				"latency": time.Since(start).Milliseconds(),
-			}).Info(constants.ErrWatchlistNotFound)
+			}).Info(errorMsg)
 
 			ctx.IndentedJSON(http.StatusNotFound, errorResponse)
 			return
@@ -241,23 +174,22 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 		return
 	}
 
-	response := models.BFFAdgToWatchlistResponse{
-		Status:          constants.ActionTypeSuccess,
-		Action:          bffAdgToWatchlistRequest.Action,
-		WatchlistWithId: watchlistNameWithId,
-	}
+	var response models.BFFAdgToWatchlistResponse
 
 	if len(watchlistNameWithId) == 0 {
-		response.Status = constants.ErrNoWatchlistsUpdated
+		response.Status = constants.ActionTypeFailure
 	}
 
 	if len(watchlistNameWithId) > 0 {
+		response.Status = constants.ActionTypeSuccess
 		response.WatchlistWithId = watchlistNameWithId
 	}
 
 	if len(warnings) > 0 {
 		response.Warnings = warnings
 	}
+	response.Action = bffAdgToWatchlistRequest.Action
+		
 
 	ctx.JSON(http.StatusOK, response)
 }

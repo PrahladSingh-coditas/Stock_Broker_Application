@@ -43,21 +43,26 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 			return nil, nil, errors.New(constants.ErrNoWatchlistForScripMsg)
 		}
 
-		if resultListsForGET.ScripCheckCount ==0 {
-			return nil,nil,errors.New(constants.ErrScripNotFoundMsg)
+		if resultListsForGET.ScripCheckCount == 0 {
+			return nil, nil, errors.New(constants.ErrScripNotFoundMsg)
 		}
 
 		if len(resultListsForGET.WatchlistId) == 0 {
 			return nil, nil, errors.New(constants.ErrNoWatchlistForScripMsg)
 		}
 
-		for i:=0 ;i<len(resultListsForGET.WatchlistId);i++ {
+		for i := 0; i < len(resultListsForGET.WatchlistId); i++ {
 			watchlistsWithId = append(watchlistsWithId, models.WatchlistWithID{
-				WatchlistId: uint64(resultListsForGET.WatchlistId[i]),
+				WatchlistId:   uint64(resultListsForGET.WatchlistId[i]),
 				WatchlistName: resultListsForGET.WatchlistName[i],
 			})
 		}
 	case models.DEL:
+
+		if len(bffAdgToWatchlistRequest.WatchlistIds) == 0 {
+			return nil, nil, errors.New("watchlist Ids can't be empty for this operation")
+		}
+
 		resultListsForDEL, err := service.watchlistRepository.DeleteScripsFromWatchlists(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.WatchlistIds, bffAdgToWatchlistRequest.ScripId)
 		if err != nil {
 			tx.Rollback()
@@ -79,6 +84,11 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 		}
 
 	case models.ADD:
+
+		if len(bffAdgToWatchlistRequest.WatchlistIds) == 0 {
+			return nil, nil, errors.New("watchlist Ids can't be empty for this operation")
+		}
+
 		result, err := service.watchlistRepository.AddScripsToWatchlists(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.WatchlistIds, bffAdgToWatchlistRequest.ScripId)
 		if err != nil {
 			tx.Rollback()

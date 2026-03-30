@@ -106,6 +106,12 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 				Error:   constants.ErrRequestFailed,
 			})
 			return
+		} else if strings.Contains(err.Error(), errors.New("watchlist Ids can't be empty for this operation").Error()) {
+			ctx.IndentedJSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
+				Message: genericModels.ErrorMessage{Key: constants.FieldWatchlistId, ErrorMessage: "watchlist Ids can't be empty for this operation"},
+				Error:   constants.ErrRequestFailed,
+			})
+			return
 		}
 
 		ctx.IndentedJSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{

@@ -3,7 +3,6 @@ package business
 import (
 	"context"
 	"errors"
-	"fmt"
 	"stock_broker_application/src/app/watchlist/commons/constants"
 	"stock_broker_application/src/app/watchlist/models"
 	"stock_broker_application/src/app/watchlist/repository"
@@ -74,8 +73,6 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 				WatchlistId: uint64(id),
 			})
 		}
-
-		fmt.Println(resultListsForDEL.ValidWatchlistIds)
 
 		if len(resultListsForDEL.ValidWatchlistIds) == 0 {
 			return nil, nil, errors.New(constants.ErrNoWatchlistForScripMsg)

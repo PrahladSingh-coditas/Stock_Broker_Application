@@ -94,7 +94,7 @@ const docTemplate = `{
                 "scripId": {
                     "type": "string"
                 },
-                "watchlistIds": {
+                "watchlistIds validate:": {
                     "type": "array",
                     "items": {
                         "type": "integer"

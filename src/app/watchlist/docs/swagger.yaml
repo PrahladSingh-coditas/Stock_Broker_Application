@@ -15,7 +15,7 @@ definitions:
         $ref: '#/definitions/models.ActionType'
       scripId:
         type: string
-      watchlistIds:
+      'watchlistIds validate:':
         items:
           type: integer
         type: array

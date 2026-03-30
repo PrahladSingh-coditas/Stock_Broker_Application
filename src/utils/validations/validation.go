@@ -87,6 +87,13 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 				default:
 					errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 				}
+			case constants.FieldWatchlistId:
+				switch err.Tag() {
+				case "watchlistRequired":
+					errorMsg = fmt.Sprintf(constants.ErrFieldRequired, "watchlistIds")
+				default:
+					errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
+				}
 			default:
 				errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 			}
@@ -146,7 +153,6 @@ func OtpValidator(f1 validator.FieldLevel) bool {
 	return matched
 }
 
-
 type Enum interface {
 	IsValid() bool
 }
@@ -163,7 +169,8 @@ func init() {
 	bffValidator.RegisterValidation("Email", IsEmailValid)
 	bffValidator.RegisterValidation("otp", OtpValidator)
 	bffValidator.RegisterValidation("checkAction", ValidateEnum[Enum])
-	bffValidator.RegisterValidation("scripFormat",ValidateScripID)
+	bffValidator.RegisterValidation("scripFormat", ValidateScripID)
+	bffValidator.RegisterValidation("watchlistRequired", ValidateWatchlistIds)
 }
 
 func GetBFFValidator() *validator.Validate {
@@ -173,17 +180,29 @@ func GetBFFValidator() *validator.Validate {
 var scripRegex = regexp.MustCompile(`(?i)^(NSE|BSE)_\d+$`)
 
 func ValidateScripID(fl validator.FieldLevel) bool {
-    scripId := fl.Field().String()
-    if scripId == "" {
-        return false
-    }
-    return scripRegex.MatchString(scripId)
+	scripId := fl.Field().String()
+	if scripId == "" {
+		return false
+	}
+	return scripRegex.MatchString(scripId)
 }
 
-//validate if watchlists exist for add and del operations
-// func ValidateWatchlistExistence(f1 validator.FieldLevel) bool {
-// 	WatchlistWithId = f1.Field().CallSlice()
+// validate if watchlists exist for add and del operations
+func ValidateWatchlistIds(fl validator.FieldLevel) bool {
+	actionField := fl.Parent().FieldByName("Action")
 
+	// If Action field not found, skip validation
+	if !actionField.IsValid() {
+		return true
+	}
 
+	action := fmt.Sprintf("%v", actionField.Interface())
 
-// }
+	watchlistIds := fl.Field().Interface().([]uint64)
+
+	if action == "ADD" || action == "DEL" {
+		return len(watchlistIds) > 0
+	}
+
+	return true
+}

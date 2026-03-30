@@ -147,18 +147,18 @@ func OtpValidator(f1 validator.FieldLevel) bool {
 	return matched
 }
 
-func WatchlistIdsValidation(fl validator.FieldLevel) bool {
-	field := fl.Field()
-	parent := fl.Parent()
+func WatchlistIdsValidation(fl validator.FieldLevel) bool { //f1 acts like a box of data and takes the curerent field that is to be evaluated
+	field := fl.Field()   //takes the field to validate (watchlistIds) and stores it in field variable
+	parent := fl.Parent() // takes out the whole struct
 
-	actionField := parent.FieldByName("Action")
+	actionField := parent.FieldByName("Action") // from the parent it finds the field name action
 	if !actionField.IsValid() {
 		return false
 	}
 
 	action := strings.ToUpper(actionField.String())
 
-	watchlistIds, ok := field.Interface().([]uint64)
+	watchlistIds, ok := field.Interface().([]uint64) //converts field to the list of numbers
 	if !ok {
 		return false
 	}

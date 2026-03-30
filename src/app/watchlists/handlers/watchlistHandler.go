@@ -74,6 +74,9 @@ func (controller *WatchlistsHandler) HandleWatchlistADG(ctx *gin.Context) {
 
 		switch err.Error() {
 
+		case constants.NoValidWatchlistIdsError:
+			commons.ErrorResponse(constants.FieldWatchlistId, constants.NoValidWatchlistIdsError, constants.RequestFailedError, string(req.Action), ctx)
+
 		case constants.UserNotFoundError:
 			commons.ErrorResponse(constants.FieldUsername, constants.UserNotFoundError, constants.RequestFailedError, string(req.Action), ctx)
 

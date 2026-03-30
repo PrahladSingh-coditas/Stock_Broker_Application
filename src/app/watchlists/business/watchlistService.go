@@ -58,7 +58,7 @@ func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx contex
 		}
 
 		if len(watchlistsDB) == 0 {
-			return nil, nil, errors.New("User has none of the provided watchlistIds")
+			return nil, nil, errors.New(constants.NoValidWatchlistIdsError)
 		}
 
 		if len(notValidIds) > 0 {
@@ -135,7 +135,7 @@ func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx contex
 
 	case models.GET:
 		if strings.TrimSpace(bffWatchlistsRequest.ScripId) == "" {
-			return nil, nil, errors.New("invalid scripId")
+			return nil, nil, errors.New(constants.ScripIdNotFoundError)
 		}
 
 		watchlists, err := service.watchlistsRepository.GetUserWatchlists(

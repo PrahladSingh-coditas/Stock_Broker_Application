@@ -43,4 +43,5 @@ const (
 	WatchlistNotFoundError         = "watchlist not found"
 	UniqueConstraintViolationError = "ERROR: duplicate key value violates unique constraint \"uq_watchlist_scrip\" (SQLSTATE 23505)"
 	RequestFailedError             = "request failed for %s actiontype"
+	NoValidWatchlistIdsError       = "User has none of the provided watchlistIds"
 )

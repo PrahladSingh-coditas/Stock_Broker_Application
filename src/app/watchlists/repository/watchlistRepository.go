@@ -115,11 +115,14 @@ func (repo *watchlistsRepository) GetValidWatchlists(ctx context.Context, db *go
 		return nil, nil, err
 	}
 
-	validMap := make(map[uint64]struct{})
+	fmt.Println("Fetched watchlists from DB:", watchlists)
+
+	validMap := make(map[uint64]bool)
 	for _, wl := range watchlists {
-		validMap[wl.Id] = struct{}{}
+		validMap[wl.Id] = true
 	}
 
+	fmt.Println("Valid watchlist IDs:", validMap)
 	var notValid []uint64
 	for _, id := range watchlistIds {
 		if _, ok := validMap[id]; !ok {

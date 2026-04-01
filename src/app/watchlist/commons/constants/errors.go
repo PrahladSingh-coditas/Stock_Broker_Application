@@ -82,7 +82,7 @@ const (
 	ErrNoValidWatchlists     = "no valid watchlists found that satisfy the constraints"
 
 	ErrWatchlistNotFound   = "watchlist not found in db"
-	ErrWatchlistsNotOfUser = "watchlists does not belong to user"
+	ErrWatchlistsNotOfUser = "watchlist does not belong to user"
 	ErrScripAlreadyExists  = "scrip already exists in watchlist"
 	ErrScripNotPresent     = "scrip not present in scrip_masters table"
 	ErrScripLimitExceeded  = "scrip limit exceeded(not allowed above 10)"

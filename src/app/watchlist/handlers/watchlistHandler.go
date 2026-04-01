@@ -36,6 +36,7 @@ func NewWatchlistHandler(service *business.WatchlistService) *WatchlistHandler {
 // @Security BearerAuth
 // @Param request body models.BFFAdgToWatchlistRequest true "ADG to Watchlist Request"
 // @Success 200 {object} models.BFFAdgToWatchlistResponse "ADG performed successfully"
+// @Success 204 {object} models.BFFAdgToWatchlistResponse "No Content"
 // @Failure 400 {object} models.ErrorAPIResponse  "Invalid Input Payload"
 // @Failure 404 {object} models.ErrorAPIResponse "Watchlists not found"
 // @Router /api/watchlist/watchlistADG [post]
@@ -85,10 +86,10 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 	if err != nil {
 		errorString := err.Error()
 
-		//400 error	
-		// 400 error if watchlist ids empty		
+		//400 error
+		// 400 error if watchlist ids empty
 		//400 error if invalid action
-		
+
 		if strings.Contains(errorString, constants.ErrEmptyScripId) || strings.Contains(errorString, constants.ErrEmptyWatchlists) || strings.Contains(errorString, constants.ErrInvalidAction) {
 			var key, errorMsg string
 
@@ -126,7 +127,7 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 		//404 if all watchlists not of user
 		//404 if user not found
 		//404 if any query error
-		
+
 		if strings.Contains(errorString, constants.ErrWatchlistNotFound) ||
 			strings.Contains(errorString, constants.ErrNoValidWatchlists) ||
 			strings.Contains(errorString, constants.ErrWatchlistsNotOfUser) ||
@@ -176,8 +177,10 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 
 	var response models.BFFAdgToWatchlistResponse
 
+	response.Action = bffAdgToWatchlistRequest.Action
+
 	if len(watchlistNameWithId) == 0 {
-		response.Status = constants.ActionTypeFailure
+		response.Status = constants.ActionTypeNoUpdate
 	}
 
 	if len(watchlistNameWithId) > 0 {
@@ -188,8 +191,5 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 	if len(warnings) > 0 {
 		response.Warnings = warnings
 	}
-	response.Action = bffAdgToWatchlistRequest.Action
-		
-
 	ctx.JSON(http.StatusOK, response)
 }

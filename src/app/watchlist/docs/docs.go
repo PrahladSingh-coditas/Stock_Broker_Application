@@ -51,6 +51,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.BFFAdgToWatchlistResponse"
                         }
                     },
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFAdgToWatchlistResponse"
+                        }
+                    },
                     "400": {
                         "description": "Invalid Input Payload",
                         "schema": {
@@ -94,7 +100,7 @@ const docTemplate = `{
                 "scripId": {
                     "type": "string"
                 },
-                "watchlistIds validate:": {
+                "watchlistIds": {
                     "type": "array",
                     "items": {
                         "type": "integer"

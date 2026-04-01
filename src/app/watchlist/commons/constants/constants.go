@@ -53,7 +53,7 @@ const (
 const Purpose = "password_reset"
 
 const ActionTypeSuccess = "success"
-const ActionTypeFailure = "failure"
+const ActionTypeNoUpdate = "no updates"
 
 
 

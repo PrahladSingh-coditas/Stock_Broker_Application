@@ -38,13 +38,6 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 	switch actionType {
 	case models.ADD:
 
-		// if strings.TrimSpace(bffAdgToWatchlistRequest.ScripId) == "" {
-		// 	return nil, nil, errors.New(constants.ErrEmptyScripId)
-		// }
-
-		// if len(bffAdgToWatchlistRequest.WatchlistIds) == 0 {
-		// 	return nil, nil, errors.New(constants.ErrEmptyWatchlists)
-		// }
 
 		addedWatchlists, warningsResult, err := service.watchlistRepository.WatchlistAddOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest)
 		if err != nil {
@@ -73,13 +66,6 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 		}
 
 	case models.DEL:
-		// if strings.TrimSpace(bffAdgToWatchlistRequest.ScripId) == "" {
-		// 	return nil, nil, errors.New(constants.ErrEmptyScripId)
-		// }
-
-		// if len(bffAdgToWatchlistRequest.WatchlistIds) == 0 {
-		// 	return nil, nil, errors.New(constants.ErrEmptyWatchlists)
-		// }
 
 		deletedWatchlists, warningsResult, err := service.watchlistRepository.WatchlistDeleteOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest)
 		if err != nil {
@@ -113,10 +99,6 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 
 
 	case models.GET:
-
-		// if strings.TrimSpace(bffAdgToWatchlistRequest.ScripId) == "" {
-		// 	return nil, nil, errors.New(constants.ErrEmptyScripId)
-		// }
 
 		WatchlistNamewithId, err := service.watchlistRepository.WatchlistGetOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest)
 		if err != nil {

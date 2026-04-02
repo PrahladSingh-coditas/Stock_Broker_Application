@@ -22,7 +22,7 @@ func NewWatchlistsService(watchlistsRepository repository.WatchlistsRepository) 
 	}
 }
 
-func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx context.Context, bffWatchlistsRequest models.BFFAdgToWatchlistRequest, username string) ([]structModels.WatchlistWithId, []string, error) {
+func (service *WatchlistsService) ADGtoWatchlist(ctx context.Context, spanCtx context.Context, bffWatchlistsRequest models.BFFAdgToWatchlistRequest, username string) ([]structModels.WatchlistWithId, []string, error) {
 	postgresClinet := utils.GetPostgresClient()
 	client := postgresClinet.GormDB
 
@@ -44,7 +44,7 @@ func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx contex
 
 		exists, err := service.watchlistsRepository.CheckScripExists(spanCtx, client, bffWatchlistsRequest.ScripId)
 		if err != nil {
-			return nil, nil, errors.New(constants.QueryError)
+			return nil, nil, fmt.Errorf(constants.QueryError, err)
 		}
 		if !exists {
 			return nil, nil, errors.New(constants.ScripIdNotFoundError)
@@ -54,7 +54,7 @@ func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx contex
 			spanCtx, client, users.ID, bffWatchlistsRequest.WatchlistIds,
 		)
 		if err != nil {
-			return nil, nil, errors.New(constants.QueryError)
+			return nil, nil, fmt.Errorf(constants.QueryError, err)
 		}
 
 		if len(watchlistsDB) == 0 {
@@ -77,7 +77,7 @@ func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx contex
 			return nil, warnings, nil
 		}
 
-		watchlistIdNames, err := service.watchlistsRepository.AddScripWithCTE(
+		watchlistIdNames, err := service.watchlistsRepository.AddScripToWatchist(
 			spanCtx,
 			client,
 			users.ID,
@@ -116,7 +116,7 @@ func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx contex
 
 	case models.DEL:
 
-		watchlists, err := service.watchlistsRepository.DeleteScripWithCTE(
+		watchlists, err := service.watchlistsRepository.DeleteScripFromWatchlist(
 			spanCtx,
 			client,
 			users.ID,
@@ -124,7 +124,7 @@ func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx contex
 			bffWatchlistsRequest.ScripId,
 		)
 		if err != nil {
-			return nil, nil, errors.New(constants.QueryError)
+			return nil, nil, fmt.Errorf(constants.QueryError, err)
 		}
 
 		if len(watchlists) == 0 {
@@ -142,7 +142,7 @@ func (service *WatchlistsService) Watchlists(ctx context.Context, spanCtx contex
 			spanCtx, client, users.ID, bffWatchlistsRequest.ScripId,
 		)
 		if err != nil {
-			return nil, nil, errors.New(constants.QueryError)
+			return nil, nil, fmt.Errorf(constants.QueryError, err)
 		}
 
 		if len(watchlists) == 0 {

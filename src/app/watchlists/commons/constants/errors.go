@@ -38,7 +38,7 @@ const (
 	ScripIdNotFoundError           = "scripId not found"
 	UserNotFoundError              = "user not found" // try to find by username
 	AuthenticationFailedError      = "authentication failed"
-	QueryError                     = "error in executing query"
+	QueryError                     = "error in executing query : %s"
 	InvalidActionTypeError         = "invalid action type, must be 'ADD' 'GET' or 'DEL'"
 	WatchlistNotFoundError         = "watchlist not found"
 	UniqueConstraintViolationError = "ERROR: duplicate key value violates unique constraint \"uq_watchlist_scrip\" (SQLSTATE 23505)"

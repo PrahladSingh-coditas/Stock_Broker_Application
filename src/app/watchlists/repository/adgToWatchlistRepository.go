@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	genericModels "stock_broker_application/src/models"
 	"time"
 	"watchlists/commons/constants"
@@ -22,8 +21,8 @@ type WatchlistsRepository interface {
 	CheckScripExists(ctx context.Context, db *gorm.DB, scripId string) (bool, error)
 	GetValidWatchlists(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64) ([]genericModels.Watchlists, []uint64, error)
 
-	AddScripWithCTE(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error)
-	DeleteScripWithCTE(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error)
+	AddScripToWatchist(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error)
+	DeleteScripFromWatchlist(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error)
 }
 
 type watchlistsRepository struct{}
@@ -91,7 +90,7 @@ func (user *watchlistsRepository) CheckScripExists(ctx context.Context, db *gorm
 		Count(&count).Error
 
 	if err != nil {
-		log.Println("Error:", err)
+		return false, err
 	}
 
 	logger.WithFields(logrus.Fields{
@@ -115,8 +114,6 @@ func (repo *watchlistsRepository) GetValidWatchlists(ctx context.Context, db *go
 		return nil, nil, err
 	}
 
-	fmt.Println("Fetched watchlists from DB:", watchlists)
-
 	validMap := make(map[uint64]bool)
 	for _, wl := range watchlists {
 		validMap[wl.Id] = true
@@ -133,7 +130,7 @@ func (repo *watchlistsRepository) GetValidWatchlists(ctx context.Context, db *go
 	return watchlists, notValid, nil
 }
 
-func (repo *watchlistsRepository) AddScripWithCTE(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error) {
+func (repo *watchlistsRepository) AddScripToWatchist(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error) {
 
 	var result []structModels.WatchlistWithId
 
@@ -164,7 +161,7 @@ func (repo *watchlistsRepository) AddScripWithCTE(ctx context.Context, db *gorm.
 	return result, err
 }
 
-func (repo *watchlistsRepository) DeleteScripWithCTE(
+func (repo *watchlistsRepository) DeleteScripFromWatchlist(
 	ctx context.Context,
 	db *gorm.DB,
 	userId uint64,

@@ -61,14 +61,9 @@ func (controller *WatchlistsHandler) HandleWatchlistADG(ctx *gin.Context) {
 		return
 	}
 
-	usernameInterface, exists := ctx.Get(constants.FieldUsername)
-	if !exists {
-		commons.ErrorResponse(constants.FieldUsername, constants.UserNotFoundError, constants.UserNotFoundError, string(req.Action), ctx)
-		return
-	}
-	username := usernameInterface.(string)
+	username := ctx.GetString(constants.FieldUsername)
 
-	watchlists, warnings, err := controller.service.Watchlists(ctx, ctx.Request.Context(), req, username)
+	watchlists, warnings, err := controller.service.ADGtoWatchlist(ctx, ctx.Request.Context(), req, username)
 
 	if err != nil {
 

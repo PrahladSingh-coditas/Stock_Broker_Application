@@ -14,6 +14,12 @@ func main() {
 		return
 	}
 
+	err = utils.InitRedisConfg()
+	if err!=nil{
+		log.Fatalf(constants.ErrRedisInitFailed, err)
+		return
+	}
+	
 	// Perform Migrations
 	dbClient := utils.GetPostgresClient()
 	

@@ -19,6 +19,11 @@ const (
 	ErrJWTConfigReadFailed      = "failed to read the JWT config file %s"
 )
 
+// Redis Initialization error
+const (
+	ErrRedisInitFailed = "Error connecting to redis"
+)
+
 const (
 	ErrPasswordMinLength    = "Password must be at least 8 characters long."
 	ErrPasswordLowercase    = "Password must contain at least one lower letter."

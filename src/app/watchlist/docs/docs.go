@@ -101,6 +101,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "watchlistIds": {
+                    "description": "use in built validator package here",
                     "type": "array",
                     "items": {
                         "type": "integer"

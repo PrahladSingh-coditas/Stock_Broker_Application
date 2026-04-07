@@ -16,6 +16,7 @@ definitions:
       scripId:
         type: string
       watchlistIds:
+        description: use in built validator package here
         items:
           type: integer
         type: array

@@ -17,6 +17,7 @@ const (
 	ErrReadConfigFailed         = "failed to read the config file: %s"
 	ErrUnmarshallConfigFailed   = "failed to unmarshal the config file %s"
 	ErrJWTConfigReadFailed      = "failed to read the JWT config file %s"
+	RedisConnectionError        = "Error connecting to Redis: %s"
 )
 
 const (

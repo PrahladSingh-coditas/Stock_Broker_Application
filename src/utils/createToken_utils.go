@@ -19,7 +19,7 @@ func GenerateToken(username string, purpose string) (string, error) {
 		"sub":     username,
 		"purpose": purpose,
 		"iat":     time.Now().Unix(),
-		"exp":     time.Now().Add(time.Minute * 15).Unix(),
+		"exp":     time.Now().Add(time.Minute * 10080).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(secretKey.AccessSecretKey))
@@ -51,9 +51,11 @@ func InitJWTConfig(configPath string) error {
 func ValidateToken(tokenString string) (string, error) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		//to check if it belongs to same family of signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
 		}
+		//if it does then only send the secret key to verify
 		return []byte(secretKey.AccessSecretKey), nil
 	})
 
@@ -61,6 +63,7 @@ func ValidateToken(tokenString string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		username, ok := claims["sub"].(string)
 		if !ok {

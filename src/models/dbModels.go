@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -18,3 +20,29 @@ type User struct {
 type DatabaseConfiguration struct {
 	GormDB *gorm.DB
 }
+
+type Watchlists struct {
+	ID            uint64    `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	UserId        uint64    `gorm:"column:user_id;type:bigint;not null" json:"user_id"`
+	WatchlistName string    `gorm:"column:watchlist_name;not null" json:"watchlist_name"`
+	ScripCount    uint16    `gorm:"column:scrip_count;type:smallint;default:0" json:"scrip_count"`
+	LastUpdatedAt time.Time `gorm:"column:last_updated_at;not null" json:"last_updated_at"`
+}
+
+type WatchlistScrip struct {
+	ID          uint64 `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	WatchlistId uint64 `gorm:"column:watchlist_id;not null;uniqueIndex:uq_watchlist_scrip" json:"watchlist_id"`
+	ScripId     string `gorm:"column:scrip_id;not null;uniqueIndex:uq_watchlist_scrip" json:"scrip_id"`
+
+	Watchlists  Watchlists  `gorm:"foreignKey:WatchlistId;references:ID"`
+	ScripMaster ScripMaster `gorm:"foreignKey:ScripId;references:ID"`
+}
+
+type ScripMaster struct {
+	ID        string `gorm:"column:id;primaryKey" json:"id"`
+	ScripName string `gorm:"column:scrip_name;not null" json:"scrip_name"`
+}
+
+// func(user)Tablename()string{
+// 	return "users "
+// }

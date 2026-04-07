@@ -68,6 +68,22 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 				default:
 					errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 				}
+			case constants.FieldScripId:
+				switch err.Tag() {
+				case "required":
+					errorMsg = fmt.Sprintf(constants.ErrFieldRequired, "scripId")
+				case "scripFormat":
+					errorMsg = "Incorrect scrip Id format"
+				default:
+					errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
+				}
+			case constants.FieldWatchlistId:
+				switch err.Tag() {
+				case "watchlistRequired":
+					errorMsg = fmt.Sprintf(constants.ErrFieldRequired, "watchlistIds")
+				default:
+					errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
+				}
 			default:
 				errorMsg = fmt.Sprintf(constants.ErrInvalidValue, err.Field())
 			}
@@ -127,14 +143,56 @@ func OtpValidator(f1 validator.FieldLevel) bool {
 	return matched
 }
 
+type Enum interface {
+	IsValid() bool
+}
+
+func ValidateEnum[E Enum](fl validator.FieldLevel) bool {
+	value := fl.Field().Interface().(E)
+	return value.IsValid()
+}
+
 func init() {
 	bffValidator = validator.New()
 	bffValidator.RegisterValidation("panCard", panCardValidator)
 	bffValidator.RegisterValidation("strongPassword", strongPasswordValidator)
 	bffValidator.RegisterValidation("Email", IsEmailValid)
 	bffValidator.RegisterValidation("otp", OtpValidator)
+	bffValidator.RegisterValidation("checkAction", ValidateEnum[Enum])
+	bffValidator.RegisterValidation("scripFormat", ValidateScripID)
+	bffValidator.RegisterValidation("watchlistRequired", ValidateWatchlistIds)
 }
 
 func GetBFFValidator() *validator.Validate {
 	return bffValidator
+}
+
+var scripRegex = regexp.MustCompile(`(?i)^(NSE|BSE)_\d+$`)
+
+func ValidateScripID(fl validator.FieldLevel) bool {
+	scripId := fl.Field().String()
+	if scripId == "" {
+		return false
+	}
+	return scripRegex.MatchString(scripId)
+}
+
+// validate if watchlists exist for add and del operations
+func ValidateWatchlistIds(fl validator.FieldLevel) bool {
+	actionField := fl.Parent().FieldByName("Action")
+
+	// If Action field not found, skip validation
+	if !actionField.IsValid() {
+		return true
+	}
+
+	action := fmt.Sprintf("%v", actionField.Interface())
+
+	watchlistIds := fl.Field().Interface().([]uint64)
+
+	if action == "ADD" || action == "DEL" {
+		return len(watchlistIds) > 0
+	}
+
+	return true
 }

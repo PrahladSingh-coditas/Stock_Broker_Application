@@ -10,7 +10,6 @@ definitions:
         minLength: 8
         type: string
     required:
-    - confirmpassword
     - newpassword
     type: object
   models.BFFChangePasswordResponse:

@@ -239,7 +239,6 @@ const docTemplate = `{
         "models.BFFChangePasswordRequest": {
             "type": "object",
             "required": [
-                "confirmpassword",
                 "newpassword"
             ],
             "properties": {

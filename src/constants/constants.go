@@ -25,6 +25,9 @@ const (
 	FieldEmail           = "Email"
 	FieldUsername        = "Username"
 	FieldOtp             = "Otp"
+
+	FieldScripId = "ScripId"
+	FieldWatchlistId = "WatchlistIds"
 )
 
 // Migration success Message

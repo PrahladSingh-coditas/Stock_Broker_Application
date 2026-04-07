@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
-	
+
 	"time"
 	"watchlist/commons/constants"
 	"watchlist/models"
@@ -178,7 +178,6 @@ func (repo *watchlistRepository) WatchlistDeleteOperation(ctx context.Context, d
 		return []models.WatchlistWithId{}, warnings, nil
 	}
 
-	
 	var deletedWatchlists []models.WatchlistWithId
 
 	err = db.WithContext(ctx).

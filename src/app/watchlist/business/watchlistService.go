@@ -50,7 +50,7 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 			warningsAll = append(warningsAll, msg)
 		}
 		
-		var warningsNotOfUser []string
+		var warningsNotOfUser []string  //optimisation as recommended
 		for _,val := range warningsAll{
 			if strings.Contains(val,constants.ErrWatchlistsNotOfUser){
 				warningsNotOfUser = append(warningsNotOfUser, val)

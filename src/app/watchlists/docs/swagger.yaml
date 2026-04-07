@@ -1,0 +1,121 @@
+definitions:
+  models.ActionType:
+    enum:
+    - ADD
+    - DEL
+    - GET
+    type: string
+    x-enum-varnames:
+    - ADD
+    - DEL
+    - GET
+  models.BFFAdgToWatchlistRequest:
+    properties:
+      action:
+        allOf:
+        - $ref: '#/definitions/models.ActionType'
+        example: GET
+      scripId:
+        example: BSE_2001
+        type: string
+      watchlistIds:
+        example:
+        - 1
+        - 2
+        - 3
+        items:
+          type: integer
+        type: array
+    required:
+    - action
+    - scripId
+    type: object
+  models.BFFAdgToWatchlistResponse:
+    properties:
+      action:
+        $ref: '#/definitions/models.ActionType'
+      message:
+        type: string
+      warnings:
+        items:
+          type: string
+        type: array
+      watchlistNames:
+        items:
+          $ref: '#/definitions/models.WatchlistWithId'
+        type: array
+    type: object
+  models.ErrorAPIResponse:
+    properties:
+      error:
+        type: string
+      errors:
+        $ref: '#/definitions/models.ErrorMessage'
+    type: object
+  models.ErrorMessage:
+    properties:
+      errorMessage:
+        type: string
+      key:
+        type: string
+    type: object
+  models.WatchlistWithId:
+    properties:
+      watchlist_id:
+        type: integer
+      watchlist_name:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Omnenest backend for watchlist micro-service (Middleware layer).
+  title: omnenest-backend
+  version: "1.0"
+paths:
+  /api/watch/watchlists:
+    post:
+      consumes:
+      - application/json
+      description: Performs ADD, GET or DELETE Operation Based on ActionType
+      parameters:
+      - description: Watchlist ADG Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BFFAdgToWatchlistRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ADG Request Successful
+          schema:
+            $ref: '#/definitions/models.BFFAdgToWatchlistResponse'
+        "400":
+          description: Invalid input payload
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "401":
+          description: DataBase Error
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "404":
+          description: User does not exist
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+      security:
+      - BearerAuth: []
+      summary: Executed ADG Operations
+      tags:
+      - User
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+    x-extension-openapi: '{"example": "value on a json format"}'
+swagger: "2.0"

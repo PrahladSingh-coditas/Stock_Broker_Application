@@ -5,6 +5,7 @@ const (
 )
 
 const (
+	ScripIdRegex     = `(?i)^(NSE|BSE)_\d+$`
 	PANCardRegex     = `^[A-Z]{5}[0-9]{4}[A-Z]{1}$`
 	PasswordRegex    = `^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$`
 	EmailRegex       = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$`
@@ -15,6 +16,7 @@ const (
 	OtpRegex         = "^[0-9]{4}$"
 )
 
+// columns in users
 const (
 	FieldPassword        = "Password"
 	FieldConfirmPassword = "ConfirmPassword"
@@ -24,6 +26,13 @@ const (
 	FieldEmail           = "Email"
 	FieldUsername        = "Username"
 	FieldOtp             = "Otp"
+)
+
+// request fields
+const (
+	FieldScripId     = "ScripId"
+	FieldWatchlistId = "WatchlistIds"
+	FieldAction      = "Action"
 )
 
 // Migration success Message

@@ -2,11 +2,14 @@ package business
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"stock_broker_application/src/app/watchlist/commons/constants"
 	"stock_broker_application/src/app/watchlist/models"
 	"stock_broker_application/src/app/watchlist/repository"
 	"stock_broker_application/src/utils"
+	"strconv"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -24,10 +27,17 @@ func NewWatchlistService(watchlistRepository repository.WatchlistRepository) *Wa
 }
 
 func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx context.Context, logger *logrus.Logger, bffAdgToWatchlistRequest models.BFFAdgToWatchlistRequest, username string) ([]models.WatchlistWithID, []string, error) {
-	postgresClinet := utils.GetPostgresClient()
-	tx := postgresClinet.GormDB.Begin()
+	redisClient, err := utils.GetRedisInstance(ctx)
+
+	if err != nil || redisClient == nil {
+		logger.Error(constants.RedisConnectionError)
+	}
+
+	postgresClient := utils.GetPostgresClient()
+	tx := postgresClient.GormDB.Begin()
 	var watchlistsWithId []models.WatchlistWithID
 	var warnings []string
+	var response string
 
 	userId, err := service.watchlistRepository.GetUserIdByUsername(ctx, tx, logger, username)
 
@@ -35,8 +45,26 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 		return nil, nil, err
 	}
 
+	key := "user:" + strconv.Itoa(int(*userId)) + ":scripId:" + bffAdgToWatchlistRequest.ScripId
+
 	switch bffAdgToWatchlistRequest.Action {
 	case models.GET:
+
+		if redisClient != nil {
+			response, err = redisClient.Get(ctx, key).Result()
+		}
+
+		if err == nil && len(response) != 0 {
+			err := json.Unmarshal([]byte(response), &watchlistsWithId)
+			if err != nil {
+				logger.Error(constants.RedisUnmarshallingError)
+			} else {
+				logger.Info(constants.DataFetchFromRedis)
+				break
+			}
+
+		}
+
 		resultListsForGET, err := service.watchlistRepository.GetWatchlistsWithId(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.ScripId)
 		if err != nil {
 			return nil, nil, errors.New(constants.ErrNoWatchlistForScripMsg)
@@ -56,10 +84,21 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 				WatchlistName: resultListsForGET.WatchlistName[i],
 			})
 		}
+
+		marshalledData, err := json.Marshal(watchlistsWithId)
+		if err != nil {
+			logger.Error(constants.RedismarshallingError)
+		}
+
+		err = redisClient.Set(ctx, key, marshalledData, time.Minute*60).Err()
+		if err != nil {
+			logger.Error(constants.RedisDataAdditionError)
+		}
+
 	case models.DEL:
 
 		if len(bffAdgToWatchlistRequest.WatchlistIds) == 0 {
-			return nil, nil, errors.New("watchlist Ids can't be empty for this operation")
+			return nil, nil, errors.New(constants.EmptyWatchlistIdsError)
 		}
 
 		resultListsForDEL, err := service.watchlistRepository.DeleteScripsFromWatchlists(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.WatchlistIds, bffAdgToWatchlistRequest.ScripId)
@@ -77,13 +116,19 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 		if len(resultListsForDEL.ValidWatchlistIds) == 0 {
 			return nil, nil, errors.New(constants.ErrNoWatchlistForScripMsg)
 		} else if len(resultListsForDEL.ValidWatchlistIds) != len(bffAdgToWatchlistRequest.WatchlistIds) {
-			warnings = append(warnings, "some watchlist ids were invalid")
+			warnings = append(warnings, constants.InvalidWatchlistIdsError)
+		}
+
+		err = redisClient.Del(ctx, key).Err()
+
+		if err != nil {
+			logger.Error(constants.RedisDataDeletionError)
 		}
 
 	case models.ADD:
 
 		if len(bffAdgToWatchlistRequest.WatchlistIds) == 0 {
-			return nil, nil, errors.New("watchlist Ids can't be empty for this operation")
+			return nil, nil, errors.New(constants.EmptyWatchlistIdsError)
 		}
 
 		result, err := service.watchlistRepository.AddScripsToWatchlists(ctx, tx, logger, *userId, bffAdgToWatchlistRequest.WatchlistIds, bffAdgToWatchlistRequest.ScripId)
@@ -115,6 +160,13 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 				})
 			}
 		}
+
+		err = redisClient.Del(ctx, key).Err()
+
+		if err != nil {
+			logger.Error(constants.RedisDataDeletionError)
+		}
+
 	}
 
 	if len(warnings) == 0 {

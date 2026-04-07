@@ -30,12 +30,13 @@ const (
 	MaxScripsPerWatchlist         = 10
 )
 
-//Scrip service related
+// Scrip service related
 const (
-	NoScripAddedToWatchlistMsg = "no scrips were added to any watchlist"
-	AlreadyExistsInSomeWatchlistMsg = "scrip already exists in some watchlists"
+	NoScripAddedToWatchlistMsg       = "no scrips were added to any watchlist"
+	AlreadyExistsInSomeWatchlistMsg  = "scrip already exists in some watchlists"
 	SomeWatchlistsReachedMaxLimitMsg = "some watchlists reached max limit (10)"
-	NoWarningsMsg = "no warnings!"
+	NoWarningsMsg                    = "no warnings!"
+	ActionCompletedMsg               = "action completed successfully"
 )
 
 // Logger and middleware related
@@ -61,4 +62,9 @@ const (
 const (
 	BaseConfig = "../../config"
 	RootConfig = "./src/config"
+)
+
+//redis related messages
+const (
+	DataFetchFromRedis="Data fetch from the cache memory"
 )

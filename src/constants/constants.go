@@ -38,6 +38,11 @@ const (
 	MsgDBMigrationSuccess = "Database migration completed successfully!"
 )
 
+//Redis
+const (
+	Localhost="127.0.0.1:6379"
+)
+
 const (
 	Postgres = "postgres"
 	JWT      = "jwt"

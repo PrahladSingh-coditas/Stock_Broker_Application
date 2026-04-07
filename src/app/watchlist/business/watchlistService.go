@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"stock_broker_application/src/app/watchlist/commons/constants"
 	"stock_broker_application/src/app/watchlist/models"
 	"stock_broker_application/src/app/watchlist/repository"
@@ -45,13 +46,13 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 		return nil, nil, err
 	}
 
-	key := "user:" + strconv.Itoa(int(*userId)) + ":scripId:" + bffAdgToWatchlistRequest.ScripId
+	cacheKey := fmt.Sprintf(constants.UserIdScripIdKey, strconv.Itoa(int(*userId)), bffAdgToWatchlistRequest.ScripId)
 
 	switch bffAdgToWatchlistRequest.Action {
 	case models.GET:
 
 		if redisClient != nil {
-			response, err = redisClient.Get(ctx, key).Result()
+			response, err = redisClient.Get(ctx, cacheKey).Result()
 		}
 
 		if err == nil && len(response) != 0 {
@@ -90,7 +91,7 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 			logger.Error(constants.RedismarshallingError)
 		}
 
-		err = redisClient.Set(ctx, key, marshalledData, time.Minute*60).Err()
+		err = redisClient.Set(ctx, cacheKey, marshalledData, time.Minute*60).Err()
 		if err != nil {
 			logger.Error(constants.RedisDataAdditionError)
 		}
@@ -119,7 +120,7 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 			warnings = append(warnings, constants.InvalidWatchlistIdsError)
 		}
 
-		err = redisClient.Del(ctx, key).Err()
+		err = redisClient.Del(ctx, cacheKey).Err()
 
 		if err != nil {
 			logger.Error(constants.RedisDataDeletionError)
@@ -161,7 +162,7 @@ func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx c
 			}
 		}
 
-		err = redisClient.Del(ctx, key).Err()
+		err = redisClient.Del(ctx, cacheKey).Err()
 
 		if err != nil {
 			logger.Error(constants.RedisDataDeletionError)

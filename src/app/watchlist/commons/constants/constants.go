@@ -64,7 +64,8 @@ const (
 	RootConfig = "./src/config"
 )
 
-//redis related messages
+// redis
 const (
-	DataFetchFromRedis="Data fetch from the cache memory"
+	DataFetchFromRedis = "Data fetch from the cache memory"
+	UserIdScripIdKey   = "user:%s:scripId:%s"
 )

@@ -55,7 +55,7 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 		logger.WithFields(logrus.Fields{
 			constants.Username: username,
 			constants.Latency:  time.Since(start).Milliseconds(),
-		}).Info(constants.ErrBindingFailed)
+		}).Error(constants.ErrBindingFailed)
 
 		ctx.IndentedJSON(http.StatusBadRequest, genericModels.ErrorAPIResponse{
 			Message: errorMsgs,
@@ -70,7 +70,7 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 		logger.WithFields(logrus.Fields{
 			constants.Username: username,
 			constants.Latency:  time.Since(start).Milliseconds(),
-		}).Info(constants.ErrValidationFailed)
+		}).Error(constants.ErrValidationFailed)
 
 		ctx.IndentedJSON(http.StatusBadRequest, validationErrors)
 		return
@@ -83,36 +83,52 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 	if err != nil {
 		fmt.Println(err)
 		if strings.Contains(err.Error(), errors.New(constants.ErrUserNotFoundMsg).Error()) {
+
+			logger.Error(constants.ErrUserNotFoundMsg)
+
 			ctx.IndentedJSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{Key: constants.User, ErrorMessage: constants.ErrUserNotFoundMsg},
 				Error:   constants.ErrRequestFailed,
 			})
 			return
 		} else if strings.Contains(err.Error(), errors.New(constants.ErrDatabaseQueryErrorMsg).Error()) {
+
+			logger.Error(constants.ErrDatabaseQueryErrorMsg)
+
 			ctx.IndentedJSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{Key: constants.Database, ErrorMessage: constants.ErrDatabaseQueryErrorMsg},
 				Error:   constants.ErrRequestFailed,
 			})
 			return
 		} else if strings.Contains(err.Error(), errors.New(constants.ErrScripNotFoundMsg).Error()) {
+
+			logger.Error(constants.ErrScripNotFoundMsg)
 			ctx.IndentedJSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{Key: constants.FieldScripId, ErrorMessage: constants.ErrScripNotFoundMsg},
 				Error:   constants.ErrRequestFailed,
 			})
 			return
 		} else if strings.Contains(err.Error(), errors.New(constants.ErrNoWatchlistForScripMsg).Error()) {
+
+			logger.Error(constants.ErrNoWatchlistForScripMsg)
+
 			ctx.IndentedJSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{Key: constants.FieldWatchlistId, ErrorMessage: constants.ErrNoWatchlistForScripMsg},
 				Error:   constants.ErrRequestFailed,
 			})
 			return
-		} else if strings.Contains(err.Error(), errors.New("watchlist Ids can't be empty for this operation").Error()) {
+		} else if strings.Contains(err.Error(), errors.New(constants.EmptyWatchlistIdsError).Error()) {
+
+			logger.Error(constants.EmptyWatchlistIdsError)
+
 			ctx.IndentedJSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
-				Message: genericModels.ErrorMessage{Key: constants.FieldWatchlistId, ErrorMessage: "watchlist Ids can't be empty for this operation"},
+				Message: genericModels.ErrorMessage{Key: constants.FieldWatchlistId, ErrorMessage: constants.EmptyWatchlistIdsError},
 				Error:   constants.ErrRequestFailed,
 			})
 			return
 		}
+
+		logger.Error(constants.ErrInternalServer)
 
 		ctx.IndentedJSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
 			Message: genericModels.ErrorMessage{Key: constants.Server, ErrorMessage: constants.ErrInternalServer},
@@ -127,6 +143,8 @@ func (controller *WatchlistHandler) HandleWatchlist(ctx *gin.Context) {
 		WatchlistWithId: watchlistWithId,
 		Warnings:        warnings,
 	}
+
+	logger.Info(constants.ActionCompletedMsg)
 
 	if bffAdgToWatchlistRequest.Action == models.ADD {
 		ctx.IndentedJSON(http.StatusCreated, bffAdgToWatchlistResponse)

@@ -24,6 +24,7 @@ const (
 	ErrUserAlreadyExistsMsg   = "user already exists"
 	ErrFailedToEncrypt        = "failed to encrypt password"
 	ErrServer                 = "server"
+	InvalidWatchlistIdsError  = "some watchlist ids were invalid"
 )
 
 // Request Validation Errors
@@ -44,4 +45,14 @@ const (
 	ErrDBConnectionFailed  = "Error connecting to database: %s"
 	ErrInternalServer      = "internal server error"
 	ErrJWTConfigReadFailed = "failed to read the JWT config file %s"
+)
+
+// Redis related errors
+const (
+	EmptyWatchlistIdsError  = "watchlist Ids can't be empty for this operation"
+	RedisConnectionError    = "redis connection error"
+	RedisUnmarshallingError = "redis: data unmarshalling error"
+	RedismarshallingError   = "redis: data marshalling error"
+	RedisDataAdditionError  = "redis: data addition error"
+	RedisDataDeletionError  = "redis: data deletion error"
 )

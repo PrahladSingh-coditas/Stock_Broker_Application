@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"stock_broker_application/src/constants"
 	"sync"
 
 	"github.com/redis/go-redis/v9"
@@ -12,15 +13,15 @@ var once sync.Once
 var redisErr error
 
 func initRedisClient() {
-	rc := redis.NewClient(&redis.Options{
-		Addr:     "127.0.0.1:6379",
-		Password: "",
-		DB:       0,
+	client := redis.NewClient(&redis.Options{
+		Addr:     constants.Address,
+		Password: constants.Password,
+		DB:       constants.DB,
 	})
 
-	_, err := rc.Ping(context.Background()).Result()
+	_, err := client.Ping(context.Background()).Result()
 
-	RedisClient = rc
+	RedisClient = client
 	redisErr = err
 }
 

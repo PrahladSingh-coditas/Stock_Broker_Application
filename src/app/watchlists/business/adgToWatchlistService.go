@@ -29,10 +29,9 @@ func NewWatchlistsService(watchlistsRepository repository.WatchlistsRepository) 
 
 func (service *WatchlistsService) ADGtoWatchlist(ctx context.Context, spanCtx context.Context, bffWatchlistsRequest models.BFFAdgToWatchlistRequest, username string) ([]structModels.WatchlistWithId, []string, error) {
 	postgresClient := utils.GetPostgresClient().GormDB
-	redisClient, redisError := utils.GetRedisClient()
+	redisClient, _ := utils.GetRedisClient()
 	var warnings []string
-	var cacheKey string
-	var cachedData string
+	var cacheKey, cachedData string
 
 	users, err := service.watchlistsRepository.GetUserId(spanCtx, postgresClient, username)
 	if err != nil {
@@ -144,12 +143,9 @@ func (service *WatchlistsService) ADGtoWatchlist(ctx context.Context, spanCtx co
 			return nil, nil, errors.New(constants.ScripIdNotFoundError)
 		}
 
-		if redisError == nil {
+		if redisClient != nil {
 			cacheKey = fmt.Sprintf("userId:%d:scripId:%s:watchlists", users.ID, bffWatchlistsRequest.ScripId)
-
-			if redisClient != nil {
-				cachedData, _ = redisClient.Get(ctx, cacheKey).Result()
-			}
+			cachedData, _ = redisClient.Get(ctx, cacheKey).Result()
 
 			if len(cachedData) > 0 {
 				var chachedWatchlists []structModels.WatchlistWithId

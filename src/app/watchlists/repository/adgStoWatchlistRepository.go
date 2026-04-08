@@ -8,28 +8,35 @@ import (
 	"watchlists/commons/constants"
 	"watchlists/models"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 type AdgStoWatchlistRepository interface {
-	GetUserByUsername(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error)
-	GetWatchlistDetails(ctx context.Context, db *gorm.DB, addedTo []uint64) ([]genericModels.Watchlist, error)
-	DelScripFromWatchlists(ctx context.Context, db *gorm.DB, userId uint64, scripId string, watchlistIds []uint64) ([]uint64, error)
-	AddScripToWatchlists(ctx context.Context, db *gorm.DB, userId uint64, scripId string, watchlistIds []uint64) ([]uint64, []uint64, error)
-	GetScripFromWatchlists(ctx context.Context, db *gorm.DB, userId uint64, scripId string) ([]models.WatchlistWithId, error)
+	GetUserByUsername(ctx context.Context, username string) (*genericModels.User, error)
+	GetWatchlistDetails(ctx context.Context, addedTo []uint64) ([]genericModels.Watchlist, error)
+	DelScripFromWatchlists(ctx context.Context, userId uint64, scripId string, watchlistIds []uint64) ([]uint64, error)
+	AddScripToWatchlists(ctx context.Context, userId uint64, scripId string, watchlistIds []uint64) ([]uint64, []uint64, error)
+	GetScripFromWatchlists(ctx context.Context, userId uint64, scripId string) ([]models.WatchlistWithId, error)
 }
 
-type adgStoWatchlistsRepository struct{}
+type AdgStoWatchlistsRepository struct {
+	db  *gorm.DB
+	rdb *redis.Client
+}
 
-func NewadgStoWatchlistsRepository() *adgStoWatchlistsRepository {
-	return &adgStoWatchlistsRepository{}
+func NewadgStoWatchlistsRepository(db *gorm.DB, rdb *redis.Client) *AdgStoWatchlistsRepository {
+	return &AdgStoWatchlistsRepository{
+		db:  db,
+		rdb: rdb,
+	}
 }
 
 // checks if the user exists in the given table or not
-func (repo *adgStoWatchlistsRepository) GetUserByUsername(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error) {
+func (repo *AdgStoWatchlistsRepository) GetUserByUsername(ctx context.Context, username string) (*genericModels.User, error) {
 	var user genericModels.User
 
-	result := db.WithContext(ctx).
+	result := repo.db.WithContext(ctx).
 		Table(constants.UsersTableName).
 		Where(constants.Username, username).
 		First(&user) //change table name
@@ -44,10 +51,10 @@ func (repo *adgStoWatchlistsRepository) GetUserByUsername(ctx context.Context, d
 
 // returns a list of watchlistWithIds for returning in the service response
 // optimised as compared to other helper functions, because here instaed of using a loop, we used IN oprator
-func (repo *adgStoWatchlistsRepository) GetWatchlistDetails(ctx context.Context, db *gorm.DB, addedTo []uint64) ([]genericModels.Watchlist, error) {
+func (repo *AdgStoWatchlistsRepository) GetWatchlistDetails(ctx context.Context, addedTo []uint64) ([]genericModels.Watchlist, error) {
 	var watchlists []genericModels.Watchlist
 
-	err := db.WithContext(ctx).
+	err := repo.db.WithContext(ctx).
 		Table("watchlists").
 		Where("id IN ?", addedTo).
 		Find(&watchlists).Error
@@ -61,7 +68,7 @@ func (repo *adgStoWatchlistsRepository) GetWatchlistDetails(ctx context.Context,
 
 // deletes the scripid in the request from the mentioned watchlists,
 // returns a []uint64 for the list of WIds which belong to the user.
-func (repo *adgStoWatchlistsRepository) DelScripFromWatchlists(ctx context.Context, db *gorm.DB, userId uint64, scripId string, watchlistIds []uint64) ([]uint64, error) {
+func (repo *AdgStoWatchlistsRepository) DelScripFromWatchlists(ctx context.Context, userId uint64, scripId string, watchlistIds []uint64) ([]uint64, error) {
 	if len(watchlistIds) == 0 {
 		return []uint64{}, nil
 	}
@@ -88,7 +95,7 @@ func (repo *adgStoWatchlistsRepository) DelScripFromWatchlists(ctx context.Conte
 	SELECT id FROM valid_watchlists
 	`
 	var validWatchlists []uint64
-	err := db.WithContext(ctx).Raw(query, userId, watchlistIds, scripId).Scan(&validWatchlists).Error
+	err := repo.db.WithContext(ctx).Raw(query, userId, watchlistIds, scripId).Scan(&validWatchlists).Error
 	if err != nil {
 		return nil, constants.DatabaseQueryError
 	}
@@ -96,7 +103,7 @@ func (repo *adgStoWatchlistsRepository) DelScripFromWatchlists(ctx context.Conte
 	return validWatchlists, nil
 }
 
-func (repo *adgStoWatchlistsRepository) AddScripToWatchlists(ctx context.Context, db *gorm.DB, userId uint64, scripId string, watchlistIds []uint64) ([]uint64, []uint64, error) {
+func (repo *AdgStoWatchlistsRepository) AddScripToWatchlists(ctx context.Context, userId uint64, scripId string, watchlistIds []uint64) ([]uint64, []uint64, error) {
 
 	type Result struct {
 		ValidWatchlistIds    uint64  `gorm:"column:valid_watchlist_ids"`
@@ -135,7 +142,7 @@ func (repo *adgStoWatchlistsRepository) AddScripToWatchlists(ctx context.Context
 		LEFT JOIN insert_records AS ir
 			ON vw.id = ir.watchlist_id;
 	`
-	err := db.WithContext(ctx).Raw(query, watchlistIds, userId, scripId).Scan(&results).Error
+	err := repo.db.WithContext(ctx).Raw(query, watchlistIds, userId, scripId).Scan(&results).Error
 	if err != nil {
 		if strings.Contains(strings.ToLower(err.Error()), "foreign key") {
 			return nil, nil, constants.ScripDoesNotExistError
@@ -155,7 +162,7 @@ func (repo *adgStoWatchlistsRepository) AddScripToWatchlists(ctx context.Context
 
 // checks if the scrip exists in scrip_masters table and if exists, returns the list of watchlists in which the scrip is present,
 // returns a []uint64 for the list of WIds in which the scrip is present
-func (repo *adgStoWatchlistsRepository) GetScripFromWatchlists(ctx context.Context, db *gorm.DB, userId uint64, scripId string) ([]models.WatchlistWithId, error) {
+func (repo *AdgStoWatchlistsRepository) GetScripFromWatchlists(ctx context.Context, userId uint64, scripId string) ([]models.WatchlistWithId, error) {
 	var watchlists []models.WatchlistWithId
 	type result struct {
 		ScripCount    int     `gorm:"column:scrip_count"`
@@ -186,7 +193,7 @@ func (repo *adgStoWatchlistsRepository) GetScripFromWatchlists(ctx context.Conte
 		LEFT JOIN filtered f
 			ON TRUE
 	`
-	err := db.WithContext(ctx).Raw(query, scripId, userId, scripId).Scan(&resultRows).Error
+	err := repo.db.WithContext(ctx).Raw(query, scripId, userId, scripId).Scan(&resultRows).Error
 	if err != nil {
 		return nil, constants.DatabaseQueryError
 	}

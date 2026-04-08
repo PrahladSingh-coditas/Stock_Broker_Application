@@ -69,3 +69,10 @@ const (
 	ContentType   = "Content-type"
 	Authorization = "Authorization"
 )
+
+// redis
+const (
+	RedisAddr     = "127.0.0.1:6379"
+	RedisPassword = ""
+	RedisDB       = 0
+)

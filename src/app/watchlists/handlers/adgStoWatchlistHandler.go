@@ -79,7 +79,7 @@ func (controller *AdgStoWatchlistHandler) HandleAdgStoWatchlist(ctx *gin.Context
 					Key:          constants.UserID,
 					ErrorMessage: constants.ErrUserNotFound,
 				},
-				Error: fmt.Sprintf(constants.ErrRequestFailed, ReqAction),
+				Error: fmt.Sprintf(constants.RequestFailedError, ReqAction),
 			})
 			return
 
@@ -89,7 +89,7 @@ func (controller *AdgStoWatchlistHandler) HandleAdgStoWatchlist(ctx *gin.Context
 					Key:          constants.Database,
 					ErrorMessage: constants.ErrDatabaseQuery,
 				},
-				Error: fmt.Sprintf(constants.ErrRequestFailed, ReqAction),
+				Error: fmt.Sprintf(constants.RequestFailedError, ReqAction),
 			})
 			return
 
@@ -99,7 +99,7 @@ func (controller *AdgStoWatchlistHandler) HandleAdgStoWatchlist(ctx *gin.Context
 					Key:          constants.ScripID,
 					ErrorMessage: constants.ErrScripDoesnotExist,
 				},
-				Error: fmt.Sprintf(constants.ErrRequestFailed, ReqAction),
+				Error: fmt.Sprintf(constants.RequestFailedError, ReqAction),
 			})
 			return
 
@@ -109,7 +109,7 @@ func (controller *AdgStoWatchlistHandler) HandleAdgStoWatchlist(ctx *gin.Context
 					Key:          constants.ScripID,
 					ErrorMessage: constants.ErrScripNotInWatchlists,
 				},
-				Error: fmt.Sprintf(constants.ErrRequestFailed, ReqAction),
+				Error: fmt.Sprintf(constants.RequestFailedError, ReqAction),
 			})
 			return
 
@@ -119,7 +119,7 @@ func (controller *AdgStoWatchlistHandler) HandleAdgStoWatchlist(ctx *gin.Context
 					Key:          constants.WatchlistID,
 					ErrorMessage: constants.ErrInvalidWatchists,
 				},
-				Error: fmt.Sprintf(constants.ErrRequestFailed, ReqAction),
+				Error: fmt.Sprintf(constants.RequestFailedError, ReqAction),
 			})
 			return
 
@@ -129,7 +129,7 @@ func (controller *AdgStoWatchlistHandler) HandleAdgStoWatchlist(ctx *gin.Context
 					Key:          constants.Action,
 					ErrorMessage: constants.ErrInvalidActiontype,
 				},
-				Error: fmt.Sprintf(constants.ErrRequestFailed, ReqAction),
+				Error: fmt.Sprintf(constants.RequestFailedError, ReqAction),
 			})
 			return
 
@@ -149,7 +149,7 @@ func (controller *AdgStoWatchlistHandler) HandleAdgStoWatchlist(ctx *gin.Context
 					Key:          constants.Server,
 					ErrorMessage: constants.InternalServerError,
 				},
-				Error: fmt.Sprintf(constants.ErrRequestFailed, ReqAction),
+				Error: fmt.Sprintf(constants.RequestFailedError, ReqAction),
 			})
 			return
 		}

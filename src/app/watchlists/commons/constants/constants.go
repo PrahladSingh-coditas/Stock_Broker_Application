@@ -1,5 +1,7 @@
 package constants
 
+import "time"
+
 const (
 	UsersTableName = "users"
 	Username       = "username = ?"
@@ -34,4 +36,8 @@ const (
 	Action      = "action"
 	Database    = "database"
 	Server      = "server"
+)
+
+const (
+	RedisKeyTTL = 30 * time.Minute
 )

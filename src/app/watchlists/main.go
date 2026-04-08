@@ -29,6 +29,10 @@ func main() {
 		log.Fatalf(constants.ErrJWTConfigReadFailed, err)
 	}
 
+	if err := utils.InitRedisConfig(); err != nil {
+		log.Fatalf(constants.ErrRedisConfigFailed, err)
+	}
+
 	startRouter()
 }
 

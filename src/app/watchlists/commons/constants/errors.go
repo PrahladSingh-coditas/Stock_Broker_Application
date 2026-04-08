@@ -41,5 +41,12 @@ var (
 )
 
 const (
-	ErrRequestFailed = "%s request failed"
+	RequestFailedError = "%s request failed"
+)
+
+const (
+	ErrMarshallingCache   = "error marshalling data: "
+	ErrUnmarshallingCache = "error while unmarshallig cache: "
+	ErrSavingToCache      = "error saving data to redis: "
+	ErrDeletingFromCache  = "error deleting data from redis"
 )

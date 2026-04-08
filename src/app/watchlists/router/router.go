@@ -3,6 +3,7 @@ package router
 import (
 	"authentication/middleware"
 	genericConstants "stock_broker_application/src/constants"
+	"stock_broker_application/src/utils"
 	"watchlists/business"
 	"watchlists/commons/constants"
 	"watchlists/docs"
@@ -30,8 +31,11 @@ func GetRouter() *gin.Engine {
 		AllowHeaders: []string{genericConstants.Origin, genericConstants.ContentType, genericConstants.Authorization},
 	}))
 
-	adgScripRepository := repository.NewadgStoWatchlistsRepository()
-	adgScripService := business.NewadgStoWatchlistService(adgScripRepository)
+	db := utils.GetPostgresClient().GormDB
+	rdb := utils.GetRedisClient()
+
+	adgScripRepository := repository.NewadgStoWatchlistsRepository(db, rdb)
+	adgScripService := business.NewadgStoWatchlistService(adgScripRepository, rdb)
 	adgScripHandler := handlers.NewAdgStoWatchlistHandler(adgScripService)
 
 	authGroup := router.Group(constants.AdgRoutePrefix)

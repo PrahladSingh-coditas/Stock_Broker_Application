@@ -1,0 +1,130 @@
+definitions:
+  models.Actiontype:
+    enum:
+    - ADD
+    - DEL
+    - GET
+    type: string
+    x-enum-varnames:
+    - AddAction
+    - DelAction
+    - GetAction
+  models.BffAdgStoWatchlistRequest:
+    properties:
+      action:
+        allOf:
+        - $ref: '#/definitions/models.Actiontype'
+        description: ADD or  DEL or GET
+        example: GET
+      scripId:
+        example: RELI_2018
+        type: string
+      watchlistIds:
+        example:
+        - 1
+        - 2
+        - 3
+        items:
+          type: integer
+        type: array
+    required:
+    - action
+    - scripId
+    type: object
+  models.BffAdgStoWatchlistResponse:
+    properties:
+      action:
+        allOf:
+        - $ref: '#/definitions/models.Actiontype'
+        description: the one from the request
+      status:
+        description: success or failure, if succeded - descriptive message, if failed
+          - failed adding/ deleting/ getting scrip to wathclist...
+        type: string
+      warnings:
+        description: only while adding if a scrip already exists in a watchlist
+        items:
+          type: string
+        type: array
+      watchlistNames:
+        items:
+          $ref: '#/definitions/models.WatchlistWithId'
+        type: array
+    type: object
+  models.ErrorAPIResponse:
+    properties:
+      error:
+        type: string
+      errors:
+        $ref: '#/definitions/models.ErrorMessage'
+    type: object
+  models.ErrorMessage:
+    properties:
+      errorMessage:
+        type: string
+      key:
+        type: string
+    type: object
+  models.WatchlistWithId:
+    properties:
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Watchlists ADD DEL GET APIs for Stock Broker Application
+  title: Watchlists ADG Service API
+  version: "1.0"
+paths:
+  /adg/scrip:
+    post:
+      consumes:
+      - application/json
+      description: verifies the JWT and adds/ deletes/ gets the scrip in the request
+        to/ from the list of watchlists
+      parameters:
+      - description: ADG Watchlist Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BffAdgStoWatchlistRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ADG Performed successfully
+          schema:
+            $ref: '#/definitions/models.BffAdgStoWatchlistResponse'
+        "400":
+          description: Invalid input payload
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "401":
+          description: 'Case A: JWT expired / Case B: JWT invalid / Case C: Unauthorized
+            request'
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "404":
+          description: User does not exist
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+      security:
+      - BearerAuth: []
+      summary: Perform ADG for watchlist
+      tags:
+      - Watchlist
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+    x-extension-openapi: '{"example": "value on a json format"}'
+swagger: "2.0"

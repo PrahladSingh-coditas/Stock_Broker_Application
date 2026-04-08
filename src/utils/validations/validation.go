@@ -137,12 +137,27 @@ func OtpValidator(f1 validator.FieldLevel) bool {
 	return matched
 }
 
+type Enum interface {
+	IsValid() bool
+}
+
+// ValidateEnum is a validation function that chekcs if the value of a filed implements the Enum interface and is valid.
+func ValidateEnum[E Enum](f1 validator.FieldLevel) bool {
+	val := f1.Field().Interface().(E)
+	return val.IsValid()
+}
+
+func IdChecker() {
+
+}
+
 func init() {
 	bffValidator = validator.New()
 	bffValidator.RegisterValidation("panCard", panCardValidator)
 	bffValidator.RegisterValidation("strongPassword", strongPasswordValidator)
 	bffValidator.RegisterValidation("Email", IsEmailValid)
 	bffValidator.RegisterValidation("otp", OtpValidator)
+	bffValidator.RegisterValidation("actionChecker", ValidateEnum[Enum])
 }
 
 func GetBFFValidator() *validator.Validate {

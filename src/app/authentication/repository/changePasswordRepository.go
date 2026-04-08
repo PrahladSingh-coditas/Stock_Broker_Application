@@ -43,3 +43,5 @@ func (repo *changePasswordRepository) UpdatePassword(ctx context.Context, db *go
 
 	return nil
 }
+
+//add functionlity for oldPAss != newPass

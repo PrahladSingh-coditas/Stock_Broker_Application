@@ -3,7 +3,7 @@ package constants
 //Authentications API URL Keys
 const (
 	ServiceName       = "authentication"
-	PortDefaultValude = 8080
+	PortDefaultValude = 8081
 )
 
 // Database table name & field names for users

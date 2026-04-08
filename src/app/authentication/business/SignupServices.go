@@ -5,7 +5,7 @@ import (
 	"authentication/repository"
 	"context"
 	"fmt"
-	genericErrors "stock_broker_application/src/constants"
+	// genericErrors "stock_broker_application/src/constants"
 	"stock_broker_application/src/utils"
 )
 
@@ -20,21 +20,13 @@ func NewCreateUserService(createUserRepository repository.CreateUserRepository) 
 }
 
 func (service *CreateUserService) CreateNewUser(ctx context.Context, spanCtx context.Context, bffCreateUserRequest models.BFFCreateUserRequest) error {
-	postgresClinet := utils.GetPostgresClient()
-	tx := postgresClinet.GormDB.Begin()
+	postgresClient := utils.GetPostgresClient()
+	client:= postgresClient.GormDB
 
-	if tx.Error != nil {
-		return fmt.Errorf(genericErrors.ErrBeginTx, tx.Error)
-	}
 
-	err := service.createUserRepository.CreateNewUser(spanCtx, tx, bffCreateUserRequest)
+	err := service.createUserRepository.CreateNewUser(spanCtx, client, bffCreateUserRequest)
 	if err != nil {
-		tx.Rollback()
 		return fmt.Errorf("%w", err)
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return fmt.Errorf(genericErrors.ErrCommitTx, err)
 	}
 
 	return nil

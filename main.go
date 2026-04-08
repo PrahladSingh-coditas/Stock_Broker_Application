@@ -14,9 +14,31 @@ func main() {
 		return
 	}
 
+	err = utils.InitRedisConfg()
+	if err!=nil{
+		log.Fatalf(constants.ErrRedisInitFailed)
+		return
+	}
+	
 	// Perform Migrations
 	dbClient := utils.GetPostgresClient()
+	
 	if err := dbClient.GormDB.AutoMigrate(&models.User{}); err != nil {
+		log.Fatalf(constants.ErrDBMigrationFailed, err)
+		return
+	}
+
+	if err := dbClient.GormDB.AutoMigrate(&models.Watchlists{}); err != nil {
+		log.Fatalf(constants.ErrDBMigrationFailed, err)
+		return
+	}
+
+	if err := dbClient.GormDB.AutoMigrate(&models.WatchlistScrip{}); err != nil {
+		log.Fatalf(constants.ErrDBMigrationFailed, err)
+		return
+	}
+
+	if err := dbClient.GormDB.AutoMigrate(&models.ScripMaster{}); err != nil {
 		log.Fatalf(constants.ErrDBMigrationFailed, err)
 		return
 	}

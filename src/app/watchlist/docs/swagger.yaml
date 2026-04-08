@@ -1,0 +1,111 @@
+definitions:
+  models.ActionType:
+    enum:
+    - ADD
+    - GET
+    - DEL
+    type: string
+    x-enum-varnames:
+    - ADD
+    - GET
+    - DEL
+  models.BFFAdgToWatchlistRequest:
+    properties:
+      action:
+        $ref: '#/definitions/models.ActionType'
+      scripId:
+        type: string
+      watchlistIds:
+        description: use in built validator package here
+        items:
+          type: integer
+        type: array
+    required:
+    - action
+    - scripId
+    type: object
+  models.BFFAdgToWatchlistResponse:
+    properties:
+      action:
+        $ref: '#/definitions/models.ActionType'
+      message:
+        type: string
+      warnings:
+        items:
+          type: string
+        type: array
+      watchlistNames:
+        items:
+          $ref: '#/definitions/models.WatchlistWithId'
+        type: array
+    type: object
+  models.ErrorAPIResponse:
+    properties:
+      error:
+        type: string
+      errors:
+        $ref: '#/definitions/models.ErrorMessage'
+    type: object
+  models.ErrorMessage:
+    properties:
+      errorMessage:
+        type: string
+      key:
+        type: string
+    type: object
+  models.WatchlistWithId:
+    properties:
+      watchlistId:
+        type: integer
+      watchlistName:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Omnenest backend for watchlist micro-service (Middleware layer).
+  title: omnenest-backend
+  version: "1.0"
+paths:
+  /api/watchlist/watchlistADG:
+    post:
+      consumes:
+      - application/json
+      description: Performs Add,Delete,Get to watchlists
+      parameters:
+      - description: ADG to Watchlist Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BFFAdgToWatchlistRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ADG performed successfully
+          schema:
+            $ref: '#/definitions/models.BFFAdgToWatchlistResponse'
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/models.BFFAdgToWatchlistResponse'
+        "400":
+          description: Invalid Input Payload
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "404":
+          description: Watchlists not found
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+      security:
+      - BearerAuth: []
+      summary: Watchlist ADG
+      tags:
+      - User
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+    x-extension-openapi: '{"example": "value on a json format"}'
+swagger: "2.0"

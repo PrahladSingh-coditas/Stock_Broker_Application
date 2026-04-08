@@ -19,6 +19,11 @@ const (
 	ErrJWTConfigReadFailed      = "failed to read the JWT config file %s"
 )
 
+// Redis Initialization error
+const (
+	ErrRedisInitFailed = "Error connecting to redis"
+)
+
 const (
 	ErrPasswordMinLength    = "Password must be at least 8 characters long."
 	ErrPasswordLowercase    = "Password must contain at least one lower letter."
@@ -34,4 +39,11 @@ const (
 	ErrInvalidPhoneNumber = "Phone number must be exactly 10 digits long and contain only numbers."
 	ErrFieldRequired      = "%s is required."
 	ErrInvalidEmail       = "Invalid value for Email"
+)
+
+//validate otp
+const (
+	ErrHashingPassword      = "error hashing password: %w"
+	ErrAuthenticationFailed = "authentication failed"
+	ErrUserNotFound         = "user not found"
 )

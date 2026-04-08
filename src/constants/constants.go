@@ -12,6 +12,7 @@ const (
 	DigitRegex       = `\d`
 	SpecialCharRegex = `[@$!%*?&]`
 	LowercaseRegex   = `[a-z]`
+	OtpRegexp        = "^[0-9]{4}$"
 )
 
 const (
@@ -22,6 +23,10 @@ const (
 	FieldPhoneNumber     = "PhoneNumber"
 	FieldEmail           = "Email"
 	FieldUsername        = "Username"
+	FieldOtp             = "Otp"
+
+	FieldScripId = "ScripId"
+	FieldWatchlistId = "WatchlistIds"
 )
 
 // Migration success Message

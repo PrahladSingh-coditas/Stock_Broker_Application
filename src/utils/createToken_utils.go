@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"errors"
+	"log"
 	"stock_broker_application/src/constants"
 	"stock_broker_application/src/models"
 	"stock_broker_application/src/utils/configs"
@@ -11,28 +13,30 @@ import (
 
 var secretKey *models.JWT
 
-func GenerateToken(username string) (string, string, error) {
+func GenerateToken(username string, purpose string) (string, error) {
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(time.Minute * 15).Unix(),
+		"sub":     username,
+		"purpose": purpose,
+		"iat":     time.Now().Unix(),
+		"exp":     time.Now().Add(time.Minute * 10080).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(secretKey.AccessSecretKey))
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(time.Hour * 24 * 30).Unix(),
-	})
+	// refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	// 	"username": username,
+	// 	"exp":      time.Now().Add(time.Hour * 24 * 30).Unix(),
+	// })
 
-	refreshTokenString, err := refreshToken.SignedString([]byte(secretKey.RefreshSecretKey))
-	if err != nil {
-		return "", "", err
-	}
-	return accessTokenString, refreshTokenString, nil
+	// refreshTokenString, err := refreshToken.SignedString([]byte(secretKey.RefreshSecretKey))
+	// if err != nil {
+	// 	return "", "", err
+	// }
+	return accessTokenString, nil
 }
 
 func InitJWTConfig(configPath string) error {
@@ -42,4 +46,30 @@ func InitJWTConfig(configPath string) error {
 		return err
 	}
 	return nil
+}
+
+func ValidateToken(tokenString string) (string, error) {
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		//to check if it belongs to same family of signing method
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("invalid signing method")
+		}
+		//if it does then only send the secret key to verify
+		return []byte(secretKey.AccessSecretKey), nil
+	})
+
+	log.Println(err)
+	if err != nil {
+		return "", err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		username, ok := claims["sub"].(string)
+		if !ok {
+			return "", errors.New("username missing in token")
+		}
+		return username, nil
+	}
+	return "", errors.New("Invalid token")
 }

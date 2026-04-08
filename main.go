@@ -16,7 +16,7 @@ func main() {
 
 	err = utils.InitRedisConfg()
 	if err!=nil{
-		log.Fatalf(constants.ErrRedisInitFailed, err)
+		log.Fatalf(constants.ErrRedisInitFailed)
 		return
 	}
 	

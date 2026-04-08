@@ -19,10 +19,10 @@ import (
 )
 
 type WatchlistService struct {
-	watchlistRepository repository.WatchlistRepository
+	watchlistRepository repository.WatchlistRepositoryInterface
 }
 
-func NewWatchlistService(watchlistRepository repository.WatchlistRepository) *WatchlistService {
+func NewWatchlistService(watchlistRepository repository.WatchlistRepositoryInterface) *WatchlistService {
 	return &WatchlistService{
 		watchlistRepository: watchlistRepository,
 	}
@@ -66,16 +66,16 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 			warningsAll = append(warningsAll, msg)
 		}
 
-		var warningsNotOfUser []string //optimisation as recommended
+		var countWatchlistNotOfUser int 
 		for _, val := range warningsAll {
 			if strings.Contains(val, constants.ErrWatchlistsNotOfUser) {
-				warningsNotOfUser = append(warningsNotOfUser, val)
+				countWatchlistNotOfUser++
 			} else {
 				continue
 			}
 		}
 
-		if len(warningsNotOfUser) == len(bffAdgToWatchlistRequest.WatchlistIds) {
+		if countWatchlistNotOfUser == len(bffAdgToWatchlistRequest.WatchlistIds) {
 			return nil, nil, errors.New(constants.ErrWatchlistsNotOfUser)
 		} else {
 			return addedWatchlists, warningsAll, nil
@@ -104,16 +104,16 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 		fmt.Println("warnings:", warningsAll)
 		fmt.Println("deleted:", deletedWatchlists)
 
-		var warningsNotOfUser []string
+		var countWatchlistNotOfUser int
 		for _, val := range warningsAll {
 			if strings.Contains(val, constants.ErrWatchlistsNotOfUser) {
-				warningsNotOfUser = append(warningsNotOfUser, val)
+				countWatchlistNotOfUser++
 			} else {
 				continue
 			}
 		}
 
-		if len(warningsNotOfUser) == len(bffAdgToWatchlistRequest.WatchlistIds) {
+		if countWatchlistNotOfUser == len(bffAdgToWatchlistRequest.WatchlistIds) {
 			return nil, nil, errors.New(constants.ErrWatchlistsNotOfUser)
 		} else {
 			return deletedWatchlists, warningsAll, nil

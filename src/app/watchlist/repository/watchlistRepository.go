@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type WatchlistRepository interface {
+type WatchlistRepositoryInterface interface {
 	GetUserFromDb(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error)
 	WatchlistGetOperation(ctx context.Context, db *gorm.DB, UserId uint64, bffAdgToWatchlistRequest models.BFFAdgToWatchlistRequest) ([]models.WatchlistWithId, error)
 	WatchlistAddOperation(ctx context.Context, db *gorm.DB, UserId uint64, bffAdgToWatchlistRequest models.BFFAdgToWatchlistRequest) ([]models.WatchlistWithId, []models.WatchlistValidation, error)
@@ -24,7 +24,7 @@ type WatchlistRepository interface {
 
 type watchlistRepository struct{}
 
-func NewWatchlistRepository() *watchlistRepository {
+func WatchlistRepository() *watchlistRepository {
 	return &watchlistRepository{}
 }
 

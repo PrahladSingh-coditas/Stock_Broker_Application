@@ -31,7 +31,7 @@ func GetRouter() *gin.Engine { // it basically gives a gin engine
 		AllowHeaders: []string{genericConstants.Origin, genericConstants.ContentType, genericConstants.Authorization}, // This allows frontend to send these headers.
 	}))
 
-	watchlistsRepository := repository.NewWatchlistRepository() // remove new
+	watchlistsRepository := repository.WatchlistRepository() 
 	watchlistsService := business.NewWatchlistService(watchlistsRepository)
 	watchlistsHandler := handlers.NewWatchlistHandler(watchlistsService)
 

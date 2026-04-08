@@ -6,6 +6,7 @@ require (
 	github.com/dlclark/regexp2 v1.11.5
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/redis/go-redis/v9 v9.18.0
 	github.com/spf13/viper v1.20.0
 	golang.org/x/crypto v0.36.0
 	gorm.io/driver/postgres v1.5.11
@@ -28,7 +29,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
-	github.com/redis/go-redis/v9 v9.18.0 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.12.0 // indirect

@@ -98,3 +98,17 @@ const (
 const (
 	ErrNoWatchlistsUpdated = "no watchlists updated"
 )
+
+//redis erros
+const (
+	ErrCouldntFetchFromRedis = "Couldnt fetch data from redis"
+
+	ErrGetUnsuccessful = "get operation unsucessful from redis"
+)
+
+//marshal unmarshal error
+const (
+	ErrJsonMarshalFailed = "Json marshaling failed"
+
+	ErrJsonUnmarshalFailed = "Json unmarshaling failed"
+)

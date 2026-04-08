@@ -12,6 +12,9 @@ import (
 	"watchlist/models"
 	"watchlist/repository"
 
+	"github.com/pingcap/log"
+	"go.uber.org/zap"
+
 	"stock_broker_application/src/utils"
 )
 
@@ -29,15 +32,18 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 	postgreClient := utils.GetPostgresClient()
 	client := postgreClient.GormDB
 
-	redisClient := utils.GetRedisClient()
-
-	actionType := bffAdgToWatchlistRequest.Action
-
 	//get user from db and to extract and use user.ID in ADG operations
 	user, err := service.watchlistRepository.GetUserFromDb(spanCtx, client, username)
 	if err != nil {
 		return nil, nil, errors.New(constants.ErrUserNotFound)
 	}
+
+	//redis connection and define key for redis
+	redisClient := utils.GetRedisClient()
+	redisKey := fmt.Sprintf("Watchlist of:%d ScripId:%s", user.ID, bffAdgToWatchlistRequest.ScripId)
+
+	//extract action from request and switch case on it
+	actionType := bffAdgToWatchlistRequest.Action
 
 	switch actionType {
 	case models.ADD:
@@ -45,6 +51,13 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 		addedWatchlists, warningsResult, err := service.watchlistRepository.WatchlistAddOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest)
 		if err != nil {
 			return nil, nil, err
+		} else if redisClient != nil {
+			err := redisClient.Del(ctx, redisKey).Err()
+			if err != nil {
+				log.Error("Failed to invalidate cache after ADD", zap.Error(err))
+			} else {
+				log.Info("Cache invalidated after ADD")
+			}
 		}
 
 		var warningsAll []string
@@ -73,6 +86,13 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 		deletedWatchlists, warningsResult, err := service.watchlistRepository.WatchlistDeleteOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest)
 		if err != nil {
 			return nil, nil, err
+		} else if redisClient != nil {
+			err := redisClient.Del(ctx, redisKey).Err()
+			if err != nil {
+				log.Error("Failed to invalidate cache after DEL", zap.Error(err))
+			} else {
+				log.Info("Cache invalidated after DEL")
+			}
 		}
 
 		var warningsAll []string
@@ -100,51 +120,54 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 		}
 
 	case models.GET:
-		key := fmt.Sprintf("Watchlist of:%d ScripId:%s", user.ID, bffAdgToWatchlistRequest.ScripId)
+		var CachedWatchlistIds []models.WatchlistWithId
+		//only warning: watchlists not required for get
+		var warnings []string
 
-		if redisClient == nil {
-			fmt.Println("Redisclient is nil")
+		if redisClient != nil {
+			data, err := redisClient.Get(ctx, redisKey).Result()
+			if err == nil && len(data) > 0 {
+				err := json.Unmarshal([]byte(data), &CachedWatchlistIds)
+				if err == nil {
+					fmt.Println("\nData fetched from Redis!!!!!!!!!!!!!!!!!!!!!!")
+
+					warnings = append(warnings, constants.ErrWatchlistNotRequired)
+					if len(bffAdgToWatchlistRequest.WatchlistIds) != 0 {
+						return CachedWatchlistIds, warnings, nil
+					}
+
+					return CachedWatchlistIds, nil, nil
+				} else {
+					return nil, nil, errors.New(constants.ErrJsonUnmarshalFailed)
+				}
+			} 
 		}
 
-		data, err := redisClient.Get(ctx, key).Result()
-		if len(data) > 0 {
-			var CachedWatchlistIds []models.WatchlistWithId
+		WatchlistNamewithId, err := service.watchlistRepository.WatchlistGetOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest)
+		if err != nil {
+			return nil, nil, errors.New(constants.ErrNoRowsAffected)
+		}
 
-			err = json.Unmarshal([]byte(data), &CachedWatchlistIds)
-			if err != nil {
-				return nil, nil, err
-			}
+		if len(WatchlistNamewithId) == 0 {
+			return nil, nil, errors.New(constants.ErrWatchlistNotFound)
+		}
 
-			return CachedWatchlistIds, nil, nil
-		} else {
-			WatchlistNamewithId, err := service.watchlistRepository.WatchlistGetOperation(spanCtx, client, user.ID, bffAdgToWatchlistRequest)
-			if err != nil {
-				return nil, nil, errors.New(constants.ErrNoRowsAffected)
-			}
-
-			if len(WatchlistNamewithId) == 0 {
-				return nil, nil, errors.New(constants.ErrWatchlistNotFound)
-			}
-
+		if redisClient != nil {
 			jsonData, err := json.Marshal(WatchlistNamewithId)
-			if err != nil {
-				return nil, nil, err
+			if err == nil {
+				_ = redisClient.Set(ctx, redisKey, jsonData, 30*time.Minute).Err()	
+			} else {
+				return nil,nil,errors.New(constants.ErrJsonMarshalFailed)
 			}
-
-			err = redisClient.Set(ctx, key, jsonData, 30*time.Minute).Err()
-			if err != nil {
-				return nil, nil, err
-			}
-
-			var warnings []string
-			warnings = append(warnings, constants.ErrWatchlistNotRequired)
-			if len(bffAdgToWatchlistRequest.WatchlistIds) != 0 {
-				return WatchlistNamewithId, warnings, nil
-			}
-
-			return WatchlistNamewithId, nil, nil
-
 		}
+
+		fmt.Println("\nData fetched from DB!!!!!!!!!!!!!!!!!!!!!!")
+		warnings = append(warnings, constants.ErrWatchlistNotRequired)
+		if len(bffAdgToWatchlistRequest.WatchlistIds) != 0 {
+			return WatchlistNamewithId, warnings, nil
+		}
+
+		return WatchlistNamewithId, nil, nil
 
 	default:
 		return nil, nil, errors.New(constants.ErrInvalidAction)

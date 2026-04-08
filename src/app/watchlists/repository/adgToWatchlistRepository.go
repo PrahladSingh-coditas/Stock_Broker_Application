@@ -25,7 +25,8 @@ type WatchlistsRepository interface {
 	DeleteScripFromWatchlist(ctx context.Context, db *gorm.DB, userId uint64, watchlistIds []uint64, scripId string) ([]structModels.WatchlistWithId, error)
 }
 
-type watchlistsRepository struct{}
+type watchlistsRepository struct {
+}
 
 func NewWatchlistsRepository() *watchlistsRepository {
 	return &watchlistsRepository{}
@@ -119,7 +120,6 @@ func (repo *watchlistsRepository) GetValidWatchlists(ctx context.Context, db *go
 		validMap[wl.Id] = true
 	}
 
-	fmt.Println("Valid watchlist IDs:", validMap)
 	var notValid []uint64
 	for _, id := range watchlistIds {
 		if _, ok := validMap[id]; !ok {

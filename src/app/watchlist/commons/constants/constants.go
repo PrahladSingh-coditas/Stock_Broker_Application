@@ -51,6 +51,8 @@ const (
 	Subject  = "sub"
 	Purpose  = "purpose"
 	Server   = "server"
+	Redis    = "redis"
+	Header   = "header"
 )
 
 // swagger related fields
@@ -68,4 +70,5 @@ const (
 const (
 	DataFetchFromRedis = "Data fetch from the cache memory"
 	UserIdScripIdKey   = "user:%s:scripId:%s"
+	BlacklistedCacheKey  = "BLACKLISTED_TOKEN_%s"
 )

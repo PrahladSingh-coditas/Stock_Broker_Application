@@ -11,13 +11,12 @@ import (
 
 var secretKey *models.JWT
 
-func GenerateToken(username string, purpose string) (string, error) {
+func GenerateToken(username string) (string, error) {
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":     username,
-		"purpose": purpose,
 		"iat":     time.Now().Unix(),
-		"exp":     time.Now().Add(time.Minute * 20000).Unix(),
+		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(secretKey.AccessSecretKey))

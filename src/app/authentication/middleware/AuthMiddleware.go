@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"stock_broker_application/src/app/watchlist/commons/constants"	
-	"stock_broker_application/src/app/watchlist/models"
+	"authentication/commons/constants"
+	"authentication/models"
 	"errors"
 	"fmt"
 	"log"
@@ -15,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func WatchlistMiddleware() gin.HandlerFunc {
+func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		log.Printf("Request: %s %s", c.Request.Method, c.Request.URL.Path)
@@ -32,7 +32,7 @@ func WatchlistMiddleware() gin.HandlerFunc {
 					Key:          constants.Redis,
 					ErrorMessage: constants.RedisConnectionError,
 				},
-				Error: constants.OperationFailedError,
+				Error: constants.OperationFailed,
 			})
 			return
 		}
@@ -45,7 +45,7 @@ func WatchlistMiddleware() gin.HandlerFunc {
 					Key:          constants.Header,
 					ErrorMessage: constants.ErrHeaderMissing,
 				},
-				Error: constants.OperationFailedError,
+				Error: constants.OperationFailed,
 			})
 			return
 		}
@@ -62,7 +62,7 @@ func WatchlistMiddleware() gin.HandlerFunc {
 					Key:          constants.Redis,
 					ErrorMessage: constants.RedisConnectionError,
 				},
-				Error: constants.OperationFailedError,
+				Error: constants.OperationFailed,
 			})
 			return
 		}
@@ -73,7 +73,7 @@ func WatchlistMiddleware() gin.HandlerFunc {
 					Key:          constants.Token,
 					ErrorMessage: constants.InvalidTokenError,
 				},
-				Error: constants.OperationFailedError,
+				Error: constants.OperationFailed,
 			})
 			return
 		}
@@ -86,7 +86,7 @@ func WatchlistMiddleware() gin.HandlerFunc {
 					Key:          constants.Token,
 					ErrorMessage: err.Error(),
 				},
-				Error: constants.OperationFailedError,
+				Error: constants.OperationFailed,
 			})
 			return
 		}
@@ -100,7 +100,7 @@ func WatchlistMiddleware() gin.HandlerFunc {
 						Key:          constants.Token,
 						ErrorMessage: genericConstants.ErrClaimMappingFailed,
 					},
-					Error: constants.OperationFailedError,
+					Error: constants.OperationFailed,
 				})
 				return
 			}
@@ -109,7 +109,7 @@ func WatchlistMiddleware() gin.HandlerFunc {
 						Key:          constants.Token,
 						ErrorMessage: genericConstants.ErrTokenIsInvalid,
 					},
-					Error: constants.OperationFailedError,
+					Error: constants.OperationFailed,
 				})
 			return
 		}
@@ -122,13 +122,27 @@ func WatchlistMiddleware() gin.HandlerFunc {
 						Key:          constants.Token,
 						ErrorMessage: constants.ErrUsernameNotFoundInJWT,
 					},
-					Error: constants.OperationFailedError,
+					Error: constants.OperationFailed,
 				})
 			return
 		}
 
+		expiryTime, ok := claims[constants.Expiry].(float64)
+
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, models.ErrorAPIResponse{
+					Message: models.ErrorMessage{
+						Key:          constants.Token,
+						ErrorMessage: constants.ErrExpiryTimeNotFoundInJWT,
+					},
+					Error: constants.OperationFailed,
+				})
+			return
+		}
 
 		c.Set(constants.User, username)
+		c.Set(constants.Token, tokenString)
+		c.Set(constants.ExpiryTime, int64(expiryTime))
 
 		c.Next()
 	}

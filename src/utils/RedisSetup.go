@@ -27,7 +27,7 @@ func initRedisConfig(ctx context.Context) {
 	redisErr = err
 }
 
-func GetRedisInstance(ctx context.Context) (*redis.Client, error) {
+func GetRedisClient(ctx context.Context) (*redis.Client, error) {
 	if redisClient != nil {
 		return redisClient, nil
 	}

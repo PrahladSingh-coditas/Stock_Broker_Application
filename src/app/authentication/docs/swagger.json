@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Omnenest backend for watchlist micro-service (Middleware layer).",
-        "title": "omnenest-backend",
+        "description": "backend for Auth micro-service (Middleware layer).",
+        "title": "backend",
         "contact": {},
         "version": "1.0"
     },
@@ -53,6 +53,37 @@
                         "description": "User does not exist",
                         "schema": {
                             "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "handles logout request of the user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "logout user feature",
+                "responses": {
+                    "200": {
+                        "description": "User logout successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFLogoutResponse"
                         }
                     },
                     "500": {
@@ -243,7 +274,6 @@
             "properties": {
                 "confirmPassword": {
                     "type": "string",
-                    "minLength": 8,
                     "example": "Xyz@12345"
                 },
                 "password": {
@@ -304,6 +334,15 @@
                     "maxLength": 32,
                     "minLength": 5,
                     "example": "Arijit"
+                }
+            }
+        },
+        "models.BFFLogoutResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "Success or failure"
                 }
             }
         },

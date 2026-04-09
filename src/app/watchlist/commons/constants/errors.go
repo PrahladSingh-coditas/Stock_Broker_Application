@@ -45,6 +45,8 @@ const (
 	ErrDBConnectionFailed  = "Error connecting to database: %s"
 	ErrInternalServer      = "internal server error"
 	ErrJWTConfigReadFailed = "failed to read the JWT config file %s"
+	OperationFailedError   = "operation failed"
+	InvalidTokenError      = "invalid token"
 )
 
 // Redis related errors

@@ -54,6 +54,14 @@ const (
 	ErrValidationFailed       = "validation failed"
 )
 
+//redis and token related errors
+const (
+	RedisConnectionError = "error in redis connection"
+	InvalidTokenError    = "invalid token"
+	LogoutFailed         = "logout failed"
+	OperationFailed         = "operation failed"
+)
+
 //Otp related errors
 const (
 	ErrSignInFailed            = "failed to sign in user"
@@ -64,6 +72,7 @@ const (
 	ErrTokenCreationFailed     = "token generation failed"
 	ErrHeaderMissing           = "Authorization header is missing"
 	ErrUsernameNotFoundInJWT   = "Username not found in JWT"
+	ErrExpiryTimeNotFoundInJWT = "expiry time not found in JWT"
 	ErrPurposeNotFoundInHeader = "purpose not found inside the request"
 	ErrPurposeNotMatched       = "purpose is not matching"
 )

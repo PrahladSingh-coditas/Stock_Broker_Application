@@ -46,4 +46,9 @@ const (
 	Password = "password"
 	Otp      = "OTP"
 	Token    = "token"
+	Expiry   = "exp"
+)
+
+const (
+	Redis = "redis"
 )

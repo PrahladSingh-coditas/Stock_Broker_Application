@@ -128,6 +128,43 @@
                 }
             }
         },
+        "/api/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logout user using Redis by Blacklisting Token",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "User Logout",
+                "responses": {
+                    "200": {
+                        "description": "logged out successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFLogoutUserResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Authentication failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/signin": {
             "post": {
                 "description": "Authenticates user credentials and returns success if valid",
@@ -385,6 +422,15 @@
                     "maxLength": 32,
                     "minLength": 5,
                     "example": "Sanjana"
+                }
+            }
+        },
+        "models.BFFLogoutUserResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "user logged out successfully"
                 }
             }
         },

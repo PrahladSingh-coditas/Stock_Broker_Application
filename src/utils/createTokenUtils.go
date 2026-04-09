@@ -6,6 +6,7 @@ import (
 	"stock_broker_application/src/constants"
 	"stock_broker_application/src/models"
 	"stock_broker_application/src/utils/configs"
+	"strconv"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
@@ -17,9 +18,8 @@ func GenerateToken(username string) (string, string, error) {
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
-		"purpose":  "reset-password",
 		"iat":      time.Now().Unix(),
-		"exp":      time.Now().Add(time.Hour * 600).Unix(),
+		"exp":      time.Now().Add(time.Minute * 1).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(secretKey.AccessSecretKey))
@@ -29,9 +29,8 @@ func GenerateToken(username string) (string, string, error) {
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
-		"purpose":  "reset-password",
 		"iat":      time.Now().Unix(),
-		"exp":      time.Now().Add(time.Minute * 60).Unix(),
+		"exp":      time.Now().Add(time.Minute * 1).Unix(),
 	})
 
 	refreshTokenString, err := refreshToken.SignedString([]byte(secretKey.RefreshSecretKey))
@@ -61,6 +60,16 @@ func ValidateToken(tokenString string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		expiry, ok := claims["exp"].(float64)
+		if !ok {
+			return "", errors.New("expiry missing in token")
+		}
+		exp := strconv.FormatFloat(expiry, 'f', -1, 64)
+		return exp, nil
+	}
+
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		username, ok := claims["username"].(string)
 		if !ok {

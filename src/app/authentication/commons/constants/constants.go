@@ -8,22 +8,28 @@ const (
 
 // Database table name & field names for users
 const (
-	UsersTableName   = "users"
-	Fieldemail       = "email"
+	UsersTableName    = "users"
+	Fieldemail        = "email"
 	UsernameCondition = "username = ? "
-	Password         = "password"
-	Database         = "database"
+	Password          = "password"
+	Database          = "database"
 )
 
 //Logger related fields
 const (
-	User                 = "username"
-	Latency              = "latency"
-	Otp                  = "OTP"
-	Token                = "token"
-	Bearer               = "Bearer "
-	Subject              = "sub"
-	Purpose              = "purpose"
+	User       = "username"
+	Latency    = "latency"
+	Otp        = "OTP"
+	Token      = "token"
+	Bearer     = "Bearer "
+	Subject    = "sub"
+	Purpose    = "purpose"
+	Expiry     = "exp"
+	ExpiryTime = "expiry_time"
+	Status     = "status"
+	Error      = "error"
+	Redis      = "redis"
+	Header     = "header"
 )
 
 // Success message for user
@@ -34,6 +40,7 @@ const (
 	UserOtpFetchedMsg      = "User Otp fetched successfully"
 	OtpValidatedSuccessMsg = "OTP validated successfully"
 	PasswordUpdateMsg      = "Password updated successfully"
+	LogoutSuccessMsg       = "logout successfully"
 )
 
 //Otp related messages
@@ -63,4 +70,5 @@ const (
 //token related messages
 const (
 	PasswordResetPurpose = "password_reset"
+	BlacklistedCacheKey  = "BLACKLISTED_TOKEN_%s"
 )

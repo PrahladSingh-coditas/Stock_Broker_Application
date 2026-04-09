@@ -72,6 +72,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "handles logout request of the user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "logout user feature",
+                "responses": {
+                    "200": {
+                        "description": "User logout successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFLogoutResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/signin": {
             "post": {
                 "description": "Handles the user sign and checks data from database",
@@ -251,7 +282,6 @@ const docTemplate = `{
             "properties": {
                 "confirmPassword": {
                     "type": "string",
-                    "minLength": 8,
                     "example": "Xyz@12345"
                 },
                 "password": {
@@ -312,6 +342,15 @@ const docTemplate = `{
                     "maxLength": 32,
                     "minLength": 5,
                     "example": "Arijit"
+                }
+            }
+        },
+        "models.BFFLogoutResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "Success or failure"
                 }
             }
         },
@@ -405,8 +444,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "omnenest-backend",
-	Description:      "Omnenest backend for watchlist micro-service (Middleware layer).",
+	Title:            "backend",
+	Description:      "backend for Auth micro-service (Middleware layer).",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

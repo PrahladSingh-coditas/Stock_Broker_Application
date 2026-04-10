@@ -46,10 +46,11 @@ const (
 	ErrHashingPassword      = "error hashing password: %w"
 	ErrAuthenticationFailed = "authentication failed"
 	ErrUserNotFound         = "user not found"
+	ErrUnauthorized         = "unauthorized"
 )
 
 //token errors
 const (
-	ErrHeaderNotFound = "Header not Found"
-	ErrTokenInvalidated      = "Token is invalidated"
+	ErrHeaderNotFound   = "Header not Found"
+	ErrTokenInvalidated = "Token is invalidated"
 )

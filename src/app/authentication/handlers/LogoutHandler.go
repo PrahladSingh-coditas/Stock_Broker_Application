@@ -3,13 +3,13 @@ package handlers
 import (
 	"authentication/business"
 	"authentication/commons"
-	"authentication/commons/constants"
+	authConstants "authentication/commons/constants"
 	"net/http"
 	genericModels "stock_broker_application/src/models"
 	"strings"
 	"time"
 
-	commonErrors "stock_broker_application/src/constants"
+	"stock_broker_application/src/constants"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -47,11 +47,11 @@ func (controller *LogoutUserHandler) HandleLogoutUser(ctx *gin.Context) {
 		errorString := err.Error()
 
 		// 500 error for redis fail
-		if strings.Contains(errorString, commonErrors.ErrRedisInitFailed) {
+		if strings.Contains(errorString, constants.ErrRedisInitFailed) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
-					Key:          "redis",
-					ErrorMessage: commonErrors.ErrRedisInitFailed,
+					Key:          constants.Redis,
+					ErrorMessage: constants.ErrRedisInitFailed,
 				},
 				Error: constants.ErrInternalServer,
 			}
@@ -59,27 +59,18 @@ func (controller *LogoutUserHandler) HandleLogoutUser(ctx *gin.Context) {
 			logger.WithFields(logrus.Fields{
 				"user":    tokenString,
 				"latency": time.Since(start).Milliseconds(),
-			}).Info(constants.ErrPasswordMismatch)
+			}).Info(authConstants.ErrInternalServer)
 
-			ctx.IndentedJSON(http.StatusUnauthorized, errorResponse)
+			ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
 			return
 		}
 
 		//401 unauthorized if failed to blacklist token or if token is already expired
-		if strings.Contains(errorString, constants.ErrFailedToBlacklist) || strings.Contains(errorString, constants.ErrTokenExpired) {
-			var errorMsg string
-
-			switch {
-			case strings.Contains(errorString, constants.ErrFailedToBlacklist):
-				errorMsg = constants.ErrFailedToBlacklist
-			case strings.Contains(errorString, constants.ErrTokenExpired):
-				errorMsg = constants.ErrTokenExpired
-			}
-
+		if strings.Contains(errorString, authConstants.ErrFailedToBlacklist) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
-					Key:          "token",
-					ErrorMessage: errorMsg,
+					Key:          constants.Token,
+					ErrorMessage: authConstants.ErrFailedToBlacklist,
 				},
 				Error: constants.ErrUnauthorized,
 			}
@@ -92,15 +83,16 @@ func (controller *LogoutUserHandler) HandleLogoutUser(ctx *gin.Context) {
 			ctx.IndentedJSON(http.StatusUnauthorized, errorResponse)
 			return
 		}
+		
+		//500 error
 		logger.WithFields(logrus.Fields{
 			"user":    tokenString,
 			"latency": time.Since(start).Milliseconds(),
 		}).Info(constants.ErrInternalServer)
 
-		ctx.JSON(http.StatusInternalServerError, err.Error())
+		ctx.IndentedJSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	ctx.JSON(http.StatusOK, constants.UserLogoutSuccess)
-
+	ctx.IndentedJSON(http.StatusOK, authConstants.UserLogoutSuccess)
 }

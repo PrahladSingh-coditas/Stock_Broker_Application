@@ -72,4 +72,7 @@ const (
 	ContentType   = "Content-type"
 	Bearer        = "Bearer "
 	Authorization = "Authorization"
+	Redis         = "Redis"
+	Header        = "Header"
+	Token         = "Token"
 )

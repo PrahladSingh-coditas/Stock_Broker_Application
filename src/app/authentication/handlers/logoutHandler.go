@@ -4,12 +4,9 @@ import (
 	"authentication/business"
 	"authentication/commons/constants"
 	"authentication/models"
-	"fmt"
-	"log"
 	"net/http"
 	genericModels "stock_broker_application/src/models"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,18 +33,10 @@ func LogoutUserHandler(service *business.LogoutUserService) *LogoutHandler {
 // @Router /api/auth/logout [post]
 func (controller *LogoutHandler) HandleUserLogout(ctx *gin.Context) {
 	var bffLogoutUserResponse models.BFFLogoutUserResponse
-
 	expiry := ctx.GetInt64(constants.Expiry)
-	fmt.Println()
-	fmt.Println()
-	duration := expiry - time.Now().Unix()
-	log.Println(duration)
-	timeToLive := time.Duration(duration) * time.Second
-	log.Println(timeToLive)
-
 	token := ctx.GetString(constants.Token)
 
-	err := controller.service.LogoutUser(ctx, token, timeToLive)
+	err := controller.service.LogoutUser(ctx, token, expiry)
 	if err != nil {
 		if strings.Contains(err.Error(), constants.RedisConnectionFailedError) {
 			err := genericModels.ErrorAPIResponse{

@@ -47,7 +47,7 @@ func (controller *LogoutHandler) HandleUserLogout(ctx *gin.Context) {
 
 	token := ctx.GetString(constants.Token)
 
-	err := controller.service.LogoutUser(ctx, ctx.Request.Context(), token, timeToLive)
+	err := controller.service.LogoutUser(ctx, token, timeToLive)
 	if err != nil {
 		if strings.Contains(err.Error(), constants.RedisConnectionFailedError) {
 			err := genericModels.ErrorAPIResponse{

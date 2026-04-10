@@ -14,7 +14,7 @@ type LogoutUserService struct{}
 func NewLogoutUser() *LogoutUserService {
 	return &LogoutUserService{}
 }
-func (service *LogoutUserService) LogoutUser(ctx context.Context, spanCtx context.Context, balckListedToken string, timeToLeave time.Duration) error {
+func (service *LogoutUserService) LogoutUser(ctx context.Context, balckListedToken string, timeToLeave time.Duration) error {
 	cacheKey := fmt.Sprintf("BLACKLISTE_TOKEN:%s", balckListedToken)
 	cacheValue := 1
 

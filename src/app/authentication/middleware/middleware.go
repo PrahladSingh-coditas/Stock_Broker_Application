@@ -41,6 +41,7 @@ func AuthMiddleware(redisClient *redis.Client) gin.HandlerFunc {
 
 		//redis key is gonna be token string itself
 		redisKey := fmt.Sprintf(authConstants.BlacklistedToken, tokenString)
+		c.Set(commons.RedisKey,redisKey)
 		
 		existsInRedis, err := redisClient.Exists(c.Request.Context(), redisKey).Result()
 		if err != nil {

@@ -22,4 +22,5 @@ const (
 	Token    = "token"
 	Subject  = "sub"
 	Expiry   = "exp"
+	RedisKey = "redisKey"
 )

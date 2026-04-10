@@ -52,5 +52,5 @@ const (
 //token errors
 const (
 	ErrHeaderNotFound   = "Header not Found"
-	ErrTokenInvalidated = "Token is invalidated"
+	ErrTokenInvalidated = "Token is invalidated(blacklisted)"
 )

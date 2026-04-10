@@ -41,8 +41,9 @@ func (controller *LogoutUserHandler) HandleLogoutUser(ctx *gin.Context) {
 
 	tokenString := ctx.GetString(commons.Token)
 	tokenExpiry := ctx.GetInt64(commons.Expiry)
+	redisKey := ctx.GetString(commons.RedisKey)
 
-	err := controller.service.LogoutUser(ctx, tokenString, tokenExpiry)
+	err := controller.service.LogoutUser(ctx, tokenString, tokenExpiry,redisKey)
 	if err != nil {
 		errorString := err.Error()
 
@@ -83,7 +84,7 @@ func (controller *LogoutUserHandler) HandleLogoutUser(ctx *gin.Context) {
 			ctx.IndentedJSON(http.StatusUnauthorized, errorResponse)
 			return
 		}
-		
+
 		//500 error
 		logger.WithFields(logrus.Fields{
 			"user":    tokenString,

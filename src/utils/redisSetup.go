@@ -3,7 +3,6 @@ package utils
 import (
 	"context"
 	"fmt"
-	"log"
 	"stock_broker_application/src/constants"
 	"sync"
 
@@ -17,27 +16,26 @@ var once sync.Once
 
 func InitRedisConfg() error {
 	rc := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-		Protocol: 2,
+		Addr:     constants.RedisAddress,
+		Password: constants.RedisPassword,
+		DB:       constants.RedisDB,
+		Protocol: constants.RedisProtocol,
 	})
 
 	_, err := rc.Ping(ctx).Result()
 	if err != nil {
-		return fmt.Errorf("Error connecting to Redis")
+		return fmt.Errorf(constants.ErrRedisInitFailed)
 	}
-	fmt.Println("Connected to Redis!")
+	fmt.Println(constants.RedisConnectionSuccess)
 
 	RedisClient = rc
 	return nil
 }
 
-func GetRedisClient() *redis.Client {
+func GetRedisClient() (*redis.Client, error) {
 	err := InitRedisConfg()
 	if err != nil {
-		log.Fatalf(constants.ErrRedisInitFailed)
-		return nil
+		return nil, err
 	}
-	return RedisClient
+	return RedisClient, nil
 }

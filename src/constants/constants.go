@@ -76,3 +76,14 @@ const (
 	Header        = "Header"
 	Token         = "Token"
 )
+
+// redis connectin success
+const RedisConnectionSuccess = "Connected to Redis successfully!"
+
+// redis configuration
+const (
+	RedisAddress  = "localhost:6379"
+	RedisPassword = ""
+	RedisDB       = 0
+	RedisProtocol = 2
+)

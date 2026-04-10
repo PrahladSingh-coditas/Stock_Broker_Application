@@ -6,24 +6,20 @@ import (
 	"errors"
 
 	"stock_broker_application/src/constants"
+	"stock_broker_application/src/utils"
 	"time"
-
-	"github.com/redis/go-redis/v9"
 )
 
-type LogoutUserService struct {
-	RedisClient *redis.Client
-}
+type LogoutUserService struct{}
 
-func NewLogoutUserService(redisClient *redis.Client) *LogoutUserService {
-	return &LogoutUserService{
-		RedisClient: redisClient,
-	}
+func NewLogoutUserService() *LogoutUserService {
+	return &LogoutUserService{}
 }
 
 func (user *LogoutUserService) LogoutUser(ctx context.Context, tokenString string, tokenExpiry int64, redisKey string) error {
 	//checking if redis connection has failed or not
-	if user.RedisClient == nil {
+	redisClient, err := utils.GetRedisClient()
+	if redisClient == nil && err!=nil{
 		return errors.New(constants.ErrRedisInitFailed)
 	}
 
@@ -36,7 +32,7 @@ func (user *LogoutUserService) LogoutUser(ctx context.Context, tokenString strin
 
 	timeToLive := time.Duration(remainingSeconds) * time.Second
 
-	err := user.RedisClient.Set(ctx, redisKey, redisValue, timeToLive).Err()
+	err = redisClient.Set(ctx, redisKey, redisValue, timeToLive).Err()
 	if err != nil {
 		return errors.New(authConstants.ErrFailedToBlacklist)
 	}

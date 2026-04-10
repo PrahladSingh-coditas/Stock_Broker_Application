@@ -13,14 +13,27 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 )
 
 // This middleware: Logs request method & path; Measures request execution time and also Logs how long request took
-func AuthMiddleware(redisClient *redis.Client) gin.HandlerFunc {
+func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		log.Printf("Request: %s %s", c.Request.Method, c.Request.URL.Path)
+
+		//get redis client connection from utils
+		redisClient, err := utils.GetRedisClient()
+		if redisClient == nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, models.ErrorAPIResponse{
+				Message: models.ErrorMessage{
+					Key:          constants.Redis,
+					ErrorMessage: err.Error(),
+				},
+				Error: constants.ErrUnauthorized,
+			})
+			c.Abort()
+			return
+		}
 
 		authHeader := c.GetHeader(constants.Authorization) //it will extract header and check if its missing
 		if authHeader == "" {
@@ -41,8 +54,8 @@ func AuthMiddleware(redisClient *redis.Client) gin.HandlerFunc {
 
 		//redis key is gonna be token string itself
 		redisKey := fmt.Sprintf(authConstants.BlacklistedToken, tokenString)
-		c.Set(commons.RedisKey,redisKey)
-		
+		c.Set(commons.RedisKey, redisKey)
+
 		existsInRedis, err := redisClient.Exists(c.Request.Context(), redisKey).Result()
 		if err != nil {
 			log.Fatalf("Redis error: %v", err)

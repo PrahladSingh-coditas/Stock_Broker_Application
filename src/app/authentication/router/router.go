@@ -9,7 +9,6 @@ import (
 	"authentication/repository"
 
 	genericConstants "stock_broker_application/src/constants"
-	"stock_broker_application/src/utils"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -18,9 +17,6 @@ import (
 )
 
 func GetRouter() *gin.Engine { // it basically gives a gin engine
-	//get redis client connection from utils
-	redisClient := utils.GetRedisClient()
-
 	router := gin.New()
 	//router.Use(middleware.AuthMiddleware())
 	router.Use(gin.Recovery())
@@ -54,7 +50,7 @@ func GetRouter() *gin.Engine { // it basically gives a gin engine
 	changePasswordHandler := handlers.NewChangePasswordHandler(changePasswordService)
 
 	//logout user
-	logoutUserService := business.NewLogoutUserService(redisClient)
+	logoutUserService := business.NewLogoutUserService()
 	logoutUserHandler := handlers.NewLogoutUserHandler(logoutUserService)
 
 	authGroup := router.Group(constants.AuthRoutePrefix)
@@ -64,9 +60,9 @@ func GetRouter() *gin.Engine { // it basically gives a gin engine
 
 		authGroup.POST(constants.Validateotp, verifyUserOtpHandler.HandleValidateUserOtp)
 
-		authGroup.POST(constants.ChangePassword, middleware.AuthMiddleware(redisClient), changePasswordHandler.HandleChangePassword)
+		authGroup.POST(constants.ChangePassword, middleware.AuthMiddleware(), changePasswordHandler.HandleChangePassword)
 
-		authGroup.POST(constants.LogoutUser, middleware.AuthMiddleware(redisClient), logoutUserHandler.HandleLogoutUser)
+		authGroup.POST(constants.LogoutUser, middleware.AuthMiddleware(), logoutUserHandler.HandleLogoutUser)
 	}
 
 	return router

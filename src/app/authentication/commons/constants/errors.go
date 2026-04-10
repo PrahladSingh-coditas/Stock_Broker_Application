@@ -71,8 +71,9 @@ const (
 // Logout
 const (
 	FieldNotFoundError         = "Field not found in Payload"
-	RedisConnectionFailedError = "Connection to Redis Failed"
-	RedisSetOperationError     = "Error while setting data in cache"
+	RedisConnectionFailedError = "Connection Failed"
+	RedisOperationFailedError  = "Error in Performing Operation"
 	LogoutFailedError          = "Logout failed"
-	BlacklistTokenError        = "Token Blacklisted"
+	BlacklistTokenError        = "Token Blacklisted Logout Failed"
+	TokenExpiredError          = "Token Expired"
 )

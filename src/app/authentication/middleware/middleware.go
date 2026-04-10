@@ -46,34 +46,33 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		redisClient, redisError := utils.GetRedisClient()
 		if redisError != nil {
-			log.Fatal("RedisConnectionFailedError")
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"message": constants.RedisConnectionFailedError,
+			})
 			return
 		}
 
 		if redisClient != nil {
 			exists, err := redisClient.Exists(c, cacheKey).Result()
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"message": "Failed performing operation",
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+					"message": constants.RedisOperationFailedError,
 				})
-				c.Abort()
 				return
 			}
 			if exists > 0 {
-				c.JSON(http.StatusUnauthorized, gin.H{
-					"message": "Token Blacklisted",
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"message": constants.BlacklistTokenError,
 				})
-				c.Abort()
 				return
 			}
 		}
 
 		username, err := utils.ValidateToken(tokenString)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"message": err.Error(),
 			})
-			c.Abort()
 			return
 		}
 		c.Set(constants.Username, username)

@@ -75,5 +75,4 @@ const (
 	RedisOperationFailedError  = "Error in Performing Operation"
 	LogoutFailedError          = "Logout failed"
 	BlacklistTokenError        = "Token Blacklisted Logout Failed"
-	TokenExpiredError          = "Token Expired"
 )

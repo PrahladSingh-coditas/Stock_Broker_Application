@@ -73,18 +73,6 @@ func (controller *LogoutHandler) HandleUserLogout(ctx *gin.Context) {
 			return
 		}
 
-		if strings.Contains(err.Error(), constants.TokenExpiredError) {
-			err := genericModels.ErrorAPIResponse{
-				Message: genericModels.ErrorMessage{
-					Key:          constants.Redis,
-					ErrorMessage: constants.TokenExpiredError,
-				},
-				Error: constants.AuthenticationFailedError,
-			}
-			ctx.IndentedJSON(http.StatusInternalServerError, err)
-			return
-		}
-
 		ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
 			Error: constants.LogoutFailedError,
 		})

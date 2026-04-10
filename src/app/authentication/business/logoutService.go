@@ -19,15 +19,12 @@ func (service *LogoutUserService) LogoutUser(ctx context.Context, balckListedTok
 	cacheValue := 1
 
 	redisClient, redisError := utils.GetRedisClient()
-	if redisError != nil || redisClient == nil {
+	if redisError != nil {
 		fmt.Println("RedisConnectionFailedError")
 		return errors.New(constants.RedisConnectionFailedError)
 	}
 
 	if redisClient != nil {
-		if timeToLeave < 0 {
-			return errors.New(constants.TokenExpiredError)
-		}
 		err := redisClient.Set(ctx, cacheKey, cacheValue, timeToLeave).Err()
 		if err != nil {
 			return errors.New(constants.RedisOperationFailedError)

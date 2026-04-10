@@ -37,15 +37,21 @@ const (
 	ErrFailedToEncrypt = "falied to encrpyt password"
 )
 
-//Signin and Token generation Errors
+//Signin Errors
 const (
 	ErrInvalidEmailorPassword = "invalid email or password"
 	ErrPasswordMismatch       = "password does not match "
 	ErrAuthenticationFailed   = "authentication failed"
-	ErrTokenGenerationFailed  = "failed to generate authentication tokens "
 	ErrInternalServer         = "internal server error"
 	ErrUserNotFound           = "user not found"
 	ErrNoRowsAffected         = "database error, no row affected"
+	ErrUnauthorized           = "unauthorized"
+)
+
+//token errors
+const (
+	ErrTokenExpired          = "token is expired"
+	ErrTokenGenerationFailed = "failed to generate authentication tokens "
 )
 
 const (
@@ -67,4 +73,13 @@ const (
 	ErrInvalidOtp        = "OTP must be a 4 digit number"
 )
 
-//
+//json marshal unmarshal error
+const (
+	ErrJsonMarshalFailed   = "json marshaling failed"
+	ErrJsonUnmarshalFailed = "json unmarshaling failed"
+)
+
+//token blacklisting erros
+const (
+	ErrFailedToBlacklist = "failed to blacklist token"
+)

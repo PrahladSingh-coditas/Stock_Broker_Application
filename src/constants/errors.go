@@ -47,3 +47,9 @@ const (
 	ErrAuthenticationFailed = "authentication failed"
 	ErrUserNotFound         = "user not found"
 )
+
+//token errors
+const (
+	ErrHeaderNotFound = "Header not Found"
+	ErrTokenInvalidated      = "Token is invalidated"
+)

@@ -21,4 +21,5 @@ const (
 	Otp      = "OTP"
 	Token    = "token"
 	Subject  = "sub"
+	Expiry   = "exp"
 )

@@ -12,7 +12,7 @@ const (
 	Fieldemail     = "email"
 )
 
-const(
+const (
 	UsernameField = "username = ?"
 )
 
@@ -25,7 +25,7 @@ const (
 //success message for user otp generation
 const (
 	UserOtpGeneratedSuccess = "Otp generated successfully."
-	UserOtpExpiryMsg = "Otp will expire in 2 minutes."
+	UserOtpExpiryMsg        = "Otp will expire in 2 minutes."
 )
 
 //success message for user otp validation
@@ -33,6 +33,9 @@ const OtpValidatedSuccessMsg = "OTP validated successfully"
 
 //success message for password change
 const PasswordChangedSuccess = "Password changed successfully"
+
+//success message for user logout
+const UserLogoutSuccess = "User logged out successfully"
 
 //Swagger Titile
 const SwaggerTitle = "Stock Broker Application API"
@@ -49,5 +52,10 @@ const (
 	HttpOnly = true
 )
 
-//purpose for JWT
-const Purpose = "password_reset"
+// JWT constants
+const (
+	Purpose = "password_reset"
+)
+
+//redis
+const BlacklistedToken = "BLACKLISTED_TOKEN_%s"

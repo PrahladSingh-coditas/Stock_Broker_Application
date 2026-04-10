@@ -78,6 +78,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logout the user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Logout User",
+                "responses": {
+                    "200": {
+                        "description": "logout successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFLogoutUserResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "failed to blacklist/unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "redis connection failed/ internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/signin": {
             "post": {
                 "description": "Authenticate user and return JWT tokens",
@@ -304,6 +341,15 @@ const docTemplate = `{
                     "maxLength": 32,
                     "minLength": 5,
                     "example": "Sakshi"
+                }
+            }
+        },
+        "models.BFFLogoutUserResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Logged out successfully"
                 }
             }
         },

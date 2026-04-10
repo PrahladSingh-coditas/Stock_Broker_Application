@@ -24,9 +24,9 @@ const (
 	FieldEmail           = "Email"
 	FieldUsername        = "Username"
 	FieldOtp             = "Otp"
-
-	FieldScripId = "ScripId"
-	FieldWatchlistId = "WatchlistIds"
+	FieldScripId         = "ScripId"
+	FieldWatchlistId     = "WatchlistIds"
+	FieldMessage         = "message"
 )
 
 // Migration success Message
@@ -70,5 +70,6 @@ const (
 const (
 	Origin        = "Origin"
 	ContentType   = "Content-type"
+	Bearer        = "Bearer "
 	Authorization = "Authorization"
 )

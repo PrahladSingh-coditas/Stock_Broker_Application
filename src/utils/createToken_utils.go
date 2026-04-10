@@ -19,7 +19,7 @@ func GenerateToken(username string, purpose string) (string, error) {
 		"sub":     username,
 		"purpose": purpose,
 		"iat":     time.Now().Unix(),
-		"exp":     time.Now().Add(time.Minute * 10080).Unix(),
+		"exp":     time.Now().Add(time.Minute * 2).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(secretKey.AccessSecretKey))
@@ -48,7 +48,7 @@ func InitJWTConfig(configPath string) error {
 	return nil
 }
 
-func ValidateToken(tokenString string) (string, error) {
+func ValidateToken(tokenString string) (jwt.MapClaims, error) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		//to check if it belongs to same family of signing method
@@ -61,15 +61,41 @@ func ValidateToken(tokenString string) (string, error) {
 
 	log.Println(err)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
+	// to extract claims from token
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		username, ok := claims["sub"].(string)
-		if !ok {
-			return "", errors.New("username missing in token")
-		}
-		return username, nil
+		return claims,nil
 	}
-	return "", errors.New("Invalid token")
+
+	return nil, errors.New("Invalid token")
+}
+
+func ExtractUsername(tokenString string) (string,error){
+	claims, err := ValidateToken(tokenString)
+	if err !=nil{
+		return "",err
+	}
+	
+	username, usernameFetched := claims["sub"].(string)
+	if !usernameFetched{
+		return "",errors.New("Username missing or invalid")
+	}
+
+	return username,nil
+}
+
+func ExtractExpiry(tokenString string) (int64,error){
+	claims, err := ValidateToken(tokenString)
+	if err !=nil{
+		return 0,err
+	}
+	
+	tokenExpiry, expiryFetched := claims["exp"].(float64) //jwt expiry is float64
+	if !expiryFetched{
+		return 0,errors.New("Expiry missing or invalid")
+	}
+
+	return int64(tokenExpiry),nil
 }

@@ -37,20 +37,7 @@ func GetRedisClient() *redis.Client {
 	err := InitRedisConfg()
 	if err != nil {
 		log.Fatalf(constants.ErrRedisInitFailed)
+		return nil
 	}
 	return RedisClient
 }
-
-// func SetRedisData(ctx context.Context, UserId uint64, bffAdgToWatchlistRequest models.BFFAdgToWatchlistRequest) ([]models.WatchlistWithId, error) {
-// 	err := client.Set(ctx, "greeting", "Hello, Redis!", 0).Err()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
-
-// func GetRedisData(ctx context.Context, UserId uint64, bffAdgToWatchlistRequest models.BFFAdgToWatchlistRequest) ([]models.WatchlistWithId, error){
-// 	value, err := client.Get(ctx, "greeting").Result()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// }

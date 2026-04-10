@@ -53,6 +53,12 @@ definitions:
     - phoneNumber
     - username
     type: object
+  models.BFFLogoutUserResponse:
+    properties:
+      message:
+        example: Logged out successfully
+        type: string
+    type: object
   models.BFFSigninUserRequest:
     properties:
       password:
@@ -159,6 +165,29 @@ paths:
       security:
       - BearerAuth: []
       summary: Change password
+      tags:
+      - User
+  /api/auth/logout:
+    post:
+      description: Logout the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: logout successfully
+          schema:
+            $ref: '#/definitions/models.BFFLogoutUserResponse'
+        "401":
+          description: failed to blacklist/unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "500":
+          description: redis connection failed/ internal server error
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+      security:
+      - BearerAuth: []
+      summary: Logout User
       tags:
       - User
   /api/auth/signin:

@@ -18,8 +18,8 @@ var HashnigPasswordError = errors.New(genericConstants.ErrHashingPassword)
 
 // constants for returning keys
 const (
-	Username = "username"
-	Password = "password"
-	Otp      = "OTP"
-	Token    = "token"
+	Username    = "username"
+	Password    = "password"
+	Otp         = "OTP"
+	TokenExpiry = "tokenExpiry"
 )

@@ -21,14 +21,14 @@ type AdgStoWatchlistRepository interface {
 }
 
 type AdgStoWatchlistsRepository struct {
-	db  *gorm.DB
-	rdb *redis.Client
+	db          *gorm.DB
+	redisClient *redis.Client
 }
 
-func NewadgStoWatchlistsRepository(db *gorm.DB, rdb *redis.Client) *AdgStoWatchlistsRepository {
+func NewadgStoWatchlistsRepository(db *gorm.DB, redisClient *redis.Client) *AdgStoWatchlistsRepository {
 	return &AdgStoWatchlistsRepository{
-		db:  db,
-		rdb: rdb,
+		db:          db,
+		redisClient: redisClient,
 	}
 }
 

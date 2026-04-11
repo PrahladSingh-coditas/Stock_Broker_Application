@@ -18,13 +18,13 @@ import (
 
 type AdgStoWatchlistService struct {
 	adgStoWatchlistRepository repository.AdgStoWatchlistRepository
-	rdb                       *redis.Client
+	redisClient               *redis.Client
 }
 
-func NewadgStoWatchlistService(repo repository.AdgStoWatchlistRepository, rdb *redis.Client) *AdgStoWatchlistService {
+func NewadgStoWatchlistService(repo repository.AdgStoWatchlistRepository, redisClient *redis.Client) *AdgStoWatchlistService {
 	return &AdgStoWatchlistService{
 		adgStoWatchlistRepository: repo,
-		rdb:                       rdb,
+		redisClient:               redisClient,
 	}
 }
 
@@ -100,7 +100,7 @@ func (service *AdgStoWatchlistService) AdgStoWatchlist(ctx context.Context, user
 		}
 
 		key := fmt.Sprintf("watchlists:%d:%s", user.ID, request.ScripId)
-		err = service.rdb.Del(ctx, key).Err()
+		err = service.redisClient.Del(ctx, key).Err()
 		if err != nil {
 			log.Error("error deleting cached data: ", zap.Error(err))
 		}
@@ -148,7 +148,7 @@ func (service *AdgStoWatchlistService) AdgStoWatchlist(ctx context.Context, user
 		}
 
 		key := fmt.Sprintf("watchlists:%d:%s", user.ID, request.ScripId)
-		err = service.rdb.Del(ctx, key).Err()
+		err = service.redisClient.Del(ctx, key).Err()
 		if err != nil {
 			log.Error(constants.ErrDeletingFromCache, zap.Error(err))
 		}
@@ -160,7 +160,7 @@ func (service *AdgStoWatchlistService) AdgStoWatchlist(ctx context.Context, user
 		respWatchlistWithId := []models.WatchlistWithId{}
 
 		key := fmt.Sprintf("watchlists:%d:%s", user.ID, request.ScripId)
-		val, err := service.rdb.Get(ctx, key).Result()
+		val, err := service.redisClient.Get(ctx, key).Result()
 		if err == nil {
 			var cachedIds []models.WatchlistWithId
 			if err := json.Unmarshal([]byte(val), &cachedIds); err == nil {
@@ -187,7 +187,7 @@ func (service *AdgStoWatchlistService) AdgStoWatchlist(ctx context.Context, user
 		//if fetched, set key-value to redis
 		data, err := json.Marshal(watchlists)
 		if err == nil {
-			if err = service.rdb.Set(ctx, key, data, constants.RedisKeyTTL).Err(); err != nil {
+			if err = service.redisClient.Set(ctx, key, data, constants.RedisKeyTTL).Err(); err != nil {
 				log.Error(constants.ErrSavingToCache, zap.Error(err))
 			}
 		} else {

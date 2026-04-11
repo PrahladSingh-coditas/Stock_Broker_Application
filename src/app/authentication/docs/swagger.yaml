@@ -154,6 +154,29 @@ paths:
       summary: Changes user's password
       tags:
       - User
+  /api/auth/logout:
+    post:
+      description: Handles user logout by validating jwt token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User logged out successfully
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorAPIResponse'
+      security:
+      - BearerAuth: []
+      summary: Logs out a loggedin user
+      tags:
+      - User
   /api/auth/signin:
     post:
       consumes:

@@ -14,10 +14,9 @@ var SecretKey *models.JWT
 func GenerateToken(username string) (string, string, error) {
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":     username,
-		"purpose": "password_reset",
-		"iat":     time.Now().Unix(),
-		"exp":     time.Now().Add(time.Hour * 20000).Unix(),
+		"sub": username,
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Second * 300).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(SecretKey.AccessSecretKey))
@@ -26,10 +25,9 @@ func GenerateToken(username string) (string, string, error) {
 	}
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":     username,
-		"purpose": "password_reset",
-		"iat":     time.Now().Unix(),
-		"exp":     time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"sub": username,
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
 
 	refreshTokenString, err := refreshToken.SignedString([]byte(SecretKey.RefreshSecretKey))

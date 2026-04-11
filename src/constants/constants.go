@@ -68,6 +68,9 @@ const (
 	Origin        = "Origin"
 	ContentType   = "Content-type"
 	Authorization = "Authorization"
+	Bearer        = "Bearer"
+	Token         = "token"
+	Server        = "server"
 )
 
 // redis
@@ -75,4 +78,10 @@ const (
 	RedisAddr     = "127.0.0.1:6379"
 	RedisPassword = ""
 	RedisDB       = 0
+)
+
+// claims
+const (
+	Exp = "exp"
+	Sub = "sub"
 )

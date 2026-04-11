@@ -13,11 +13,13 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	files "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"gorm.io/gorm"
 )
 
-func GetRouter() *gin.Engine {
+func GetRouter(db *gorm.DB, redisClient *redis.Client) *gin.Engine {
 	router := gin.New()
 	router.Use(middleware.LoggerMiddleware())
 	router.Use(gin.Recovery())
@@ -49,12 +51,16 @@ func GetRouter() *gin.Engine {
 	changePasswordService := business.NewChangePasswordService(changePasswordRepository, postgresClient)
 	changePasswordHandler := handlers.NewChangePasswordHandler(changePasswordService)
 
+	logoutService := business.NewLogoutService(redisClient)
+	logoutHandler := handlers.NewLogoutHandler(logoutService)
+
 	authGroup := router.Group(constants.AuthRoutePrefix)
 	{
 		authGroup.POST(constants.Signup, createUserHandler.HandleCreaterUser)
 		authGroup.POST(constants.Signin, signInHandler.HandleSignIn)
 		authGroup.POST(constants.Validateotp, verifyUserOtpHandler.HandleValidateUserOtp)
-		authGroup.POST(constants.Changepassword, middleware.AuthMiddleware(), changePasswordHandler.HandleChangePassword)
+		authGroup.POST(constants.Changepassword, middleware.AuthMiddleware(redisClient), changePasswordHandler.HandleChangePassword)
+		authGroup.POST(constants.Logout, middleware.AuthMiddleware(redisClient), logoutHandler.Logout)
 	}
 
 	return router

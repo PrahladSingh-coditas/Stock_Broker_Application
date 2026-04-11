@@ -17,7 +17,7 @@ const (
 	ErrReadConfigFailed         = "failed to read the config file: %s"
 	ErrUnmarshallConfigFailed   = "failed to unmarshal the config file %s"
 	ErrJWTConfigReadFailed      = "failed to read the JWT config file %s"
-	ErrRedisConfigFailed        = "failed to initialize redis %s"
+	ErrRedisInitFailed          = "failed to initialize redis %s"
 )
 
 const (
@@ -42,4 +42,16 @@ const (
 	ErrHashingPassword      = "error hashing password: %w"
 	ErrAuthenticationFailed = "authentication failed"
 	ErrUserNotFound         = "user not found"
+)
+
+const (
+	InvalidTokenError            = "invalid token"
+	AuthHeaderMissingError       = "missing authorization header"
+	InvalidAuthFormatError       = "invalid authorization format"
+	TokenAlreadyBlacklistedError = "token is already blacklisted"
+	UnexpectedSigningMethod      = "unexpected signing method"
+	InvalidExpClaimsError        = "invalid exp claims"
+	InvalidSubClaimsError        = "invalid sub claims"
+	TokenExpiredError            = "token is already expired"
+	RedisClientNotInitialized    = "redis client not initialized"
 )

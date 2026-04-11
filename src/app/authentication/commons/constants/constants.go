@@ -19,6 +19,7 @@ const (
 	UserLoggedInSuccessMsg    = "User logged in successfully"
 	OtpValidatedSuccessMsg    = "OTP validated successfully"
 	PasswordChangedSuccessMsg = "Password changed succefully"
+	LogoutSuccessfulMsg       = "User logged out successfully"
 )
 
 //Swagger Titile

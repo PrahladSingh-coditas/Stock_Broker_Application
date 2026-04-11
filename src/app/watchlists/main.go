@@ -9,7 +9,9 @@ import (
 
 	ServiceConstants "watchlists/commons/constants"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 // @title Watchlists ADG Service API
@@ -29,16 +31,19 @@ func main() {
 		log.Fatalf(constants.ErrJWTConfigReadFailed, err)
 	}
 
-	if err := utils.InitRedisConfig(); err != nil {
-		log.Fatalf(constants.ErrRedisConfigFailed, err)
+	if _, err := utils.InitRedis(); err != nil {
+		log.Fatalf(constants.ErrRedisInitFailed, err)
 	}
 
-	startRouter()
+	redisClient := utils.GetRedisClient()
+	db := utils.GetPostgresClient().GormDB
+
+	startRouter(db, redisClient)
 }
 
-func startRouter() {
+func startRouter(db *gorm.DB, redisClient *redis.Client) {
 	logger := logrus.New()
-	router := router.GetRouter()
+	router := router.GetRouter(db, redisClient)
 	logger.Info(fmt.Sprintf(constants.RunningServerPort, ServiceConstants.PortDefaultValude))
 	router.Run(fmt.Sprintf(":%d", ServiceConstants.PortDefaultValude))
 }

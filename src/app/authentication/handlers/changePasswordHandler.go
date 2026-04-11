@@ -92,7 +92,7 @@ func (controller changePasswordHandler) HandleChangePassword(ctx *gin.Context) {
 		if errors.Is(errChangePassword, commons.InvalidTokenError) {
 			invalidTokenErr := models.ErrorAPIResponse{
 				Message: models.ErrorMessage{
-					Key:          commons.Token,
+					Key:          genericConstants.Token,
 					ErrorMessage: constants.ErrInvalidToken,
 				},
 				Error: constants.ErrPasswordChangeFailed,

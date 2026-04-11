@@ -62,3 +62,9 @@ const (
 	ErrInvalidToken         = "invalid token"
 	ErrPasswordChangeFailed = "failed to change password"
 )
+
+//logout
+const (
+	UserAlreadyLoggedoutError = "user already logged out"
+	LogoutFailedError         = "logout failed"
+)

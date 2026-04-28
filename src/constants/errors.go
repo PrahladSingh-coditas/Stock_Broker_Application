@@ -21,7 +21,7 @@ const (
 
 // Redis Initialization error
 const (
-	ErrRedisInitFailed = "Error connecting to redis"
+	ErrRedisInitFailed = "Error connecting to redis: %s"
 )
 
 const (

@@ -24,7 +24,7 @@ func InitRedisConfg() error {
 
 	_, err := rc.Ping(ctx).Result()
 	if err != nil {
-		return fmt.Errorf(constants.ErrRedisInitFailed)
+		return fmt.Errorf(constants.ErrRedisInitFailed,err)
 	}
 	fmt.Println(constants.RedisConnectionSuccess)
 

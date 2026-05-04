@@ -32,7 +32,7 @@ func GetRouter(gdb *gorm.DB) *gin.Engine {
 		AllowHeaders: []string{genericConstants.Origin, genericConstants.ContentType, genericConstants.Authorization},
 	}))
 
-	createUserRepository := repository.NewCreateUserRepository()
+	createUserRepository := repository.NewCreateUserRepository(gdb)
 	createUserService := business.NewCreateUserService(createUserRepository)
 	createUserHandler := handlers.NewCreateUserHandler(createUserService)
 

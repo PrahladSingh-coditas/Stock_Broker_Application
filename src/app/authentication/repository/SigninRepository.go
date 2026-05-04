@@ -4,6 +4,7 @@ import (
 	"authentication/commons/constants"
 	"context"
 	"errors"
+	"fmt"
 	GenericUserModel "stock_broker_application/src/models"
 	"time"
 
@@ -12,30 +13,34 @@ import (
 )
 
 type SignInUserRepository interface {
-	SignInUser(ctx context.Context, db *gorm.DB, username string) (*GenericUserModel.User, error)
-	StoreOTP(ctx context.Context, db *gorm.DB, username string, data map[string]interface{}) error
+	SignInUser(ctx context.Context, username string) (*GenericUserModel.User, error)
+	StoreOTP(ctx context.Context, username string, data map[string]interface{}) error
 }
 
-type signInUserRepository struct{}
-
-func NewSignInUserRepository() *signInUserRepository {
-	return &signInUserRepository{}
+type signInUserRepository struct {
+	gdb *gorm.DB
 }
 
-func (user *signInUserRepository) SignInUser(ctx context.Context, db *gorm.DB, username string) (*GenericUserModel.User, error) {
+func NewSignInUserRepository(gormDB *gorm.DB) *signInUserRepository {
+	return &signInUserRepository{
+		gdb: gormDB,
+	}
+}
+
+func (repo *signInUserRepository) SignInUser(ctx context.Context, username string) (*GenericUserModel.User, error) {
 
 	start := time.Now()
 	logger := logrus.New()
 
 	var fetchedUserData GenericUserModel.User
+	var user GenericUserModel.User
 
-	err := db.Where(constants.UsernameCondition, username).First(&fetchedUserData)
-
-	if err.RowsAffected == 0 {
-		return nil, errors.New(constants.ErrUserNotFoundMsg)
-	}
+	err := repo.gdb.Model(&user).Where(constants.UsernameCondition, username).First(&fetchedUserData)
 
 	if err.Error != nil {
+		if err.Error == gorm.ErrRecordNotFound {
+			return nil, errors.New(constants.ErrUserNotFoundMsg)
+		}
 		return nil, errors.New(constants.ErrDatabaseQueryErrorMsg)
 	}
 
@@ -47,19 +52,20 @@ func (user *signInUserRepository) SignInUser(ctx context.Context, db *gorm.DB, u
 	return &fetchedUserData, nil
 }
 
-func (repo *signInUserRepository) StoreOTP(ctx context.Context, db *gorm.DB, username string, updates map[string]interface{}) error {
+func (repo *signInUserRepository) StoreOTP(ctx context.Context, username string, updates map[string]interface{}) error {
 
 	var user GenericUserModel.User
 
-	result := db.Model(&user).
+	err := repo.gdb.Model(&user).
 		Where(constants.UsernameCondition, username).
 		Updates(updates)
 
-	if result.RowsAffected == 0 {
-		return errors.New(constants.ErrUserNotFoundMsg)
-	}
+	fmt.Println(err.Error)
 
-	if result.Error != nil {
+	if err.Error != nil {
+		if err.Error == gorm.ErrRecordNotFound {
+			return errors.New(constants.ErrUserNotFoundMsg)
+		}
 		return errors.New(constants.ErrDatabaseQueryErrorMsg)
 	}
 

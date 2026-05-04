@@ -9,6 +9,7 @@ import (
 	"stock_broker_application/src/utils"
 
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 // @title backend
@@ -29,12 +30,14 @@ func main() {
 		log.Fatalf(constants.ErrJWTConfigReadFailed, err)
 	}
 
-	startRouter()
+	postgresClient := utils.GetPostgresClient().GormDB
+
+	startRouter(postgresClient)
 }
 
-func startRouter() {
+func startRouter(gdb *gorm.DB) {
 	logger := logrus.New()
-	router := router.GetRouter()
+	router := router.GetRouter(gdb)
 	logger.Info(fmt.Sprintf(constants.RunningServerPort, ServiceConstants.PortDefaultValude))
 	router.Run(fmt.Sprintf(":%d", ServiceConstants.PortDefaultValude))
 }

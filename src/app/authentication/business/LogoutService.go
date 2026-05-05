@@ -5,33 +5,29 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"stock_broker_application/src/utils"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 )
 
-type LogoutUserService struct{}
+type LogoutUserService struct {
+	redisClient *redis.Client
+}
 
-func NewLogoutUserService() *LogoutUserService {
-	return &LogoutUserService{}
+func NewLogoutUserService(redisClient *redis.Client) *LogoutUserService {
+	return &LogoutUserService{redisClient: redisClient}
 }
 
 func (service *LogoutUserService) LogoutUser(ctx context.Context, logger *logrus.Logger, tokenString string, expiryTime int64) error {
-	redisClient, err := utils.GetRedisClient(ctx)
-
-	if err != nil {
-		logger.Error(constants.RedisConnectionError)
-		return errors.New(constants.RedisConnectionError)
-	}
 
 	duration := expiryTime - time.Now().Unix()
 	ttl := time.Duration(duration) * time.Second
 
 	cacheKey := fmt.Sprintf(constants.BlacklistedCacheKey, tokenString)
 
-	err = redisClient.Set(ctx, cacheKey, 1, ttl).Err()
-
+	err := service.redisClient.Set(ctx, cacheKey, 1, ttl).Err()
+	
 	if err != nil {
 		logger.Error(constants.RedisConnectionError)
 		return errors.New(constants.RedisConnectionError)

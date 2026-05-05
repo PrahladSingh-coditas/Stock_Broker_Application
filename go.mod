@@ -7,6 +7,7 @@ require (
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-playground/validator/v10 v10.30.1
+	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/lib/pq v1.12.0
 	github.com/redis/go-redis/v9 v9.18.0

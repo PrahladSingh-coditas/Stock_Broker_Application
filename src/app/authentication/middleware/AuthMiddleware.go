@@ -13,9 +13,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(redisClient *redis.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		log.Printf("Request: %s %s", c.Request.Method, c.Request.URL.Path)
@@ -25,17 +26,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			log.Printf("Completed in %v", duration)
 		}()
 
-		redisClient, err := utils.GetRedisClient(c)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, models.ErrorAPIResponse{
-				Message: models.ErrorMessage{
-					Key:          constants.Redis,
-					ErrorMessage: constants.RedisConnectionError,
-				},
-				Error: constants.OperationFailed,
-			})
-			return
-		}
 
 		authHeader := c.GetHeader(genericConstants.Authorization)
 
@@ -105,12 +95,12 @@ func AuthMiddleware() gin.HandlerFunc {
 				return
 			}
 			c.AbortWithStatusJSON(http.StatusUnauthorized, models.ErrorAPIResponse{
-					Message: models.ErrorMessage{
-						Key:          constants.Token,
-						ErrorMessage: genericConstants.ErrTokenIsInvalid,
-					},
-					Error: constants.OperationFailed,
-				})
+				Message: models.ErrorMessage{
+					Key:          constants.Token,
+					ErrorMessage: genericConstants.ErrTokenIsInvalid,
+				},
+				Error: constants.OperationFailed,
+			})
 			return
 		}
 
@@ -118,12 +108,12 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if !ok {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, models.ErrorAPIResponse{
-					Message: models.ErrorMessage{
-						Key:          constants.Token,
-						ErrorMessage: constants.ErrUsernameNotFoundInJWT,
-					},
-					Error: constants.OperationFailed,
-				})
+				Message: models.ErrorMessage{
+					Key:          constants.Token,
+					ErrorMessage: constants.ErrUsernameNotFoundInJWT,
+				},
+				Error: constants.OperationFailed,
+			})
 			return
 		}
 
@@ -131,12 +121,12 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if !ok {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, models.ErrorAPIResponse{
-					Message: models.ErrorMessage{
-						Key:          constants.Token,
-						ErrorMessage: constants.ErrExpiryTimeNotFoundInJWT,
-					},
-					Error: constants.OperationFailed,
-				})
+				Message: models.ErrorMessage{
+					Key:          constants.Token,
+					ErrorMessage: constants.ErrExpiryTimeNotFoundInJWT,
+				},
+				Error: constants.OperationFailed,
+			})
 			return
 		}
 

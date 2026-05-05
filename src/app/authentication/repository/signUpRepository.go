@@ -16,16 +16,18 @@ import (
 )
 
 type CreateUserRepository interface {
-	CreateNewUser(ctx context.Context, db *gorm.DB, bffCreateUserRequest models.BFFCreateUserRequest) error
+	CreateNewUser(ctx context.Context, bffCreateUserRequest models.BFFCreateUserRequest) error
 }
 
-type createUserRepository struct{}
-
-func NewCreateUserRepository() *createUserRepository {
-	return &createUserRepository{}
+type createUserRepository struct {
+	db *gorm.DB
 }
 
-func (user *createUserRepository) CreateNewUser(ctx context.Context, db *gorm.DB, bffCreateUserRequest models.BFFCreateUserRequest) error {
+func NewCreateUserRepository(db *gorm.DB) *createUserRepository {
+	return &createUserRepository{db: db}
+}
+
+func (user *createUserRepository) CreateNewUser(ctx context.Context, bffCreateUserRequest models.BFFCreateUserRequest) error {
 
 	start := time.Now()
 	logger := logrus.New()
@@ -44,7 +46,7 @@ func (user *createUserRepository) CreateNewUser(ctx context.Context, db *gorm.DB
 		Email:       bffCreateUserRequest.Email,
 	}
 
-	result := db.WithContext(ctx).Table(constants.UsersTableName).Create(&NewUser)
+	result := user.db.WithContext(ctx).Table(constants.UsersTableName).Create(&NewUser)
 	if result.Error != nil {
 		errorMsgs := result.Error.Error()
 		if strings.Contains(errorMsgs, constants.ErrUniqueConstraintViolation) {

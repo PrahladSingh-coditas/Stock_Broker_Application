@@ -12,11 +12,13 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	files "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"gorm.io/gorm"
 )
 
-func GetRouter() *gin.Engine {
+func GetRouter(gdb *gorm.DB, redisClient *redis.Client, redisError error) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Recovery())
 
@@ -30,11 +32,11 @@ func GetRouter() *gin.Engine {
 		AllowHeaders: []string{genericConstants.Origin, genericConstants.ContentType, genericConstants.Authorization},
 	}))
 
-	createUserRepository := repository.NewCreateUserRepository()
+	createUserRepository := repository.NewCreateUserRepository(gdb)
 	createUserService := business.NewCreateUserService(createUserRepository)
 	createUserHandler := handlers.NewCreateUserHandler(createUserService)
 
-	signinUserRepository := repository.NewSigninUserRepository()
+	signinUserRepository := repository.NewSigninUserRepository(gdb)
 	signinUserService := business.NewSigninUserService(signinUserRepository)
 	signinUserHandler := handlers.NewSigninUserHandler(signinUserService)
 
@@ -50,7 +52,7 @@ func GetRouter() *gin.Engine {
 	changePasswordService := business.NewChangePasswordService(changePasswordRepository)
 	changePasswordHandler := handlers.NewChangePasswordHandler(changePasswordService)
 
-	logoutUserService := business.NewLogoutUser()
+	logoutUserService := business.NewLogoutUser(redisClient, redisError)
 	logoutUserHandler := handlers.LogoutUserHandler(logoutUserService)
 
 	authGroup := router.Group(constants.RoutePrefix)

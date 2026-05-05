@@ -7,6 +7,7 @@ import (
 	"net/http"
 	genericModels "stock_broker_application/src/models"
 	"stock_broker_application/src/utils/validations"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,16 +59,26 @@ func (controller *SigninUserHandler) HandleSigninUser(ctx *gin.Context) {
 	// then we call the function that is in service
 	err := controller.service.SigninUser(ctx, ctx.Request.Context(), bffSigninUserRequest)
 	if err != nil {
-		if err.Error() == constants.UserNotFoundError {
+
+		if strings.Contains(err.Error(), constants.UserNotFoundError) {
 			ctx.JSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
 				Error: constants.UserNotFoundError,
 			})
 			return
 		}
-		ctx.JSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+
+		if strings.Contains(err.Error(), constants.InvalidUsernamePasswordError) {
+			ctx.JSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+				Error: constants.InvalidUsernamePasswordError,
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
 			Error: constants.AuthenticationFailedError,
 		})
+
 		return
 	}
-	ctx.IndentedJSON(http.StatusOK, constants.UserLoggedInSuccessMsg)
+	ctx.IndentedJSON(http.StatusOK, gin.H{"message": constants.UserLoggedInSuccessMsg})
 }

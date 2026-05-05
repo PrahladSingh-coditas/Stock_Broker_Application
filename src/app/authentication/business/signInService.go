@@ -6,7 +6,6 @@ import (
 	"authentication/repository"
 	"context"
 	"errors"
-	"fmt"
 	"stock_broker_application/src/utils"
 )
 
@@ -21,9 +20,9 @@ func NewSigninUserService(signinUserRepository repository.SigninUserRepository) 
 }
 
 func (service *SigninUserService) SigninUser(ctx context.Context, spanCtx context.Context, bffSigninUserRequest models.BFFSigninUserRequest) error {
-	postgresClinet := utils.GetPostgresClient()
-	client := postgresClinet.GormDB
-	user, err := service.signinUserRepository.SigninUser(spanCtx, client, bffSigninUserRequest.Username)
+	// postgresClinet := utils.GetPostgresClient()
+	// client := postgresClinet.GormDB
+	user, err := service.signinUserRepository.SigninUser(spanCtx, bffSigninUserRequest.Username)
 	if err != nil {
 		if err.Error() == constants.UserNotFoundError {
 			return errors.New(constants.UserNotFoundError)
@@ -33,7 +32,7 @@ func (service *SigninUserService) SigninUser(ctx context.Context, spanCtx contex
 
 	passwordMatch := utils.CompareHashPassword(user.Password, bffSigninUserRequest.Password)
 	if !passwordMatch {
-		return fmt.Errorf(constants.PasswordMismatchError, errors.New(constants.InvalidUsernamePasswordError))
+		return errors.New(constants.InvalidUsernamePasswordError)
 	}
 	return nil
 

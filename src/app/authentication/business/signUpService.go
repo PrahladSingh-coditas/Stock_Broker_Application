@@ -5,7 +5,6 @@ import (
 	"authentication/repository"
 	"context"
 	"fmt"
-	"stock_broker_application/src/utils"
 )
 
 type CreateUserService struct {
@@ -19,10 +18,8 @@ func NewCreateUserService(createUserRepository repository.CreateUserRepository) 
 }
 
 func (service *CreateUserService) CreateNewUser(ctx context.Context, spanCtx context.Context, bffCreateUserRequest models.BFFCreateUserRequest) error {
-	postgresClinet := utils.GetPostgresClient()
-	client := postgresClinet.GormDB
 
-	err := service.createUserRepository.CreateNewUser(spanCtx, client, bffCreateUserRequest)
+	err := service.createUserRepository.CreateNewUser(spanCtx, bffCreateUserRequest)
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}

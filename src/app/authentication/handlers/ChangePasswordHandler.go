@@ -5,10 +5,11 @@ import (
 	"authentication/commons/constants"
 	"authentication/models"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"net/http"
 	genericModels "stock_broker_application/src/models"
 	"stock_broker_application/src/utils/validations"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -76,7 +77,8 @@ func (handler *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) {
 	err := handler.changePasswordService.ServiceChangePassword(ctx, ctx.Request.Context(), username, bffChangePasswordRequest.NewPassword, logger)
 
 	if err != nil {
-		if errors.Is(err, errors.New(constants.ErrFailedToEncrypt)) {
+		fmt.Println(err)
+		if strings.Contains(err.Error(), constants.ErrFailedToEncrypt) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.Password,
@@ -92,7 +94,7 @@ func (handler *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) {
 
 			ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
 			return
-		} else if errors.Is(err,  errors.New(constants.ErrDatabaseQueryErrorMsg)) {
+		} else if strings.Contains(err.Error(), constants.ErrDatabaseQueryErrorMsg) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Error: constants.ErrDatabaseQueryErrorMsg,
 			}
@@ -104,7 +106,7 @@ func (handler *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) {
 
 			ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
 			return
-		} else if errors.Is(err, errors.New(constants.ErrUserNotFoundMsg)) {
+		} else if strings.Contains(err.Error(), constants.ErrUserNotFoundMsg) {
 			errorResponse := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.User,
@@ -119,19 +121,6 @@ func (handler *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) {
 			}).Info(constants.ErrUserNotFoundMsg)
 
 			ctx.IndentedJSON(http.StatusNotFound, errorResponse)
-			return
-		} else {
-
-			errorResponse := genericModels.ErrorAPIResponse{
-				Error: constants.ErrAuthenticationFailed,
-			}
-
-			logger.WithFields(logrus.Fields{
-				constants.User:    username,
-				constants.Latency: time.Since(start).Milliseconds(),
-			}).Info(constants.ErrAuthenticationFailed)
-
-			ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
 			return
 		}
 	}

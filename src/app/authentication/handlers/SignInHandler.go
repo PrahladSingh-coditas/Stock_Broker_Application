@@ -123,18 +123,6 @@ func (controller *SignInUserHandler) HandleSignInUser(ctx *gin.Context) {
 
 			ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
 			return
-		} else {
-			errorResponse := genericModels.ErrorAPIResponse{
-				Error: constants.ErrAuthenticationFailed,
-			}
-
-			logger.WithFields(logrus.Fields{
-				constants.User:    bffSignInRequest.Username,
-				constants.Latency: time.Since(start).Milliseconds(),
-			}).Info(constants.ErrAuthenticationFailed)
-
-			ctx.IndentedJSON(http.StatusInternalServerError, errorResponse)
-			return
 		}
 	}
 

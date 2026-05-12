@@ -10,27 +10,29 @@ import (
 )
 
 type ChangePasswordRepository interface {
-	UpdateUserPassword(ctx context.Context, db *gorm.DB, username string, NewHashedPassword string, logger *logrus.Logger) error
+	UpdateUserPassword(ctx context.Context, username string, NewHashedPassword string, logger *logrus.Logger) error
 }
 
-type changePasswordRepository struct{}
-
-func NewChangePasswordRepository() *changePasswordRepository {
-	return &changePasswordRepository{}
+type changePasswordRepository struct {
+	gdb *gorm.DB
 }
 
-func (repo *changePasswordRepository) UpdateUserPassword(ctx context.Context, db *gorm.DB, username string, newHashedPassword string, logger *logrus.Logger) error {
+func NewChangePasswordRepository(gormDB *gorm.DB) *changePasswordRepository {
+	return &changePasswordRepository{gdb: gormDB}
+}
+
+func (repo *changePasswordRepository) UpdateUserPassword(ctx context.Context, username string, newHashedPassword string, logger *logrus.Logger) error {
 
 	start := time.Now()
 
-	result := db.WithContext(ctx).Table(constants.UsersTableName).Where(constants.UsernameCondition, username).Update(constants.Password, newHashedPassword)
+	result := repo.gdb.Debug().WithContext(ctx).Table(constants.UsersTableName).Where(constants.UsernameCondition, username).Update(constants.Password, newHashedPassword)
 
-	if result.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
-	}
-	
 	if result.Error != nil {
 		return result.Error
+	}
+	
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
 
 	logger.WithFields(logrus.Fields{

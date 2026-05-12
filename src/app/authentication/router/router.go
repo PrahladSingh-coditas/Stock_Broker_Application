@@ -12,11 +12,14 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
+
 	files "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"gorm.io/gorm"
 )
 
-func GetRouter() *gin.Engine {
+func GetRouter(gdb *gorm.DB, redisClient *redis.Client) *gin.Engine {
 	router := gin.New()
 	//router.Use(middleware.AuthMiddleware())
 	router.Use(gin.Recovery())
@@ -31,32 +34,32 @@ func GetRouter() *gin.Engine {
 		AllowHeaders: []string{genericConstants.Origin, genericConstants.ContentType, genericConstants.Authorization},
 	}))
 
-	createUserRepository := repository.NewCreateUserRepository()
+	createUserRepository := repository.NewCreateUserRepository(gdb)
 	createUserService := business.NewCreateUserService(createUserRepository)
 	createUserHandler := handlers.NewCreateUserHandler(createUserService)
 
-	signInUserRepository := repository.NewSignInUserRepository()
+	signInUserRepository := repository.NewSignInUserRepository(gdb)
 	signInUserService := business.NewSignInUserService(signInUserRepository)
 	signInUserHandler := handlers.NewSignInUserHandler(signInUserService)
 
-	validateUserOtpRepository := repository.NewValidateUserOtpRepository()
+	validateUserOtpRepository := repository.NewValidateUserOtpRepository(gdb)
 	validateUserOtpService := business.NewValidateUserOtpService(validateUserOtpRepository)
 	validateUserOtpHandler := handlers.NewValidateUserOtpHandler(validateUserOtpService)
 
-	changePasswordRepository := repository.NewChangePasswordRepository()
+	changePasswordRepository := repository.NewChangePasswordRepository(gdb)
 	changePasswordService := business.NewChangePasswordService(changePasswordRepository)
 	changePasswordHandler := handlers.NewChangePasswordHandler(changePasswordService)
 
-	logoutUserService:=business.NewLogoutUserService()
-	logoutUserHandler:=handlers.NewLogoutUserHandler(logoutUserService)
+	logoutUserService := business.NewLogoutUserService(redisClient)
+	logoutUserHandler := handlers.NewLogoutUserHandler(logoutUserService)
 
 	authGroup := router.Group(constants.AuthRoutePrefix)
 	{
 		authGroup.POST(constants.Signup, createUserHandler.HandleCreaterUser)
 		authGroup.POST(constants.Signin, signInUserHandler.HandleSignInUser)
 		authGroup.POST(constants.ValidateOtp, validateUserOtpHandler.HandleValidateUserOtp)
-		authGroup.PATCH(constants.ChangePassword, middleware.AuthMiddleware(), changePasswordHandler.HandleChangePassword)
-		authGroup.POST(constants.Logout, middleware.AuthMiddleware(), logoutUserHandler.HandleLogoutUser)
+		authGroup.PATCH(constants.ChangePassword, middleware.AuthMiddleware(redisClient), changePasswordHandler.HandleChangePassword)
+		authGroup.POST(constants.Logout, middleware.AuthMiddleware(redisClient), logoutUserHandler.HandleLogoutUser)
 	}
 
 	return router

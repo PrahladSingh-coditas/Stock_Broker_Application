@@ -56,7 +56,10 @@ const (
 
 //redis and token related errors
 const (
-	RedisConnectionError = "error in redis connection"
+	//RedisConnectionError = "error in redis connection"
+	RedisSetOperationError = "error in redis set operation"
+	RedisExistsOperationError = "error in redis exists operation"
+	RedisGetOperationError = "error in redis get operation"
 	InvalidTokenError    = "invalid token"
 	LogoutFailed         = "logout failed"
 	OperationFailed         = "operation failed"

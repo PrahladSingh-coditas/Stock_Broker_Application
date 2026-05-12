@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"stock_broker_application/src/utils"
-	genConstants "stock_broker_application/src/constants"
 	"time"
 
 	"gorm.io/gorm"
@@ -26,10 +25,7 @@ func NewValidateUserOtpService(repository repository.ValidateUserOtpRepository) 
 // this function takes userRequest, fetches the user from db(via repository), performs all otp validations and returns error/ nil
 func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) (string, error) {
 
-	postgresClinet := utils.GetPostgresClient()
-	tx := postgresClinet.GormDB
-
-	userData, err := service.repository.GetUserByUsername(spanCtx, tx, bffValidateUserOtpRequest.Username)
+	userData, err := service.repository.GetUserByUsername(spanCtx, bffValidateUserOtpRequest.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", constants.UserNotFoundError
@@ -44,8 +40,6 @@ func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, span
 	if !utils.CheckOtpExpiry(userData.OtpExpiresAt, time.Now()) {
 		return "", constants.OtpExpiredError
 	}
-
-	utils.InitJWTConfig(genConstants.ConfigPath)
 
 	accessToken, err := utils.GenerateToken(bffValidateUserOtpRequest.Username)
 

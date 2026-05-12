@@ -25,7 +25,7 @@ func WatchlistMiddleware() gin.HandlerFunc {
 			log.Printf("Completed in %v", duration)
 		}()
 
-		redisClient, err := utils.GetRedisClient(c)
+		redisClient,_, err := utils.GetRedisClient(c,true)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, models.ErrorAPIResponse{
 				Message: models.ErrorMessage{

@@ -28,7 +28,7 @@ func NewWatchlistService(watchlistRepository repository.WatchlistRepository) *Wa
 }
 
 func (service *WatchlistService) ServiceWatchlist(ctx context.Context, spanCtx context.Context, logger *logrus.Logger, bffAdgToWatchlistRequest models.BFFAdgToWatchlistRequest, username string) ([]models.WatchlistWithID, []string, error) {
-	redisClient, err := utils.GetRedisClient(ctx)
+	redisClient,_, err := utils.GetRedisClient(ctx,true)
 
 	if err != nil || redisClient == nil {
 		logger.Error(constants.RedisConnectionError)

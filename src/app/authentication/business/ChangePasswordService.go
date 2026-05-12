@@ -23,16 +23,13 @@ func NewChangePasswordService(changePasswordReposioty repository.ChangePasswordR
 
 func (service *ChangePasswordService) ServiceChangePassword(ctx context.Context, spanCtx context.Context, username string, newPassword string, logger *logrus.Logger) error {
 
-	postgresClinet := utils.GetPostgresClient()
-	tx := postgresClinet.GormDB
-
 	newHashedPassword, err := utils.HashPassword(newPassword)
 
 	if err != nil {
 		return errors.New(constants.ErrFailedToEncrypt)
 	}
 
-	err = service.changePasswordReposioty.UpdateUserPassword(ctx, tx, username, newHashedPassword, logger)
+	err = service.changePasswordReposioty.UpdateUserPassword(ctx, username, newHashedPassword, logger)
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {

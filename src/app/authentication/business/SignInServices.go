@@ -22,10 +22,8 @@ func NewSignInUserService(signInUserRepository repository.SignInUserRepository) 
 }
 
 func (service *SignInUserService) SignInUser(ctx context.Context, spanCtx context.Context, bffSignInRequest models.BFFSignInUserRequest) error {
-	postgresClinet := utils.GetPostgresClient()
-	tx := postgresClinet.GormDB
 
-	userData, err1 := service.signInUserRepository.SignInUser(spanCtx, tx, bffSignInRequest.Username)
+	userData, err1 := service.signInUserRepository.SignInUser(spanCtx, bffSignInRequest.Username)
 	if err1 != nil {
 		return err1
 	}
@@ -41,7 +39,7 @@ func (service *SignInUserService) SignInUser(ctx context.Context, spanCtx contex
 		constants.OTPExpiryTime: time.Now().Unix() + constants.OtpTimeLimitInSeconds,
 	}
 
-	err2 := service.signInUserRepository.StoreOTP(ctx, tx, bffSignInRequest.Username, data)
+	err2 := service.signInUserRepository.StoreOTP(ctx, bffSignInRequest.Username, data)
 	if err2 != nil {
 		return err2
 	}

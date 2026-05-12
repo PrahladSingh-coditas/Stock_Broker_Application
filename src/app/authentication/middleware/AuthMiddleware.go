@@ -50,7 +50,7 @@ func AuthMiddleware(redisClient *redis.Client) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, models.ErrorAPIResponse{
 				Message: models.ErrorMessage{
 					Key:          constants.Redis,
-					ErrorMessage: constants.RedisConnectionError,
+					ErrorMessage: constants.RedisExistsOperationError,
 				},
 				Error: constants.OperationFailed,
 			})

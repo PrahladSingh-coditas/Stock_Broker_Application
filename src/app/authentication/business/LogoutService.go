@@ -29,8 +29,8 @@ func (service *LogoutUserService) LogoutUser(ctx context.Context, logger *logrus
 	err := service.redisClient.Set(ctx, cacheKey, 1, ttl).Err()
 	
 	if err != nil {
-		logger.Error(constants.RedisConnectionError)
-		return errors.New(constants.RedisConnectionError)
+		logger.Error(constants.RedisSetOperationError)
+		return errors.New(constants.RedisSetOperationError)
 	}
 
 	return nil

@@ -5,10 +5,12 @@ import (
 	"authentication/handlers"
 	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"authentication/commons/constants"
 	"stock_broker_application/src/utils"
 
 	"github.com/gin-gonic/gin"
@@ -26,8 +28,8 @@ func getLogoutRouter(rclient *redis.Client) *gin.Engine {
 
 	router.POST("/api/auth/logout", func(ctx *gin.Context) {
 		ctx.Set("username", "Arijit")
-		ctx.Set("token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzgwNDgwNjEsImlhdCI6MTc3Nzk2MTY2MSwic3ViIjoiQXJpaml0In0.NdfXzmr50xBhGFQm50qPwlvvkIKbVgeY88fMHbroX-c")
-		ctx.Set("expiry-time", 1778048061)
+		ctx.Set("token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Nzg1NzA2NjgsImlhdCI6MTc3ODQ4NDI2OCwic3ViIjoiQXJpaml0In0.oQV8f1D0SlRg9Gu2gFLqMvmlhzhAIFyncLv6PWpHliw")
+		ctx.Set("expiry-time", 1778570668)
 		ctx.Next()
 	}, handler.HandleLogoutUser)
 	return router
@@ -49,7 +51,7 @@ func (suite *LogoutTestSuite) TestMockLogoutUser200LogoutSuccessful() {
 	//t := suite.T()
 	ctx := context.Background()
 	rClient, mock, _ := utils.GetRedisClient(ctx, false)
-	token := "BLACKLISTED_TOKEN_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzgwNDgwNjEsImlhdCI6MTc3Nzk2MTY2MSwic3ViIjoiQXJpaml0In0.NdfXzmr50xBhGFQm50qPwlvvkIKbVgeY88fMHbroX-c"
+	token := "BLACKLISTED_TOKEN_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Nzg1NzA2NjgsImlhdCI6MTc3ODQ4NDI2OCwic3ViIjoiQXJpaml0In0.oQV8f1D0SlRg9Gu2gFLqMvmlhzhAIFyncLv6PWpHliw"
 
 	//mock.ExpectExists(token).SetVal(0)
 	mock.ExpectSet(token, 1, 0).SetVal("OK")
@@ -57,11 +59,31 @@ func (suite *LogoutTestSuite) TestMockLogoutUser200LogoutSuccessful() {
 	router := getLogoutRouter(rClient)
 
 	request := httptest.NewRequest(http.MethodPost, "/api/auth/logout", bytes.NewBufferString(`{}`))
-	request.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzgwNDgwNjEsImlhdCI6MTc3Nzk2MTY2MSwic3ViIjoiQXJpaml0In0.NdfXzmr50xBhGFQm50qPwlvvkIKbVgeY88fMHbroX-c")
+	request.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Nzg1NzA2NjgsImlhdCI6MTc3ODQ4NDI2OCwic3ViIjoiQXJpaml0In0.oQV8f1D0SlRg9Gu2gFLqMvmlhzhAIFyncLv6PWpHliw")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, request)
 
 	suite.Equal(http.StatusOK, w.Code)
 	suite.Contains(w.Body.String(), "logout successfully")
+	suite.NoError(mock.ExpectationsWereMet())
+}
+
+func (suite *LogoutTestSuite) TestMockLogoutUser500RedisSetError() {
+	//t := suite.T()
+	ctx := context.Background()
+	rClient, mock, _ := utils.GetRedisClient(ctx, false)
+	token := "BLACKLISTED_TOKEN_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Nzg1NzA2NjgsImlhdCI6MTc3ODQ4NDI2OCwic3ViIjoiQXJpaml0In0.oQV8f1D0SlRg9Gu2gFLqMvmlhzhAIFyncLv6PWpHliw"
+
+	mock.ExpectSet(token, 1, 0).SetErr(errors.New(constants.RedisSetOperationError))
+
+	router := getLogoutRouter(rClient)
+
+	request := httptest.NewRequest(http.MethodPost, "/api/auth/logout", bytes.NewBufferString(`{}`))
+	//request.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Nzg1NzA2NjgsImlhdCI6MTc3ODQ4NDI2OCwic3ViIjoiQXJpaml0In0.oQV8f1D0SlRg9Gu2gFLqMvmlhzhAIFyncLv6PWpHliw")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, request)
+
+	suite.Equal(http.StatusInternalServerError, w.Code)
+	suite.Contains(w.Body.String(), "error in redis set operation")
 	suite.NoError(mock.ExpectationsWereMet())
 }

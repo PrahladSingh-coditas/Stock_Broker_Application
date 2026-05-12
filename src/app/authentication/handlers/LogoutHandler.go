@@ -38,26 +38,19 @@ func (handler *LogoutUserHandler) HandleLogoutUser(ctx *gin.Context) {
 	err := handler.logoutUserService.LogoutUser(ctx, logger, tokenString, expiryTime)
 
 	if err != nil {
-		if strings.Contains(err.Error(), constants.RedisConnectionError) {
+		if strings.Contains(err.Error(), constants.RedisSetOperationError) {
 
-			logger.Error(constants.RedisConnectionError)
+			logger.Error(constants.RedisSetOperationError)
 
 			ctx.IndentedJSON(http.StatusInternalServerError, models.ErrorAPIResponse{
 				Message: models.ErrorMessage{
 					Key:          constants.Redis,
-					ErrorMessage: constants.RedisConnectionError,
+					ErrorMessage: constants.RedisSetOperationError,
 				},
 				Error: constants.LogoutFailed,
 			})
 			return
 		}
-
-		logger.Error(constants.LogoutFailed)
-
-		ctx.IndentedJSON(http.StatusInternalServerError, models.ErrorAPIResponse{
-			Error: constants.LogoutFailed,
-		})
-		return
 	}
 
 	logger.Error(constants.LogoutSuccessMsg)

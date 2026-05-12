@@ -67,22 +67,12 @@ func (controller *ForgotPasswordHandler) HandleForgotPassword(ctx *gin.Context) 
 			})
 			return
 		}
-		if err.Error() == constants.NoRecordsAffectedError {
-			ctx.JSON(http.StatusNotImplemented, genericModels.ErrorAPIResponse{
-				Error: constants.NoRecordsAffectedError,
-			})
-			return
-		}
 		if err.Error() == constants.AuthenticationFailedError {
 			ctx.JSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
 				Error: constants.InvalidCredentialsError,
 			})
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
-			Error: constants.DatabaseError,
-		})
-		return
 	}
 	ctx.IndentedJSON(http.StatusOK, constants.ForgotPasswordGenerateOtpSuccessMsg)
 }

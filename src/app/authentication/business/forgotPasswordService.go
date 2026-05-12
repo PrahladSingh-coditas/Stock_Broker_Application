@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"math/rand"
-	"stock_broker_application/src/utils"
 	"time"
 )
 
@@ -22,10 +21,8 @@ func NewForgotPasswordService(forgotPasswordRepository repository.ForgotPassword
 }
 
 func (service *ForgotPasswordService) ReadRecordsWithConditions(ctx context.Context, spanCtx context.Context, bffForgotPasswordRequest models.BFFForgotPasswordRequest) error {
-	postgresClinet := utils.GetPostgresClient()
-	client := postgresClinet.GormDB
 
-	user, err := service.forgotPasswordRepository.ForgotPassword(spanCtx, client, bffForgotPasswordRequest.Username)
+	user, err := service.forgotPasswordRepository.ForgotPassword(spanCtx, bffForgotPasswordRequest.Username)
 	if err != nil {
 		if err.Error() == constants.UserNotFoundError {
 			return errors.New(constants.UserNotFoundError)
@@ -42,10 +39,10 @@ func (service *ForgotPasswordService) ReadRecordsWithConditions(ctx context.Cont
 		"OtpExpiresAt": uint64(time.Now().Unix() + 120),
 	}
 
-	errs := service.forgotPasswordRepository.GenerateOTP(spanCtx, client, bffForgotPasswordRequest.Username, otp)
+	errs := service.forgotPasswordRepository.GenerateOTP(spanCtx, bffForgotPasswordRequest.Username, otp)
 	if errs != nil {
-		if errs.Error() == constants.NoRecordsAffectedError {
-			return errors.New(constants.NoRecordsAffectedError)
+		if errs.Error() == constants.UserNotFoundError {
+			return errors.New(constants.UserNotFoundError)
 		}
 		return errors.New(constants.AuthenticationFailedError)
 	}

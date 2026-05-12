@@ -13,24 +13,28 @@ import (
 )
 
 type ForgotPasswordRepository interface {
-	ForgotPassword(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error)
-	GenerateOTP(ctx context.Context, db *gorm.DB, username string, otp map[string]interface{}) error
+	ForgotPassword(ctx context.Context, username string) (*genericModels.User, error)
+	GenerateOTP(ctx context.Context, username string, otp map[string]interface{}) error
 }
 
-type forgotPasswordRepository struct{}
-
-func NewForgotPasswordRepository() *forgotPasswordRepository {
-	return &forgotPasswordRepository{}
+type forgotPasswordRepository struct {
+	db *gorm.DB
 }
 
-func (user *forgotPasswordRepository) ForgotPassword(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error) {
+func NewForgotPasswordRepository(db *gorm.DB) *forgotPasswordRepository {
+	return &forgotPasswordRepository{
+		db: db,
+	}
+}
+
+func (user *forgotPasswordRepository) ForgotPassword(ctx context.Context, username string) (*genericModels.User, error) {
 
 	start := time.Now()
 	logger := logrus.New()
 
 	var existingUser genericModels.User
 
-	result := db.WithContext(ctx).
+	result := user.db.WithContext(ctx).
 		Table(constants.UsersTableName).
 		Where(constants.FieldUsername, username).
 		First(&existingUser)
@@ -49,17 +53,17 @@ func (user *forgotPasswordRepository) ForgotPassword(ctx context.Context, db *go
 	return &existingUser, nil
 }
 
-func (user *forgotPasswordRepository) GenerateOTP(ctx context.Context, db *gorm.DB, username string, otp map[string]interface{}) error {
+func (user *forgotPasswordRepository) GenerateOTP(ctx context.Context, username string, otp map[string]interface{}) error {
 	start := time.Now()
 	logger := logrus.New()
 
-	result := db.Model(&genericModels.User{}).
+	result := user.db.Debug().Model(&genericModels.User{}).
 		Where(constants.FieldUsername, username).
 		Updates(otp)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return errors.New(constants.NoRecordsAffectedError)
+			return errors.New(constants.UserNotFoundError)
 		}
 		return fmt.Errorf("%s: %w", constants.AuthenticationFailedError, result.Error)
 	}

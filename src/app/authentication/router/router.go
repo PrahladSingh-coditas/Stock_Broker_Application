@@ -40,7 +40,7 @@ func GetRouter(gdb *gorm.DB, redisClient *redis.Client, redisError error) *gin.E
 	signinUserService := business.NewSigninUserService(signinUserRepository)
 	signinUserHandler := handlers.NewSigninUserHandler(signinUserService)
 
-	forgotPasswordRepository := repository.NewForgotPasswordRepository()
+	forgotPasswordRepository := repository.NewForgotPasswordRepository(gdb)
 	forgotPasswordService := business.NewForgotPasswordService(forgotPasswordRepository)
 	forgotPasswordHandler := handlers.NewForgotPasswordHandler(forgotPasswordService)
 

@@ -44,7 +44,7 @@ func GetRouter(gdb *gorm.DB, redisClient *redis.Client, redisError error) *gin.E
 	forgotPasswordService := business.NewForgotPasswordService(forgotPasswordRepository)
 	forgotPasswordHandler := handlers.NewForgotPasswordHandler(forgotPasswordService)
 
-	verifyUserOtpRepository := repository.NewValidateUserOtpRepository()
+	verifyUserOtpRepository := repository.NewValidateUserOtpRepository(gdb)
 	verifyUserOtpService := business.NewValidateUserOtpService(verifyUserOtpRepository)
 	verifyUserOtpHandler := handlers.NewValidateUserOtpHandler(verifyUserOtpService)
 

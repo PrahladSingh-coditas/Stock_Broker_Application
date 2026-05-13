@@ -11,23 +11,25 @@ import (
 )
 
 type ValidateUserOtpRepository interface {
-	GetUserByUsername(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error)
+	GetUserByUsername(ctx context.Context, username string) (*genericModels.User, error)
 }
 
-type validateUserOtpRepository struct{}
+type validateUserOtpRepository struct {
+	db *gorm.DB
+}
 
-func NewValidateUserOtpRepository() *validateUserOtpRepository {
-	return &validateUserOtpRepository{}
+func NewValidateUserOtpRepository(gdb *gorm.DB) *validateUserOtpRepository {
+	return &validateUserOtpRepository{db: gdb}
 }
 
 // this function takes username from request(from service), fetces the user from db and returns the user
-func (repo *validateUserOtpRepository) GetUserByUsername(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error) {
+func (repo *validateUserOtpRepository) GetUserByUsername(ctx context.Context, username string) (*genericModels.User, error) {
 
 	start := time.Now()
 	logger := logrus.New()
 
 	var user genericModels.User
-	result := db.WithContext(ctx).Table(constants.UsersTableName).Where(constants.FieldUsername, username).First(&user)
+	result := repo.db.WithContext(ctx).Table(constants.UsersTableName).Where(constants.FieldUsername, username).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}

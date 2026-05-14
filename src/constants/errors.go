@@ -2,10 +2,11 @@ package constants
 
 // Database Transaction & Connection Errors
 const (
-	ErrBeginTx            = "failed to begin database transaction: %w"
-	ErrCommitTx           = "failed to commit database transaction: %w"
-	ErrDBConnectionFailed = "Error connecting to database: %s"
-	ErrInternalServer     = "internal server error"
+	ErrBeginTx                 = "failed to begin database transaction: %w"
+	ErrCommitTx                = "failed to commit database transaction: %w"
+	ErrDBConnectionFailed      = "Error connecting to database: %s"
+	ErrInternalServer          = "internal server error"
+	RedisConnectionFailedError = "Connection Failed: %s"
 )
 
 // Database Initialization & Config Errors

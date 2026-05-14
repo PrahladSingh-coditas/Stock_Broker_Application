@@ -18,7 +18,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetRouter(gdb *gorm.DB, redisClient *redis.Client, redisError error) *gin.Engine {
+func GetRouter(gdb *gorm.DB, redisClient *redis.Client) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Recovery())
 
@@ -52,7 +52,7 @@ func GetRouter(gdb *gorm.DB, redisClient *redis.Client, redisError error) *gin.E
 	changePasswordService := business.NewChangePasswordService(changePasswordRepository)
 	changePasswordHandler := handlers.NewChangePasswordHandler(changePasswordService)
 
-	logoutUserService := business.NewLogoutUser(redisClient, redisError)
+	logoutUserService := business.NewLogoutUser(redisClient)
 	logoutUserHandler := handlers.LogoutUserHandler(logoutUserService)
 
 	authGroup := router.Group(constants.RoutePrefix)

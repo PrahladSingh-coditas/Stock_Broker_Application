@@ -38,18 +38,6 @@ func (controller *LogoutHandler) HandleUserLogout(ctx *gin.Context) {
 
 	err := controller.service.LogoutUser(ctx, token, expiry)
 	if err != nil {
-		if strings.Contains(err.Error(), constants.RedisConnectionFailedError) {
-			err := genericModels.ErrorAPIResponse{
-				Message: genericModels.ErrorMessage{
-					Key:          constants.Redis,
-					ErrorMessage: constants.RedisConnectionFailedError,
-				},
-				Error: constants.AuthenticationFailedError,
-			}
-			ctx.IndentedJSON(http.StatusInternalServerError, err)
-			return
-		}
-
 		if strings.Contains(err.Error(), constants.RedisOperationFailedError) {
 			err := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
@@ -61,11 +49,6 @@ func (controller *LogoutHandler) HandleUserLogout(ctx *gin.Context) {
 			ctx.IndentedJSON(http.StatusInternalServerError, err)
 			return
 		}
-
-		ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
-			Error: constants.LogoutFailedError,
-		})
-		return
 	}
 	bffLogoutUserResponse.Message = "Logout Successful and Token Blacklisted"
 	ctx.IndentedJSON(http.StatusOK, bffLogoutUserResponse)

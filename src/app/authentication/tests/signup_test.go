@@ -1,248 +1,252 @@
 package tests
 
-// import (
-// 	"authentication/business"
-// 	"authentication/commons/constants"
-// 	"authentication/handlers"
-// 	"authentication/repository"
-// 	"bytes"
-// 	"errors"
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"regexp"
-// 	"testing"
+import (
+	"authentication/business"
+	"authentication/commons/constants"
+	"authentication/handlers"
+	"authentication/repository"
+	"bytes"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"regexp"
+	"testing"
 
-// 	"github.com/DATA-DOG/go-sqlmock"
-// 	"github.com/gin-gonic/gin"
-// 	"github.com/stretchr/testify/suite"
-// 	"gorm.io/driver/mysql"
-// 	"gorm.io/gorm"
-// )
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/suite"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+)
 
-// const insertUserQuery = "INSERT INTO `users` (`username`,`password`,`panCard`,`phoneNumber`,`email`) VALUES (?,?,?,?,?)"
+const insertUserQuery = "INSERT INTO `users` (`username`,`password`,`panCard`,`phoneNumber`,`email`) VALUES (?,?,?,?,?)"
 
-// func signupSQLMock(t *testing.T) (*gorm.DB, sqlmock.Sqlmock) {
-// 	sqlDB, mock, _ := sqlmock.New()
+func signupSQLMock(t *testing.T) (*gorm.DB, sqlmock.Sqlmock) {
+	sqlDB, mock, _ := sqlmock.New()
 
-// 	dialector := mysql.New(mysql.Config{
-// 		Conn:                      sqlDB,
-// 		SkipInitializeWithVersion: true,
-// 	})
+	dialector := mysql.New(mysql.Config{
+		Conn:                      sqlDB,
+		SkipInitializeWithVersion: true,
+	})
 
-// 	gdb, _ := gorm.Open(dialector, &gorm.Config{})
-// 	return gdb, mock
-// }
+	gdb, _ := gorm.Open(dialector, &gorm.Config{})
+	return gdb, mock
+}
 
-// func GetSignupRouter(gdb *gorm.DB) *gin.Engine {
-// 	gin.SetMode(gin.TestMode)
-// 	r := gin.New()
-// 	signupRepo := repository.NewCreateUserRepository(gdb)
-// 	signupService := business.NewCreateUserService(signupRepo)
-// 	signupHandler := handlers.NewCreateUserHandler(signupService)
-// 	r.POST("/api/auth/signup", signupHandler.HandleCreaterUser)
-// 	return r
-// }
+func GetSignupRouter(gdb *gorm.DB) *gin.Engine {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	signupRepo := repository.NewCreateUserRepository(gdb)
+	signupService := business.NewCreateUserService(signupRepo)
+	signupHandler := handlers.NewCreateUserHandler(signupService)
+	r.POST("/api/auth/signup", signupHandler.HandleCreaterUser)
+	return r
+}
 
-// type SignupTestSuite struct {
-// 	suite.Suite
-// }
+type SignupTestSuite struct {
+	suite.Suite
+}
 
-// func (s *SignupTestSuite) TestSignup_Success() {
-// 	gdb, mock := signupSQLMock(s.T())
+func (s *SignupTestSuite) SetupTest() {
+	gin.SetMode(gin.TestMode)
+}
 
-// 	mock.ExpectBegin()
+func (s *SignupTestSuite) TestSignup_Success() {
+	gdb, mock := signupSQLMock(s.T())
 
-// 	mock.ExpectExec(regexp.QuoteMeta(insertUserQuery)).
-// 		WithArgs(
-// 			"Dinesh",
-// 			sqlmock.AnyArg(),
-// 			"AABCD1234F",
-// 			9876543210,
-// 			"dinesh@gmail.com",
-// 		).
-// 		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectBegin()
 
-// 	mock.ExpectCommit()
+	mock.ExpectExec(regexp.QuoteMeta(insertUserQuery)).
+		WithArgs(
+			"Dinesh",
+			sqlmock.AnyArg(),
+			"AABCD1234F",
+			9876543210,
+			"dinesh@gmail.com",
+		).
+		WillReturnResult(sqlmock.NewResult(1, 1))
 
-// 	r := GetSignupRouter(gdb)
+	mock.ExpectCommit()
 
-// 	body := `{
-// 		"username":"Dinesh",
-// 		"password":"Dinesh@123",
-// 		"confirmPassword":"Dinesh@123",
-// 		"panCard":"AABCD1234F",
-// 		"phoneNumber":9876543210,
-// 		"email":"dinesh@gmail.com"
-// 	}`
+	r := GetSignupRouter(gdb)
 
-// 	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup", bytes.NewBufferString(body))
-// 	req.Header.Set("Content-type", "application/json")
+	body := `{
+		"username":"Dinesh",
+		"password":"Dinesh@123",
+		"confirmPassword":"Dinesh@123",
+		"panCard":"AABCD1234F",
+		"phoneNumber":9876543210,
+		"email":"dinesh@gmail.com"
+	}`
 
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
+	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup", bytes.NewBufferString(body))
+	req.Header.Set("Content-type", "application/json")
 
-// 	s.Equal(http.StatusCreated, w.Code)
-// 	s.Contains(w.Body.String(), "User created successfully")
-// 	s.NoError(mock.ExpectationsWereMet())
-// }
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-// func (s *SignupTestSuite) TestSignup_InvalidRequest() {
-// 	gdb, mock := signupSQLMock(s.T())
-// 	r := GetSignupRouter(gdb)
+	s.Equal(http.StatusCreated, w.Code)
+	s.Contains(w.Body.String(), "User created successfully")
+	s.NoError(mock.ExpectationsWereMet())
+}
 
-// 	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup",
-// 		bytes.NewBufferString(`{"username":123}`))
+func (s *SignupTestSuite) TestSignup_InvalidRequest() {
+	gdb, mock := signupSQLMock(s.T())
+	r := GetSignupRouter(gdb)
 
-// 	req.Header.Set("Content-Type", "application/json")
+	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup",
+		bytes.NewBufferString(`{"username":123}`))
 
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
+	req.Header.Set("Content-Type", "application/json")
 
-// 	s.Equal(http.StatusBadRequest, w.Code)
-// 	s.NoError(mock.ExpectationsWereMet())
-// }
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-// func (s *SignupTestSuite) TestSignup_ValidationError() {
-// 	gdb, mock := signupSQLMock(s.T())
-// 	r := GetSignupRouter(gdb)
+	s.Equal(http.StatusBadRequest, w.Code)
+	s.NoError(mock.ExpectationsWereMet())
+}
 
-// 	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup",
-// 		bytes.NewBufferString(`{"username":"Dinesh"}`))
+func (s *SignupTestSuite) TestSignup_ValidationError() {
+	gdb, mock := signupSQLMock(s.T())
+	r := GetSignupRouter(gdb)
 
-// 	req.Header.Set("Content-Type", "application/json")
+	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup",
+		bytes.NewBufferString(`{"username":"Dinesh"}`))
 
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
+	req.Header.Set("Content-Type", "application/json")
 
-// 	s.Equal(http.StatusBadRequest, w.Code)
-// 	s.NoError(mock.ExpectationsWereMet())
-// }
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-// func (s *SignupTestSuite) TestSignup_DuplicateUsername() {
-// 	gdb, mock := signupSQLMock(s.T())
+	s.Equal(http.StatusBadRequest, w.Code)
+	s.NoError(mock.ExpectationsWereMet())
+}
 
-// 	mock.ExpectBegin()
+func (s *SignupTestSuite) TestSignup_DuplicateUsername() {
+	gdb, mock := signupSQLMock(s.T())
 
-// 	mock.ExpectExec(regexp.QuoteMeta(insertUserQuery)).
-// 		WillReturnError(errors.New(constants.ErrUniqueConstraintViolation))
+	mock.ExpectBegin()
 
-// 	mock.ExpectRollback()
+	mock.ExpectExec(regexp.QuoteMeta(insertUserQuery)).
+		WillReturnError(errors.New(constants.ErrUniqueConstraintViolation))
 
-// 	r := GetSignupRouter(gdb)
+	mock.ExpectRollback()
 
-// 	body := `{
-// 			"username":"Dinesh",
-// 			"password":"Dinesh@123",
-// 			"confirmPassword":"Dinesh@123",
-// 			"panCard":"AABCD1234F",
-// 			"phoneNumber":9876543210,
-// 			"email":"dinesh@gmail.com"
-// 		}`
+	r := GetSignupRouter(gdb)
 
-// 	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup", bytes.NewBufferString(body))
-// 	req.Header.Set("Content-Type", "application/json")
+	body := `{
+			"username":"Dinesh",
+			"password":"Dinesh@123",
+			"confirmPassword":"Dinesh@123",
+			"panCard":"AABCD1234F",
+			"phoneNumber":9876543210,
+			"email":"dinesh@gmail.com"
+		}`
 
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
+	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
 
-// 	s.Equal(http.StatusConflict, w.Code)
-// 	s.NoError(mock.ExpectationsWereMet())
-// }
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-// func (s *SignupTestSuite) TestSignup_DuplicatePanCard() {
-// 	gdb, mock := signupSQLMock(s.T())
+	s.Equal(http.StatusConflict, w.Code)
+	s.NoError(mock.ExpectationsWereMet())
+}
 
-// 	mock.ExpectBegin()
+func (s *SignupTestSuite) TestSignup_DuplicatePanCard() {
+	gdb, mock := signupSQLMock(s.T())
 
-// 	mock.ExpectExec(regexp.QuoteMeta(insertUserQuery)).
-// 		WillReturnError(errors.New("duplicate key value violates unique constraint : idx_users_pan_card"))
+	mock.ExpectBegin()
 
-// 	mock.ExpectRollback()
+	mock.ExpectExec(regexp.QuoteMeta(insertUserQuery)).
+		WillReturnError(errors.New("duplicate key value violates unique constraint : idx_users_pan_card"))
 
-// 	r := GetSignupRouter(gdb)
+	mock.ExpectRollback()
 
-// 	body := `{
-// 			"username":"Sanjana",
-// 			"password":"Sanjana@123",
-// 			"confirmPassword":"Sanjana@123",
-// 			"panCard":"AABCD1234F",
-// 			"phoneNumber":9906543210,
-// 			"email":"sanjana@gmail.com"
-// 		}`
+	r := GetSignupRouter(gdb)
 
-// 	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup", bytes.NewBufferString(body))
-// 	req.Header.Set("Content-Type", "application/json")
+	body := `{
+			"username":"Sanjana",
+			"password":"Sanjana@123",
+			"confirmPassword":"Sanjana@123",
+			"panCard":"AABCD1234F",
+			"phoneNumber":9906543210,
+			"email":"sanjana@gmail.com"
+		}`
 
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
+	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
 
-// 	s.Equal(http.StatusConflict, w.Code)
-// 	s.NoError(mock.ExpectationsWereMet())
-// }
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-// func (s *SignupTestSuite) TestSignup_DuplicateEmail() {
-// 	gdb, mock := signupSQLMock(s.T())
+	s.Equal(http.StatusConflict, w.Code)
+	s.NoError(mock.ExpectationsWereMet())
+}
 
-// 	mock.ExpectBegin()
+func (s *SignupTestSuite) TestSignup_DuplicateEmail() {
+	gdb, mock := signupSQLMock(s.T())
 
-// 	mock.ExpectExec(regexp.QuoteMeta(insertUserQuery)).
-// 		WillReturnError(errors.New("duplicate key value violates unique constraint : idx_users_email"))
+	mock.ExpectBegin()
 
-// 	mock.ExpectRollback()
+	mock.ExpectExec(regexp.QuoteMeta(insertUserQuery)).
+		WillReturnError(errors.New("duplicate key value violates unique constraint : idx_users_email"))
 
-// 	r := GetSignupRouter(gdb)
+	mock.ExpectRollback()
 
-// 	body := `{
-// 			"username":"Sanjana",
-// 			"password":"Sanjana@123",
-// 			"confirmPassword":"Sanjana@123",
-// 			"panCard":"ABCDE1234F",
-// 			"phoneNumber":9906543210,
-// 			"email":"dinesh@gmail.com"
-// 		}`
+	r := GetSignupRouter(gdb)
 
-// 	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup", bytes.NewBufferString(body))
-// 	req.Header.Set("Content-Type", "application/json")
+	body := `{
+			"username":"Sanjana",
+			"password":"Sanjana@123",
+			"confirmPassword":"Sanjana@123",
+			"panCard":"ABCDE1234F",
+			"phoneNumber":9906543210,
+			"email":"dinesh@gmail.com"
+		}`
 
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
+	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
 
-// 	s.Equal(http.StatusConflict, w.Code)
-// 	s.NoError(mock.ExpectationsWereMet())
-// }
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-// func (s *SignupTestSuite) TestSignup_InternalError() {
-// 	gdb, mock := signupSQLMock(s.T())
+	s.Equal(http.StatusConflict, w.Code)
+	s.NoError(mock.ExpectationsWereMet())
+}
 
-// 	mock.ExpectBegin()
+func (s *SignupTestSuite) TestSignup_InternalError() {
+	gdb, mock := signupSQLMock(s.T())
 
-// 	mock.ExpectExec(regexp.QuoteMeta(insertUserQuery)).
-// 		WillReturnError(errors.New("Database Query Error"))
+	mock.ExpectBegin()
 
-// 	mock.ExpectRollback()
+	mock.ExpectExec(regexp.QuoteMeta(insertUserQuery)).
+		WillReturnError(errors.New("Database Query Error"))
 
-// 	r := GetSignupRouter(gdb)
+	mock.ExpectRollback()
 
-// 	body := `{
-// 			"username":"Dinesh",
-// 			"password":"Dinesh@123",
-// 			"confirmPassword":"Dinesh@123",
-// 			"panCard":"AABCD1234F",
-// 			"phoneNumber":9876543210,
-// 			"email":"dinesh@gmail.com"
-// 		}`
+	r := GetSignupRouter(gdb)
 
-// 	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup", bytes.NewBufferString(body))
-// 	req.Header.Set("Content-Type", "application/json")
+	body := `{
+			"username":"Dinesh",
+			"password":"Dinesh@123",
+			"confirmPassword":"Dinesh@123",
+			"panCard":"AABCD1234F",
+			"phoneNumber":9876543210,
+			"email":"dinesh@gmail.com"
+		}`
 
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
+	req := httptest.NewRequest(http.MethodPost, "/api/auth/signup", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
 
-// 	s.Equal(http.StatusInternalServerError, w.Code)
-// 	s.Contains(w.Body.String(), "failed to create user")
-// 	s.NoError(mock.ExpectationsWereMet())
-// }
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-// func TestSignupTestSuite(t *testing.T) {
-// 	suite.Run(t, new(SignupTestSuite))
-// }
+	s.Equal(http.StatusInternalServerError, w.Code)
+	s.Contains(w.Body.String(), "failed to create user")
+	s.NoError(mock.ExpectationsWereMet())
+}
+
+func TestSignupTestSuite(t *testing.T) {
+	suite.Run(t, new(SignupTestSuite))
+}

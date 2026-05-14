@@ -44,7 +44,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Set(constants.Expiry, exp)
 		cacheKey := fmt.Sprintf("BLACKLISTE_TOKEN:%s", tokenString)
 
-		redisClient, redisError := utils.GetRedisClient()
+		redisClient, _, redisError := utils.GetRedisClient(false)
 		if redisError != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"message": constants.RedisConnectionFailedError,

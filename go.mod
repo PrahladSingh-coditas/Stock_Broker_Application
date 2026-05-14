@@ -5,6 +5,7 @@ go 1.26.0
 require (
 	github.com/dlclark/regexp2 v1.11.5
 	github.com/go-playground/validator/v10 v10.25.0
+	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/redis/go-redis/v9 v9.18.0
 	github.com/spf13/viper v1.20.0

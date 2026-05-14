@@ -49,6 +49,10 @@ type ValidateOTPTestSuite struct {
 	suite.Suite
 }
 
+func (s *ValidateOTPTestSuite) SetupTest() {
+	gin.SetMode(gin.TestMode)
+}
+
 func (s *ValidateOTPTestSuite) TestValidateOTP_Success() {
 	t := s.T()
 

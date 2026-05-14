@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"stock_broker_application/src/utils"
-	"strconv"
 	"strings"
 	"time"
 
@@ -31,7 +30,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		log.Println("Authorization header:", authHeader)
 		c.Set(constants.Token, tokenString)
 
-		tokenExpiry, err := utils.ValidateToken(tokenString)
+		claims, err := utils.ValidateToken(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": err.Error(),
@@ -39,9 +38,14 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		expiry, _ := strconv.Atoi(tokenExpiry)
-		exp := int64(expiry)
-		c.Set(constants.Expiry, exp)
+
+		fmt.Println("##################", claims, "#################")
+		tokenExpiry, _ := claims["exp"].(float64)
+		c.Set(constants.Expiry, int64(tokenExpiry))
+
+		username, _ := claims["username"].(string)
+		c.Set(constants.Username, username)
+
 		cacheKey := fmt.Sprintf("BLACKLISTE_TOKEN:%s", tokenString)
 
 		redisClient, _, redisError := utils.GetRedisClient(false)
@@ -67,15 +71,6 @@ func AuthMiddleware() gin.HandlerFunc {
 				return
 			}
 		}
-
-		username, err := utils.ValidateToken(tokenString)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
-		c.Set(constants.Username, username)
 
 		log.Printf("Request: %s %s", c.Request.Method, c.Request.URL.Path)
 		c.Next()

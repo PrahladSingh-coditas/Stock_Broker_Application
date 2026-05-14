@@ -53,7 +53,7 @@ func (s *ValidateOTPTestSuite) SetupTest() {
 	gin.SetMode(gin.TestMode)
 }
 
-func (s *ValidateOTPTestSuite) TestValidateOTP_Success() {
+func (s *ValidateOTPTestSuite) TestValidateOTP200OTPGenerationSuccess() {
 	t := s.T()
 
 	gdb, mock := validateOTPSQLMock(t)
@@ -72,7 +72,7 @@ func (s *ValidateOTPTestSuite) TestValidateOTP_Success() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *ValidateOTPTestSuite) TestValidateOTP_DatabaseError() {
+func (s *ValidateOTPTestSuite) TestValidateOTP500DatabaseError() {
 	t := s.T()
 
 	gdb, mock := validateOTPSQLMock(t)
@@ -90,7 +90,7 @@ func (s *ValidateOTPTestSuite) TestValidateOTP_DatabaseError() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *ValidateOTPTestSuite) TestValidateOTP_IncorrectOTP() {
+func (s *ValidateOTPTestSuite) TestValidateOTP401IncorrectOTP() {
 	t := s.T()
 
 	gdb, mock := validateOTPSQLMock(t)
@@ -109,7 +109,7 @@ func (s *ValidateOTPTestSuite) TestValidateOTP_IncorrectOTP() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *ValidateOTPTestSuite) TestValidateOTP_ExpiredOTP() {
+func (s *ValidateOTPTestSuite) TestValidateOTP401ExpiredOTP() {
 	t := s.T()
 
 	gdb, mock := validateOTPSQLMock(t)
@@ -128,7 +128,7 @@ func (s *ValidateOTPTestSuite) TestValidateOTP_ExpiredOTP() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *ValidateOTPTestSuite) TestValidateOTP_InvalidPayload() {
+func (s *ValidateOTPTestSuite) TestValidateOTP400InvalidRequest() {
 	t := s.T()
 
 	gdb, mock := validateOTPSQLMock(t)
@@ -145,7 +145,7 @@ func (s *ValidateOTPTestSuite) TestValidateOTP_InvalidPayload() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *ValidateOTPTestSuite) TestValidateOTP_UserNotFoundError() {
+func (s *ValidateOTPTestSuite) TestValidateOTP404UserNotFound() {
 	t := s.T()
 
 	gdb, mock := validateOTPSQLMock(t)
@@ -163,7 +163,7 @@ func (s *ValidateOTPTestSuite) TestValidateOTP_UserNotFoundError() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *ValidateOTPTestSuite) TestValidateOTP_ValidationError() {
+func (s *ValidateOTPTestSuite) TestValidateOTP400ValidationError() {
 	t := s.T()
 
 	gdb, mock := validateOTPSQLMock(t)

@@ -36,7 +36,7 @@ func (s *LogoutTestSuite) SetupTest() {
 	gin.SetMode(gin.TestMode)
 }
 
-func (s *LogoutTestSuite) TestLogout_Success() {
+func (s *LogoutTestSuite) TestLogout200LogoutSuccess() {
 	mockRedisClient, mockRedisController, _ := utils.GetRedisClient(true)
 	mockRedisController.ExpectSet("BLACKLISTE_TOKEN:this-is-token-string", 1, 0).SetVal("Ok")
 	r := GetLogoutRouter(mockRedisClient)
@@ -51,7 +51,7 @@ func (s *LogoutTestSuite) TestLogout_Success() {
 	s.NoError(mockRedisController.ExpectationsWereMet())
 }
 
-func (s *LogoutTestSuite) TestLogout_SetOperationError() {
+func (s *LogoutTestSuite) TestLogout500RedisOperationFailed() {
 	mockRedisClient, mockRedisController, _ := utils.GetRedisClient(true)
 	mockRedisController.ExpectSet("BLACKLISTE_TOKEN:this-is-token-string", 1, 0).SetErr(errors.New("Error in Performing Operation"))
 	r := GetLogoutRouter(mockRedisClient)
@@ -66,7 +66,7 @@ func (s *LogoutTestSuite) TestLogout_SetOperationError() {
 	s.NoError(mockRedisController.ExpectationsWereMet())
 }
 
-func (s *LogoutTestSuite) TestLogout_RedisConnectionError() {
+func (s *LogoutTestSuite) TestLogout500RedisConnectionFailed() {
 	mockRedisClient, mockRedisController, _ := utils.GetRedisClient(true)
 	mockRedisController.ExpectSet("BLACKLISTE_TOKEN:this-is-token-string", 1, 0).SetErr(errors.New("Redis Connection Interrupted, Failed Operation"))
 	r := GetLogoutRouter(mockRedisClient)

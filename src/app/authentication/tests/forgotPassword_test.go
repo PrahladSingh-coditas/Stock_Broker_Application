@@ -51,7 +51,7 @@ func (s *ForgotPasswordTestSuite) SetupTest() {
 	gin.SetMode(gin.TestMode)
 }
 
-func (s *ForgotPasswordTestSuite) TestForgotPassword_Success() {
+func (s *ForgotPasswordTestSuite) TestForgotPassword200OTPSentSuccess() {
 	t := s.T()
 
 	gdb, mock := forgotPasswordSQLMock(t)
@@ -74,7 +74,7 @@ func (s *ForgotPasswordTestSuite) TestForgotPassword_Success() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *ForgotPasswordTestSuite) TestForgotPassword_UserNotFound() {
+func (s *ForgotPasswordTestSuite) TestForgotPassword404UserNotFound() {
 	t := s.T()
 	gdb, mock := forgotPasswordSQLMock(t)
 	mock.ExpectQuery(regexp.QuoteMeta(queryByDetails)).WithArgs("Sakshi", 1).WillReturnError(gorm.ErrRecordNotFound)
@@ -111,7 +111,7 @@ func (s *ForgotPasswordTestSuite) TestMockForgotPassword404UserNotFoundForGenera
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *ForgotPasswordTestSuite) TestForgotPassword_AuthenticationFailed() {
+func (s *ForgotPasswordTestSuite) TestForgotPassword401DatabaseErrorForGetUsername() {
 	t := s.T()
 	gdb, mock := forgotPasswordSQLMock(t)
 	mock.ExpectQuery(regexp.QuoteMeta(queryByDetails)).WithArgs("Sanjana", 1).WillReturnError(errors.New("Database Error"))
@@ -127,7 +127,7 @@ func (s *ForgotPasswordTestSuite) TestForgotPassword_AuthenticationFailed() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *ForgotPasswordTestSuite) TestMockForgotPassword401Unauthorized() {
+func (s *ForgotPasswordTestSuite) TestMockForgotPassword401DatabaseErrorForSetExpiry() {
 	t := s.T()
 	gdb, mock := forgotPasswordSQLMock(t)
 	rows := sqlmock.NewRows([]string{"panCard", "phoneNumber", "username"}).AddRow("ABCDE1234F", 8432805566, "Sanjana")
@@ -148,7 +148,7 @@ func (s *ForgotPasswordTestSuite) TestMockForgotPassword401Unauthorized() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *ForgotPasswordTestSuite) TestForgotPassword_InvalidRequest() {
+func (s *ForgotPasswordTestSuite) TestForgotPassword400InvalidRequest() {
 	t := s.T()
 	gdb, mock := forgotPasswordSQLMock(t)
 	r := GetForgotPasswordRouter(gdb)
@@ -162,7 +162,7 @@ func (s *ForgotPasswordTestSuite) TestForgotPassword_InvalidRequest() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *ForgotPasswordTestSuite) TestForgotPassword_ValidationError() {
+func (s *ForgotPasswordTestSuite) TestForgotPassword400ValidationError() {
 	t := s.T()
 	gdb, mock := forgotPasswordSQLMock(t)
 	r := GetForgotPasswordRouter(gdb)

@@ -23,15 +23,11 @@ func NewChangePasswordService(changePasswordRepository repository.ChangePassword
 }
 
 func (service *ChangePasswordService) ChangePassword(ctx context.Context, spanCtx context.Context, bffChangePasswordRequest models.BFFChangePasswordRequest, username string) error {
-	postgresClinet := utils.GetPostgresClient()
-	client := postgresClinet.GormDB
-
-	userDB, errs := service.changePasswordRepository.GetPassword(spanCtx, client, username)
+	userDB, errs := service.changePasswordRepository.GetPassword(spanCtx, username)
 	if errs != nil {
 		if errs.Error() == constants.UserNotFoundError {
 			return errors.New(constants.UserNotFoundError)
 		}
-		fmt.Println("Error fetching user password:")
 		return errors.New(constants.AuthenticationFailedError)
 	}
 
@@ -42,7 +38,7 @@ func (service *ChangePasswordService) ChangePassword(ctx context.Context, spanCt
 			log.Info(constants.ErrFailedToEncrypt)
 		}
 		new_password := hashPassword
-		err = service.changePasswordRepository.UpdatePassword(spanCtx, client, username, new_password)
+		err = service.changePasswordRepository.UpdatePassword(spanCtx, username, new_password)
 		if err != nil {
 			return fmt.Errorf(constants.PasswordChangeFailedError, err)
 		}

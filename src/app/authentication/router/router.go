@@ -48,7 +48,7 @@ func GetRouter(gdb *gorm.DB, redisClient *redis.Client) *gin.Engine {
 	verifyUserOtpService := business.NewValidateUserOtpService(verifyUserOtpRepository)
 	verifyUserOtpHandler := handlers.NewValidateUserOtpHandler(verifyUserOtpService)
 
-	changePasswordRepository := repository.NewChangePasswordRepository()
+	changePasswordRepository := repository.NewChangePasswordRepository(gdb)
 	changePasswordService := business.NewChangePasswordService(changePasswordRepository)
 	changePasswordHandler := handlers.NewChangePasswordHandler(changePasswordService)
 

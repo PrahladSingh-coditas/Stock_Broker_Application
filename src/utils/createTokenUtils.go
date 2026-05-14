@@ -6,7 +6,6 @@ import (
 	"stock_broker_application/src/constants"
 	"stock_broker_application/src/models"
 	"stock_broker_application/src/utils/configs"
-	"strconv"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
@@ -19,7 +18,7 @@ func GenerateToken(username string) (string, string, error) {
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
 		"iat":      time.Now().Unix(),
-		"exp":      time.Now().Add(time.Minute * 2).Unix(),
+		"exp":      time.Now().Add(time.Hour * 90000).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(secretKey.AccessSecretKey))
@@ -49,33 +48,58 @@ func InitJWTConfig(configPath string) error {
 	return nil
 }
 
-func ValidateToken(tokenString string) (string, error) {
+// func ValidateToken(tokenString string) (string, error) {
+// 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+// 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+// 			return nil, errors.New("invalid signing method")
+// 		}
+// 		return []byte(secretKey.AccessSecretKey), nil
+// 	})
+// 	log.Println(err)
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+// 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+// 		expiry, ok := claims["exp"].(float64)
+// 		if !ok {
+// 			return "", errors.New("expiry missing in token")
+// 		}
+// 		exp := strconv.FormatFloat(expiry, 'f', -1, 64)
+// 		return exp, nil
+// 	}
+
+// 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+// 		username, ok := claims["username"].(string)
+// 		if !ok {
+// 			return "", errors.New("username missing in token")
+// 		}
+// 		return username, nil
+// 	}
+// 	return "", errors.New("Invalid token")
+// }
+
+func ValidateToken(tokenString string) (jwt.MapClaims, error) {
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
 		}
+
 		return []byte(secretKey.AccessSecretKey), nil
 	})
-	log.Println(err)
+
 	if err != nil {
-		return "", err
+		log.Println("JWT parse error:", err)
+		return nil, err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		expiry, ok := claims["exp"].(float64)
-		if !ok {
-			return "", errors.New("expiry missing in token")
-		}
-		exp := strconv.FormatFloat(expiry, 'f', -1, 64)
-		return exp, nil
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if !ok || !token.Valid {
+		return nil, errors.New("invalid token")
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		username, ok := claims["username"].(string)
-		if !ok {
-			return "", errors.New("username missing in token")
-		}
-		return username, nil
-	}
-	return "", errors.New("Invalid token")
+	return claims, nil
 }

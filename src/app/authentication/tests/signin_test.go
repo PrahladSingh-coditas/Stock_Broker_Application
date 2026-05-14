@@ -51,7 +51,7 @@ func (s *SigninTestSuite) SetupTest() {
 	gin.SetMode(gin.TestMode)
 }
 
-func (s *SigninTestSuite) TestSignin_Success() {
+func (s *SigninTestSuite) TestSignin200LoginSuccess() {
 	t := s.T()
 
 	gdb, mock := signinSQLMock(t)
@@ -70,7 +70,7 @@ func (s *SigninTestSuite) TestSignin_Success() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *SigninTestSuite) TestSignin_InvalidRequest() {
+func (s *SigninTestSuite) TestSignin400InvalidRequest() {
 	t := s.T()
 	gdb, mock := signinSQLMock(t)
 	r := GetSigninRouter(gdb)
@@ -84,7 +84,7 @@ func (s *SigninTestSuite) TestSignin_InvalidRequest() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *SigninTestSuite) TestSignin_InvalidPassword() {
+func (s *SigninTestSuite) TestSignin400InvalidPassword() {
 	t := s.T()
 	gdb, mock := signinSQLMock(t)
 	hashPassword, _ := bcrypt.GenerateFromPassword([]byte("Sanjana@123"), bcrypt.DefaultCost)
@@ -101,7 +101,7 @@ func (s *SigninTestSuite) TestSignin_InvalidPassword() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *SigninTestSuite) TestSignin_UserNotFound() {
+func (s *SigninTestSuite) TestSignin404UserNotFound() {
 	t := s.T()
 	gdb, mock := signinSQLMock(t)
 	mock.ExpectQuery(regexp.QuoteMeta(queryByUsername)).WithArgs("Sakshi", 1).WillReturnError(gorm.ErrRecordNotFound)
@@ -116,7 +116,7 @@ func (s *SigninTestSuite) TestSignin_UserNotFound() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *SigninTestSuite) TestSignin_InternalServerError() {
+func (s *SigninTestSuite) TestSignin500InternalServerError() {
 	t := s.T()
 	gdb, mock := signinSQLMock(t)
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `users` WHERE username = ? ORDER BY `users`.`id` LIMIT ?")).WithArgs("Sanjana", 1).WillReturnError(sql.ErrNoRows)
@@ -131,7 +131,7 @@ func (s *SigninTestSuite) TestSignin_InternalServerError() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *SigninTestSuite) TestSignin_ValidationError() {
+func (s *SigninTestSuite) TestSignin400ValidationError() {
 	t := s.T()
 	gdb, mock := signinSQLMock(t)
 	r := GetSigninRouter(gdb)

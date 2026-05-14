@@ -13,24 +13,28 @@ import (
 )
 
 type ChangePasswordRepository interface {
-	GetPassword(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error)
-	UpdatePassword(ctx context.Context, db *gorm.DB, username string, password string) error
+	GetPassword(ctx context.Context, username string) (*genericModels.User, error)
+	UpdatePassword(ctx context.Context, username string, password string) error
 }
 
-type changePasswordRepository struct{}
-
-func NewChangePasswordRepository() *changePasswordRepository {
-	return &changePasswordRepository{}
+type changePasswordRepository struct {
+	db *gorm.DB
 }
 
-func (user *changePasswordRepository) GetPassword(ctx context.Context, db *gorm.DB, username string) (*genericModels.User, error) {
+func NewChangePasswordRepository(gdb *gorm.DB) *changePasswordRepository {
+	return &changePasswordRepository{
+		db: gdb,
+	}
+}
+
+func (user *changePasswordRepository) GetPassword(ctx context.Context, username string) (*genericModels.User, error) {
 
 	start := time.Now()
 	logger := logrus.New()
 
 	var User genericModels.User
 	//get old password from db by username
-	result := db.WithContext(ctx).
+	result := user.db.WithContext(ctx).
 		Table(constants.UsersTableName).
 		Where(constants.FieldUsername, username).
 		First(&User)
@@ -38,7 +42,6 @@ func (user *changePasswordRepository) GetPassword(ctx context.Context, db *gorm.
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, errors.New(constants.UserNotFoundError)
-
 		}
 		return nil, fmt.Errorf("%s: %w", constants.AuthenticationFailedError, result.Error)
 	}
@@ -50,20 +53,19 @@ func (user *changePasswordRepository) GetPassword(ctx context.Context, db *gorm.
 	return &User, nil
 }
 
-func (user *changePasswordRepository) UpdatePassword(ctx context.Context, db *gorm.DB, username string, password string) error {
+func (user *changePasswordRepository) UpdatePassword(ctx context.Context, username string, password string) error {
 
 	start := time.Now()
 	logger := logrus.New()
 
 	//update password in database by new password
-	result := db.WithContext(ctx).Table(constants.UsersTableName).
+	result := user.db.WithContext(ctx).Table(constants.UsersTableName).
 		Where(constants.FieldUsername, username).
 		Update(constants.FieldPassword, password)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return errors.New(constants.UserNotFoundError)
-
 		}
 		return fmt.Errorf("%s: %w", constants.AuthenticationFailedError, result.Error)
 	}

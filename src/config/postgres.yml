@@ -1,7 +1,7 @@
-host: localhost
+host: _
 port: 5432
-username: postgres
-password: Test@123
-dbName: postgres
-timezone: Asia/kolkata
-sslmode: disable
+username: _
+password: _
+dbName: stock-broker
+timezone: Asia/Kolkata
+sslmode: require

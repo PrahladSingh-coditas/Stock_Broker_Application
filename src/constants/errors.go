@@ -35,3 +35,4 @@ const (
 	ErrFieldRequired      = "%s is required."
 	ErrInvalidEmail       = "Invalid value for Email"
 )
+

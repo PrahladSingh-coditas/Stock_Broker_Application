@@ -15,6 +15,185 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/auth/changepassword": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Authenticates user credentials and returns success if valid",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Change Password",
+                "parameters": [
+                    {
+                        "description": "User Change Password Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Password changed in successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input payload",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid Uername",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Authentication failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/forgotpassword": {
+            "post": {
+                "description": "Authenticates user credentials to generate OTP for forgot password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Forgot Password",
+                "parameters": [
+                    {
+                        "description": "Request OTP for forgot password",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFForgotPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OTP Sent successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input payload",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Authentication failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "501": {
+                        "description": "Not Implemented",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/signin": {
+            "post": {
+                "description": "Authenticates user credentials and returns success if valid",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Sign in a user",
+                "parameters": [
+                    {
+                        "description": "User Signin Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFSigninUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User signed in successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input payload",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid username or password",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Authentication failed",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/signup": {
             "post": {
                 "description": "Handles user registration by validating input and storing user details",
@@ -66,9 +245,87 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/auth/validateotp": {
+            "post": {
+                "description": "Validates user OTP and return clear success/ failure message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Validates user OTP",
+                "parameters": [
+                    {
+                        "description": "User OTP Validation Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFValidateUserOtpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OTP validation successful",
+                        "schema": {
+                            "$ref": "#/definitions/models.BFFValidateUserOtpResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input payload",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Case A: Incorrect OTP / Case B: Expired OTP",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User does not exist",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorAPIResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "models.BFFChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "confirmPassword",
+                "newpassword"
+            ],
+            "properties": {
+                "confirmPassword": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "SanjanaS@123"
+                },
+                "newpassword": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 8,
+                    "example": "SanjanaS@123"
+                }
+            }
+        },
         "models.BFFCreateUserRequest": {
             "type": "object",
             "required": [
@@ -83,33 +340,109 @@ const docTemplate = `{
                 "confirmPassword": {
                     "type": "string",
                     "minLength": 8,
-                    "example": "Secure@123"
+                    "example": "Sanjana@123"
                 },
                 "email": {
                     "type": "string",
-                    "example": "arijit@gmail.com"
+                    "example": "sanjana@gmail.com"
                 },
                 "panCard": {
                     "type": "string",
-                    "example": "EQZRP1234P"
+                    "example": "ABCDE1234F"
                 },
                 "password": {
                     "type": "string",
                     "maxLength": 20,
                     "minLength": 8,
-                    "example": "Secure@123"
+                    "example": "Sanjana@123"
                 },
                 "phoneNumber": {
                     "type": "integer",
                     "maximum": 9999999999,
                     "minimum": 1000000000,
-                    "example": 7568912340
+                    "example": 8432805566
                 },
                 "username": {
                     "type": "string",
                     "maxLength": 32,
                     "minLength": 5,
-                    "example": "Arijit"
+                    "example": "Sanjana"
+                }
+            }
+        },
+        "models.BFFForgotPasswordRequest": {
+            "type": "object",
+            "required": [
+                "panCard",
+                "phoneNumber",
+                "username"
+            ],
+            "properties": {
+                "panCard": {
+                    "type": "string",
+                    "example": "ABCDE1234F"
+                },
+                "phoneNumber": {
+                    "type": "integer",
+                    "maximum": 9999999999,
+                    "minimum": 1000000000,
+                    "example": 8432805566
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 5,
+                    "example": "Sanjana"
+                }
+            }
+        },
+        "models.BFFSigninUserRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 8,
+                    "example": "Sanjana@123"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 5,
+                    "example": "Sanjana"
+                }
+            }
+        },
+        "models.BFFValidateUserOtpRequest": {
+            "type": "object",
+            "required": [
+                "otp",
+                "username"
+            ],
+            "properties": {
+                "otp": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 5,
+                    "example": "Sanjana"
+                }
+            }
+        },
+        "models.BFFValidateUserOtpResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         },
@@ -135,17 +468,25 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "x-extension-openapi": "{\"example\": \"value on a json format\"}"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "omnenest-backend",
+	Description:      "Omnenest backend for watchlist micro-service (Middleware layer).",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

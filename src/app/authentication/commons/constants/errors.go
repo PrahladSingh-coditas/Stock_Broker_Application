@@ -9,8 +9,9 @@ const (
 
 // Field Names (JSON/DB)
 const (
-	FieldPanCard = "panCard"
-	FieldEmail   = "email"
+	FieldPanCard     = "panCard"
+	FieldPhoneNumber = "phoneNumber"
+	FieldEmail       = "email"
 )
 
 // Duplicate Entry Errors
@@ -28,8 +29,8 @@ const (
 
 // Request Validation Errors
 const (
-	ErrInvalidPayload  = "invalid required payload"
-	ErrUnexpectedValue = "unexpected value for the field."
+	InvalidPayloadError  = "invalid required payload"
+	UnexpectedValueError = "unexpected value for the field."
 )
 
 //Encrypt & Decrypt Erros
@@ -39,8 +40,30 @@ const (
 
 //Signin and Token generation Errors
 const (
-	ErrInvalidEmailorPassword = "invalid email or password"
-	ErrPasswordMismatch       = "password does not match %w"
-	ErrAuthenticationFailed   = "authentication failed"
-	ErrTokenGenerationFailed  = "failed to generate authentication tokens %s"
+	UserNotFoundError            = "user not found"               // try to find by username
+	InvalidUsernamePasswordError = "invalid username or password" //invalid userame or password
+	PasswordMismatchError        = "password does not match %w"
+	AuthenticationFailedError    = "authentication failed"
+	TokenGenerationFailedError   = "failed to generate authentication tokens %s"
+	MissingCredentialsError      = "username and password are required"
+	PasswordChangeFailedError    = "failed to change password: %s"
+	SamePasswordError            = "new password cannot be the same as the old password"
+	ReEnterNewPasswordError      = "re-enter new password"
+)
+
+// Forgot Password Errors
+const (
+	InvalidCredentialsError = "invalid pancard and phonenumber"
+	DataNotFoundError       = "no user match the credentials"
+	NoRecordsAffectedError  = "query had no effect on rows"
+	GenerateOtpError        = "error while generating otp"
+	DatabaseError           = "database error"
+)
+
+//OTP Validation Errors
+const (
+	IncorrectOTPError    = "Incorrect OTP"
+	OtpExpiredError      = "OTP Expired"
+	SigninFailedError    = "Signin Failed"
+	TokenGenerationError = "Error in Generating Token"
 )

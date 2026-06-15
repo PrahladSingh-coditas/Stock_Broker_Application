@@ -6,16 +6,24 @@ const (
 	PortDefaultValude = 8080
 )
 
-// Database table name & field names for users
+//Database table name & field names for users
 const (
 	UsersTableName = "users"
 	Fieldemail     = "email"
+	FieldUsername  = "username = ?"
+	FieldPassword  = "password"
 )
 
 // Success message for user
 const (
-	UserCreationSuccessMsg = "User created successfully"
-	UserLoggedInSuccessMsg = "User logged in successfully"
+	UserCreationSuccessMsg              = "User created successfully"
+	UserLoggedInSuccessMsg              = "User logged in successfully"
+	UserReadSuccessMsg                  = "User read successfully"
+	CredentialMatchSuccessMsg           = "Credential matched successfully"
+	ForgotPasswordGenerateOtpSuccessMsg = "Forgot password OTP sent successfully, will expire in 2 minutes"
+	OtpValidatedSuccessMsg              = "OTP Validation Successful"
+	TokenGeneratedSuccessMsg            = "Token Generated Successfully"
+	PasswordChangeSuccessMsg            = "Password Changed Successfully"
 )
 
 //Swagger Titile
@@ -31,4 +39,11 @@ const (
 	Domain   = ""
 	Secure   = true
 	HttpOnly = true
+)
+
+const (
+	Username = "username"
+	Password = "password"
+	Otp      = "OTP"
+	Token    = "token"
 )

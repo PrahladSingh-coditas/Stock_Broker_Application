@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"errors"
+	"log"
 	"stock_broker_application/src/constants"
 	"stock_broker_application/src/models"
 	"stock_broker_application/src/utils/configs"
@@ -15,7 +17,9 @@ func GenerateToken(username string) (string, string, error) {
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
-		"exp":      time.Now().Add(time.Minute * 15).Unix(),
+		"purpose":  "reset-password",
+		"iat":      time.Now().Unix(),
+		"exp":      time.Now().Add(time.Minute * 60).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(secretKey.AccessSecretKey))
@@ -25,7 +29,9 @@ func GenerateToken(username string) (string, string, error) {
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
-		"exp":      time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"purpose":  "reset-password",
+		"iat":      time.Now().Unix(),
+		"exp":      time.Now().Add(time.Minute * 60).Unix(),
 	})
 
 	refreshTokenString, err := refreshToken.SignedString([]byte(secretKey.RefreshSecretKey))
@@ -42,4 +48,25 @@ func InitJWTConfig(configPath string) error {
 		return err
 	}
 	return nil
+}
+
+func ValidateToken(tokenString string) (string, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("invalid signing method")
+		}
+		return []byte(secretKey.AccessSecretKey), nil
+	})
+	log.Println(err)
+	if err != nil {
+		return "", err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		username, ok := claims["username"].(string)
+		if !ok {
+			return "", errors.New("username missing in token")
+		}
+		return username, nil
+	}
+	return "", errors.New("Invalid token")
 }

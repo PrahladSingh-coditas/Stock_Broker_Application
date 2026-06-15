@@ -1,0 +1,11 @@
+package models
+
+type BFFValidateUserOtpRequest struct {
+	Username string `json:"username" example:"Sanjana" validate:"required,min=5,max=32"`
+	Otp      string `json:"otp" validate:"required,otp"`
+}
+
+type BFFValidateUserOtpResponse struct {
+	Message string `json:"message"`
+	Token   string `json:"token"`
+}

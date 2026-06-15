@@ -7,6 +7,15 @@ import (
 	"stock_broker_application/src/utils"
 )
 
+// @title stock_broker_application-backend
+// @version 1.0
+// @description stock_broker_application-backend
+// @BasePath /v1
+// @query.collection.format multi
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @x-extension-openapi {"example": "value on a json format"}
 func main() {
 	err := utils.InitPostgresConfg(constants.RootConfig)
 	if err != nil {

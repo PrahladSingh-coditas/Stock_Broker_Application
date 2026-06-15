@@ -1,4 +1,4 @@
-host: ep-blue-bird-a5e87ya0-pooler.us-east-2.aws.neon.tech
+host: _
 port: 5432
 username: admin
 password: _

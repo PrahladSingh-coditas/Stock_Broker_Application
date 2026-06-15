@@ -1,6 +1,6 @@
 module stock_broker_application
 
-go 1.23.6
+go 1.26.0
 
 require (
 	github.com/dlclark/regexp2 v1.11.5

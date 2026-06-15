@@ -33,8 +33,10 @@ func main() {
 }
 
 func startRouter() {
+	postgresClinet := utils.GetPostgresClient().GormDB
+	redisClient, redisError := utils.GetRedisClient()
 	logger := logrus.New()
-	router := router.GetRouter()
+	router := router.GetRouter(postgresClinet, redisClient, redisError)
 	logger.Info(fmt.Sprintf(constants.RunningServerPort, ServiceConstants.PortDefaultValude))
 	router.Run(fmt.Sprintf(":%d", ServiceConstants.PortDefaultValude))
 }

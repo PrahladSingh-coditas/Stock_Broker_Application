@@ -33,12 +33,12 @@ const (
 	UnexpectedValueError = "unexpected value for the field."
 )
 
-//Encrypt & Decrypt Erros
+// Encrypt & Decrypt Erros
 const (
 	ErrFailedToEncrypt = "falied to encrpyt password"
 )
 
-//Signin and Token generation Errors
+// Signin and Token generation Errors
 const (
 	UserNotFoundError            = "user not found"               // try to find by username
 	InvalidUsernamePasswordError = "invalid username or password" //invalid userame or password
@@ -60,10 +60,19 @@ const (
 	DatabaseError           = "database error"
 )
 
-//OTP Validation Errors
+// OTP Validation Errors
 const (
 	IncorrectOTPError    = "Incorrect OTP"
 	OtpExpiredError      = "OTP Expired"
 	SigninFailedError    = "Signin Failed"
 	TokenGenerationError = "Error in Generating Token"
+)
+
+// Logout
+const (
+	FieldNotFoundError         = "Field not found in Payload"
+	RedisConnectionFailedError = "Connection Failed"
+	RedisOperationFailedError  = "Error in Performing Operation"
+	LogoutFailedError          = "Logout failed"
+	BlacklistTokenError        = "Token Blacklisted Logout Failed"
 )

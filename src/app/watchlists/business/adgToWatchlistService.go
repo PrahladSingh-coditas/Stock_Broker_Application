@@ -33,7 +33,7 @@ func (service *WatchlistsService) ADGtoWatchlist(ctx context.Context, spanCtx co
 	var warnings []string
 	var cacheKey, cachedData string
 
-	redisClient, redisError := utils.GetRedisClient()
+	redisClient, _, redisError := utils.GetRedisClient(false)
 	if redisError != nil {
 		log.Error("Redis connection failed", zap.Error(redisError))
 	}

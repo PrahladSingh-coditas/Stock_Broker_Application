@@ -7,6 +7,7 @@ import (
 	"net/http"
 	genericModels "stock_broker_application/src/models"
 	"stock_broker_application/src/utils/validations"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -59,21 +60,21 @@ func (controller *ChangePasswordHandler) HandleChangePassword(ctx *gin.Context) 
 	err := controller.service.ChangePassword(ctx, ctx.Request.Context(), bffChangePasswordRequest, username)
 	if err != nil {
 
-		if err.Error() == constants.UserNotFoundError {
-			ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+		if strings.Contains(err.Error(), constants.UserNotFoundError) {
+			ctx.JSON(http.StatusNotFound, genericModels.ErrorAPIResponse{
 				Error: constants.UserNotFoundError,
 			})
 			return
 		}
 
-		if err.Error() == constants.PasswordChangeFailedError {
+		if strings.Contains(err.Error(), constants.PasswordChangeFailedError) {
 			ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
 				Error: constants.PasswordChangeFailedError,
 			})
 			return
 		}
 
-		if err.Error() == constants.SamePasswordError {
+		if strings.Contains(err.Error(), constants.SamePasswordError) {
 			ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
 				Error: constants.SamePasswordError,
 			})

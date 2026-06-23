@@ -6,9 +6,11 @@ import (
 	"authentication/models"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	genericModels "stock_broker_application/src/models"
 	"stock_broker_application/src/utils/validations"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -61,7 +63,8 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 
 	token, err := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
 	if err != nil {
-		if errors.Is(err, errors.New(constants.UserNotFoundError)) {
+		fmt.Println(err)
+		if strings.Contains(err.Error(), constants.UserNotFoundError) {
 			err := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.Username,
@@ -73,7 +76,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 			return
 		}
 
-		if errors.Is(err, errors.New(constants.IncorrectOTPError)) {
+		if strings.Contains(err.Error(), constants.IncorrectOTPError) {
 			err := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.Otp,
@@ -85,7 +88,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 			return
 		}
 
-		if errors.Is(err, errors.New(constants.OtpExpiredError)) {
+		if strings.Contains(err.Error(), constants.OtpExpiredError) {
 			err := genericModels.ErrorAPIResponse{
 				Message: genericModels.ErrorMessage{
 					Key:          constants.Otp,
@@ -109,7 +112,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 			return
 		}
 
-		ctx.IndentedJSON(http.StatusUnauthorized, genericModels.ErrorAPIResponse{
+		ctx.IndentedJSON(http.StatusInternalServerError, genericModels.ErrorAPIResponse{
 			Error: constants.SigninFailedError,
 		})
 		return

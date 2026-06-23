@@ -47,7 +47,11 @@ type SignupTestSuite struct {
 	suite.Suite
 }
 
-func (s *SignupTestSuite) TestSignup_Success() {
+func (s *SignupTestSuite) SetupTest() {
+	gin.SetMode(gin.TestMode)
+}
+
+func (s *SignupTestSuite) TestSignup200SignUpSuccess() {
 	gdb, mock := signupSQLMock(s.T())
 
 	mock.ExpectBegin()
@@ -86,7 +90,7 @@ func (s *SignupTestSuite) TestSignup_Success() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *SignupTestSuite) TestSignup_InvalidRequest() {
+func (s *SignupTestSuite) TestSignup400InvalidRequest() {
 	gdb, mock := signupSQLMock(s.T())
 	r := GetSignupRouter(gdb)
 
@@ -102,7 +106,7 @@ func (s *SignupTestSuite) TestSignup_InvalidRequest() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *SignupTestSuite) TestSignup_ValidationError() {
+func (s *SignupTestSuite) TestSignup400ValidationError() {
 	gdb, mock := signupSQLMock(s.T())
 	r := GetSignupRouter(gdb)
 
@@ -118,7 +122,7 @@ func (s *SignupTestSuite) TestSignup_ValidationError() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *SignupTestSuite) TestSignup_DuplicateUsername() {
+func (s *SignupTestSuite) TestSignup409DuplicateUsername() {
 	gdb, mock := signupSQLMock(s.T())
 
 	mock.ExpectBegin()
@@ -149,7 +153,7 @@ func (s *SignupTestSuite) TestSignup_DuplicateUsername() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *SignupTestSuite) TestSignup_DuplicatePanCard() {
+func (s *SignupTestSuite) TestSignup409DuplicatePanCard() {
 	gdb, mock := signupSQLMock(s.T())
 
 	mock.ExpectBegin()
@@ -180,7 +184,7 @@ func (s *SignupTestSuite) TestSignup_DuplicatePanCard() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *SignupTestSuite) TestSignup_DuplicateEmail() {
+func (s *SignupTestSuite) TestSignup409DuplicateEmail() {
 	gdb, mock := signupSQLMock(s.T())
 
 	mock.ExpectBegin()
@@ -211,7 +215,7 @@ func (s *SignupTestSuite) TestSignup_DuplicateEmail() {
 	s.NoError(mock.ExpectationsWereMet())
 }
 
-func (s *SignupTestSuite) TestSignup_InternalError() {
+func (s *SignupTestSuite) TestSignup500DatabaseError() {
 	gdb, mock := signupSQLMock(s.T())
 
 	mock.ExpectBegin()

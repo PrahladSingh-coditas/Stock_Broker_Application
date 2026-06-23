@@ -25,9 +25,8 @@ func NewValidateUserOtpService(repository repository.ValidateUserOtpRepository) 
 
 // this function takes userRequest, fetches the user from db(via repository), performs all otp validations and returns access token and error/ nil
 func (service *ValidateUserOtpService) ValidateUserOtp(ctx context.Context, spanCtx context.Context, bffValidateUserOtpRequest models.BFFValidateUserOtpRequest) (string, error) {
-	postgresClinet := utils.GetPostgresClient()
-	client := postgresClinet.GormDB
-	userFromDB, err := service.repository.GetUserByUsername(spanCtx, client, bffValidateUserOtpRequest.Username)
+
+	userFromDB, err := service.repository.GetUserByUsername(spanCtx, bffValidateUserOtpRequest.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", errors.New(constants.UserNotFoundError)

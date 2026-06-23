@@ -15,9 +15,10 @@ const (
 
 // Success message for user
 const (
-	UserCreationSuccessMsg = "User created successfully"
-	UserLoggedInSuccessMsg = "User logged in successfully"
-	OtpValidatedSuccessMsg = "OTP validated successfully"
+	UserCreationSuccessMsg    = "User created successfully"
+	UserLoggedInSuccessMsg    = "User logged in successfully"
+	OtpValidatedSuccessMsg    = "OTP validated successfully"
+	PasswordChangedSuccessMsg = "Password changed succefully"
 )
 
 //Swagger Titile

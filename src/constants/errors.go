@@ -26,6 +26,7 @@ const (
 	ErrPasswordDigit        = "Password must contain at least one digit."
 	ErrPasswordSpecialChar  = "Password must contain at least one special character (@$!%*?&)."
 	ErrConfirmPasswordMatch = "ConfirmPassword must match Password."
+	ErrNewPasswordMatch     = "ConfirmPasword must match NewPassword"
 )
 
 const (

@@ -59,7 +59,7 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 		return
 	}
 
-	errWhileOtpValidation := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
+	accessToken, errWhileOtpValidation := controller.service.ValidateUserOtp(ctx, ctx.Request.Context(), bffValidateUserOtpRequest)
 	if errWhileOtpValidation != nil {
 		if errors.Is(errWhileOtpValidation, commons.UserNotFoundError) { //errors.New(constants.ErrUserNotFound)
 			errorUserNotFoundResponse := genericModels.ErrorAPIResponse{
@@ -103,5 +103,8 @@ func (controller *ValidateUserOtpHandler) HandleValidateUserOtp(ctx *gin.Context
 		return
 	}
 
-	ctx.IndentedJSON(http.StatusOK, constants.OtpValidatedSuccessMsg)
+	ctx.IndentedJSON(http.StatusOK, models.BFFValidateUserOtpResponse{
+		Message:     constants.OtpValidatedSuccessMsg,
+		AccessToken: accessToken,
+	})
 }

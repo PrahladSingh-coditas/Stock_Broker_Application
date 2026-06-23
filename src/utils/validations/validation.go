@@ -47,7 +47,7 @@ func FormatValidationErrors(err error) ([]models.ErrorMessage, string) {
 			errorMsg = fmt.Sprintf(constants.ErrFieldRequired, fieldName)
 		} else {
 			switch err.Field() {
-			case constants.FieldPassword:
+			case constants.FieldPassword, "NewPassword":
 				passwordErrors := ValidatePasswordConstraints(err.Value().(string))
 				if len(passwordErrors) > 0 {
 					for _, msg := range passwordErrors {

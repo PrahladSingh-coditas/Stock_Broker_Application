@@ -3,5 +3,5 @@ port: 5432
 username: admin
 password: password_here
 dbName: stock-broker
-timezone: Asia/kolkata
+timezone: Asia/Kolkata
 sslmode: require

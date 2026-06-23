@@ -53,4 +53,12 @@ const (
 	ErrExpiredOtp        = "OTP expired"
 	ErrIncorrectOtp      = "entered OTP is not correct"
 	ErrInvalidOtp        = "OTP must be a 4 digit number"
+	ErrJWTExpired        = "Token Expired"
+	ErrJWTInvalid        = "Invalid Token"
+	ErrJWTUnauthorized   = "Unauthorized"
+)
+
+const (
+	ErrInvalidToken         = "invalid token"
+	ErrPasswordChangeFailed = "failed to change password"
 )

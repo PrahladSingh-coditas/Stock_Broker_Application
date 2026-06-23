@@ -11,6 +11,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// @title Authentication Service API
+// @version 1.0
+// @description Authentication APIs for Stock Broker Application
+// @query.collection.format multi
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @x-extension-openapi {"example": "value on a json format"}
 func main() {
 
 	if err := utils.InitPostgresConfg(constants.BaseConfig); err != nil {

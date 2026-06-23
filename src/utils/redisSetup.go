@@ -3,7 +3,6 @@ package utils
 import (
 	"context"
 	"fmt"
-	"log"
 	"stock_broker_application/src/constants"
 	"sync"
 
@@ -17,40 +16,26 @@ var once sync.Once
 
 func InitRedisConfg() error {
 	rc := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-		Protocol: 2,
+		Addr:     constants.RedisAddress,
+		Password: constants.RedisPassword,
+		DB:       constants.RedisDB,
+		Protocol: constants.RedisProtocol,
 	})
 
 	_, err := rc.Ping(ctx).Result()
 	if err != nil {
-		return fmt.Errorf("Error connecting to Redis")
+		return fmt.Errorf(constants.ErrRedisInitFailed,err)
 	}
-	fmt.Println("Connected to Redis!")
+	fmt.Println(constants.RedisConnectionSuccess)
 
 	RedisClient = rc
 	return nil
 }
 
-func GetRedisClient() *redis.Client {
+func GetRedisClient() (*redis.Client, error) {
 	err := InitRedisConfg()
 	if err != nil {
-		log.Fatalf(constants.ErrRedisInitFailed)
+		return nil, err
 	}
-	return RedisClient
+	return RedisClient, nil
 }
-
-// func SetRedisData(ctx context.Context, UserId uint64, bffAdgToWatchlistRequest models.BFFAdgToWatchlistRequest) ([]models.WatchlistWithId, error) {
-// 	err := client.Set(ctx, "greeting", "Hello, Redis!", 0).Err()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
-
-// func GetRedisData(ctx context.Context, UserId uint64, bffAdgToWatchlistRequest models.BFFAdgToWatchlistRequest) ([]models.WatchlistWithId, error){
-// 	value, err := client.Get(ctx, "greeting").Result()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// }

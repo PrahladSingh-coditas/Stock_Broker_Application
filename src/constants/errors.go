@@ -21,7 +21,7 @@ const (
 
 // Redis Initialization error
 const (
-	ErrRedisInitFailed = "Error connecting to redis"
+	ErrRedisInitFailed = "Error connecting to redis: %s"
 )
 
 const (
@@ -46,4 +46,11 @@ const (
 	ErrHashingPassword      = "error hashing password: %w"
 	ErrAuthenticationFailed = "authentication failed"
 	ErrUserNotFound         = "user not found"
+	ErrUnauthorized         = "unauthorized"
+)
+
+//token errors
+const (
+	ErrHeaderNotFound   = "Header not Found"
+	ErrTokenInvalidated = "Token is invalidated(blacklisted)"
 )

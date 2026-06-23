@@ -39,7 +39,7 @@ func (service *WatchlistService) Watchlist(ctx context.Context, spanCtx context.
 	}
 
 	//redis connection and define key for redis
-	redisClient := utils.GetRedisClient()
+	redisClient,_ := utils.GetRedisClient()
 	redisKey := fmt.Sprintf("Watchlist of:%d ScripId:%s", user.ID, bffAdgToWatchlistRequest.ScripId)
 
 	//extract action from request and switch case on it

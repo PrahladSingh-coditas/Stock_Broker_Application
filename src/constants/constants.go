@@ -24,9 +24,9 @@ const (
 	FieldEmail           = "Email"
 	FieldUsername        = "Username"
 	FieldOtp             = "Otp"
-
-	FieldScripId = "ScripId"
-	FieldWatchlistId = "WatchlistIds"
+	FieldScripId         = "ScripId"
+	FieldWatchlistId     = "WatchlistIds"
+	FieldMessage         = "message"
 )
 
 // Migration success Message
@@ -70,5 +70,20 @@ const (
 const (
 	Origin        = "Origin"
 	ContentType   = "Content-type"
+	Bearer        = "Bearer "
 	Authorization = "Authorization"
+	Redis         = "Redis"
+	Header        = "Header"
+	Token         = "Token"
+)
+
+// redis connectin success
+const RedisConnectionSuccess = "Connected to Redis successfully!"
+
+// redis configuration
+const (
+	RedisAddress  = "localhost:6379"
+	RedisPassword = ""
+	RedisDB       = 0
+	RedisProtocol = 2
 )

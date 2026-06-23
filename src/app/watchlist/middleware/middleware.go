@@ -3,6 +3,7 @@ package middleware
 import (
 	"log"
 	"net/http"
+	"stock_broker_application/src/constants"
 	"stock_broker_application/src/utils"
 	"strings"
 	"time"
@@ -17,21 +18,21 @@ func AuthMiddleware() gin.HandlerFunc {
 		start := time.Now()
 		log.Printf("Request: %s %s", c.Request.Method, c.Request.URL.Path)
 
-		authHeader := c.GetHeader("Authorization")
+		authHeader := c.GetHeader(constants.Authorization)
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": "Header not Found",
+				constants.FieldMessage: constants.ErrHeaderNotFound,
 			})
 			c.Abort()
 			return
 		}
 
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		tokenString := strings.TrimPrefix(authHeader, constants.Bearer)
 
-		username, err := utils.ValidateToken(tokenString)
+		username, err := utils.ExtractUsername(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": err.Error(),
+				constants.FieldMessage: err.Error(),
 			})
 			c.Abort()
 			return

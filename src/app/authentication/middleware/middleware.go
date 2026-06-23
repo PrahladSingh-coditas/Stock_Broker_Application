@@ -2,8 +2,12 @@ package middleware
 
 import (
 	"authentication/commons"
+	authConstants "authentication/commons/constants"
+	"fmt"
 	"log"
 	"net/http"
+	"stock_broker_application/src/constants"
+	"stock_broker_application/src/models"
 	"stock_broker_application/src/utils"
 	"strings"
 	"time"
@@ -11,38 +15,100 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// This middleware: Logs request method & path; Measures request execution time; Logs how long request took
+// This middleware: Logs request method & path; Measures request execution time and also Logs how long request took
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		log.Printf("Request: %s %s", c.Request.Method, c.Request.URL.Path)
 
-		authHeader := c.GetHeader("Authorization") //it will extract header and check if its missing
+		//get redis client connection from utils
+		redisClient, err := utils.GetRedisClient()
+		if redisClient == nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, models.ErrorAPIResponse{
+				Message: models.ErrorMessage{
+					Key:          constants.Redis,
+					ErrorMessage: err.Error(),
+				},
+				Error: constants.ErrUnauthorized,
+			})
+			c.Abort()
+			return
+		}
+
+		authHeader := c.GetHeader(constants.Authorization) //it will extract header and check if its missing
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": "Header not Found",
+			c.JSON(http.StatusUnauthorized, models.ErrorAPIResponse{
+				Message: models.ErrorMessage{
+					Key:          constants.Authorization,
+					ErrorMessage: constants.ErrHeaderNotFound,
+				},
+				Error: constants.ErrUnauthorized,
 			})
 			c.Abort()
 			return
 		}
 
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		//extracting token from bearer and setting it
+		tokenString := strings.TrimPrefix(authHeader, constants.Bearer)
+		c.Set(commons.Token, tokenString)
 
-		username, err := utils.ValidateToken(tokenString)
+		//redis key is gonna be token string itself
+		redisKey := fmt.Sprintf(authConstants.BlacklistedToken, tokenString)
+		c.Set(commons.RedisKey, redisKey)
+
+		existsInRedis, err := redisClient.Exists(c.Request.Context(), redisKey).Result()
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": err.Error(),
+			log.Fatalf("Redis error: %v", err)
+		}
+
+		//if token exists in redis then the token is invalidated
+		if existsInRedis > 0 {
+			fmt.Println("Already exists")
+			c.JSON(http.StatusUnauthorized, models.ErrorAPIResponse{
+				Message: models.ErrorMessage{
+					Key:          constants.Redis,
+					ErrorMessage: constants.ErrTokenInvalidated,
+				},
+				Error: constants.ErrUnauthorized,
 			})
 			c.Abort()
 			return
 		}
 
-	
+		//extracting username
+		username, err := utils.ExtractUsername(tokenString)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, models.ErrorAPIResponse{
+				Message: models.ErrorMessage{
+					Key:          constants.Header,
+					ErrorMessage: err.Error(),
+				},
+				Error: constants.ErrUnauthorized,
+			})
+			c.Abort()
+			return
+		}
+
+		//extracting token expiry
+		tokenExpiry, err := utils.ExtractExpiry(tokenString)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, models.ErrorAPIResponse{
+				Message: models.ErrorMessage{
+					Key:          constants.Header,
+					ErrorMessage: err.Error(),
+				},
+				Error: constants.ErrUnauthorized,
+			})
+			c.Abort()
+			return
+		}
+
+		//setting username and token expiry
 		c.Set(commons.Username, username)
+		c.Set(commons.Expiry, tokenExpiry)
 
 		c.Next() // Continue to the next middleware or actual route handler.
 		duration := time.Since(start)
 		log.Printf("Completed in %v", duration)
-
 	}
 }

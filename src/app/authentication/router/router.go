@@ -45,9 +45,13 @@ func GetRouter() *gin.Engine { // it basically gives a gin engine
 	verifyUserOtpHandler := handlers.NewValidateUserOtpHandler(verifyUserOtpService)
 
 	//change password
-	changePasswordRepository:= repository.NewChangePasswordRepository()
+	changePasswordRepository := repository.NewChangePasswordRepository()
 	changePasswordService := business.NewChangePasswordService(changePasswordRepository)
 	changePasswordHandler := handlers.NewChangePasswordHandler(changePasswordService)
+
+	//logout user
+	logoutUserService := business.NewLogoutUserService()
+	logoutUserHandler := handlers.NewLogoutUserHandler(logoutUserService)
 
 	authGroup := router.Group(constants.AuthRoutePrefix)
 	{
@@ -57,6 +61,8 @@ func GetRouter() *gin.Engine { // it basically gives a gin engine
 		authGroup.POST(constants.Validateotp, verifyUserOtpHandler.HandleValidateUserOtp)
 
 		authGroup.POST(constants.ChangePassword, middleware.AuthMiddleware(), changePasswordHandler.HandleChangePassword)
+
+		authGroup.POST(constants.LogoutUser, middleware.AuthMiddleware(), logoutUserHandler.HandleLogoutUser)
 	}
 
 	return router
